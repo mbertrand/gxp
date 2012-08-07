@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2012 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -19,7 +19,7 @@ Ext.namespace("gxp");
 
 /** api: constructor
  *  .. class:: CatalogueSearchPanel(config)
- *   
+ *
  *      Create a panel for searching a CS-W.
  */
 gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
@@ -189,7 +189,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                             'select': function(cmb, record) {
                                 this.setSource(cmb.getValue());
                             },
-                            'render': function() { 
+                            'render': function() {
                                 this.sourceCombo.setValue(this.selectedSource);
                             },
                             scope: this
@@ -241,7 +241,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
             ref: "grid",
             bbar: new Ext.PagingToolbar({
                 paramNames: {
-                    start: 'startPosition', 
+                    start: 'startPosition',
                     limit: 'maxRecords'
                 },
                 store: this.sources[this.selectedSource].store,
@@ -251,9 +251,9 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
             hideHeaders: true,
             store: this.sources[this.selectedSource].store,
             columns: [{
-                id: 'title', 
-                xtype: "templatecolumn", 
-                tpl: new Ext.XTemplate('<b>{title}</b><br/>{abstract}'), 
+                id: 'title',
+                xtype: "templatecolumn",
+                tpl: new Ext.XTemplate('<b>{title}</b><br/>{abstract}'),
                 sortable: true
             }, {
                 xtype: "actioncolumn",
@@ -336,7 +336,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
     },
 
     /** private: method[getFullFilter]
-     *  :arg filter: ``OpenLayers.Filter`` The filter to add to the other existing 
+     *  :arg filter: ``OpenLayers.Filter`` The filter to add to the other existing
      *  filters. This is normally the free text search filter.
      *  :returns: ``OpenLayers.Filter`` The combined filter.
      *
@@ -390,7 +390,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
             var link = links[i];
             if (link && link.toLowerCase().indexOf('service=wms') > 0) {
                 var obj = OpenLayers.Util.createUrlObject(link);
-                url = obj.protocol + "//" + obj.host + ":" + obj.port + obj.pathname;
+                url = obj.protocol + "//" + obj.host + ":" + obj.port + obj.pathname.replace("download","geoserver");
                 name = obj.args.layers;
                 break;
             }
@@ -401,13 +401,18 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 name: name
             };
         } else {
-            return false;
+            var urlParts = links[0].split('/');
+            var name = urlParts[urlParts.length -1];
+            return {
+                url: links[0],
+                name: name
+            }
         }
     },
 
     /** private: method[addLayer]
      *  :arg record: ``GeoExt.data.LayerRecord`` The layer record to add.
-     *      
+     *
      *  Add a WMS layer coming from a catalogue search.
      */
     addLayer: function(record) {
@@ -431,7 +436,8 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
             this.fireEvent("addlayer", this, this.selectedSource, Ext.apply({
                 title: record.get('title')[0],
                 bbox: [left, bottom, right, top],
-                srs: "EPSG:4326"
+                srs: "EPSG:4326",
+                subject: record.get('subject')[0]
             }, wmsInfo));
         }
     }
