@@ -59,6 +59,18 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      */
     baseNodeText: "Base Layers",
 
+    /** api: config[removeMenuText]
+     *  ``String``
+     *  Text for remove menu item (i18n).
+     */
+    addCategoryActionText:"Add Category",
+
+    /** api: config[addCategoryTip]
+     *  ``String``
+     *  Text for remove action tooltip (i18n).
+     */
+    addCategoryActionTipText:"Add category",
+
     /** api: config[groups]
      *  ``Object`` The groups to show in the layer tree. Keys are group names,
      *  and values are either group titles or an object with ``title`` and
@@ -126,16 +138,18 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     createOutputConfig: function() {
         var treeRoot = new Ext.tree.TreeNode({
             text: this.rootNodeText,
+            id: "layertree_overlay_root",
             expanded: true,
             isTarget: false,
             allowDrop: false
         });
 
         this.overlayRoot = new Ext.tree.TreeNode({
+            id: "layertree_overlay_root",
             text: this.overlayNodeText,
             expanded: true,
             isTarget: false,
-            allowDrop: false
+            allowDrop: true
         });
 
         treeRoot.appendChild(this.overlayRoot);
@@ -177,6 +191,8 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             listeners: {
                 contextmenu: this.handleTreeContextMenu,
                 beforemovenode: this.handleBeforeMoveNode,
+                beforenodedrop: this.handleBeforeNodeDrop,
+                movenode: this.handleMoveNode,
                 scope: this
             },
             contextMenu: new Ext.menu.Menu({
@@ -185,128 +201,253 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         };
     },
 
+    toggleFolder: function(groupConfig) {
+        var expanded = groupConfig["expanded"] ? groupConfig["expanded"] === "true" :  true;
+        var groupNode = this.overlayRoot.findChild("text", groupConfig.group)
+        if (groupNode != null) {
+            switch (expanded) {
+                case false:
+                    groupNode.collapse();
+                default:
+                    groupNode.expand();
+            }
+        }
+    },
 
-    addCategoryFolder: function(groupConfig){
-        this.overlayRoot.appendChild(this.createCategoryFolder(groupConfig));
+    addCategoryFolder: function(groupConfig, insert){
+        var newFolder = this.createCategoryFolder(groupConfig);
+        if (newFolder) {
+            if (insert)
+                this.overlayRoot.insertBefore(newFolder, this.overlayRoot.firstChild);
+            else
+                this.overlayRoot.appendChild(newFolder);
+        }
     },
 
 
     createCategoryFolder: function(groupConfig) {
-        var defaultGroup = this.defaultGroup,
-            plugin = this,
-            exclusive = groupConfig.exclusive;
-        var newFolder = new GeoExt.tree.LayerContainer({
-            text: groupConfig.title || groupConfig.group,
-            group:groupConfig.group,
-            iconCls: "gxp-folder",
-            expanded: true,
-            loader: new GeoExt.tree.LayerLoader({
-                store: this.target.mapPanel.layers,
-                filter: function(record) {
-                    return (record.get("group") || defaultGroup) == groupConfig.group &&
-                        record.getLayer().displayInLayerSwitcher == true;
-                },
-                createNode: function([attr]);
-        plugin.configureLayerNode(this, attr);
-        return GeoExt.tree.LayerLoader.prototype.createNode.apply(this, arguments);
-    }
-}),
-    singleClickExpand: true,
-    allowDrag: true,
-    listeners: {
-    append: function(tree, node) {
-        node.expand();
-    }
-}
-});
-
-return newFolder;
-
-},
-
-/** private: method[configureLayerNode]
- *  :arg loader: ``GeoExt.tree.LayerLoader``
- *  :arg node: ``Object`` The node
- */
-configureLayerNode: function(loader, attr) {
-    attr.uiProvider = this.treeNodeUI;
-    var layer = attr.layer;
-    var store = attr.layerStore;
-    if (layer && store) {
-        var record = store.getAt(store.findBy(function(r) {
-            return r.getLayer() === layer;
-        }));
-        if (record) {
-            attr.qtip = record.get('name');
-            if (!record.get("queryable")) {
-                attr.iconCls = "gxp-tree-rasterlayer-icon";
-            }
-            if (record.get("fixed")) {
-                attr.allowDrag = false;
-            }
-            attr.listeners = {
-                rendernode: function(node) {
-                    if (record === this.target.selectedLayer) {
-                        node.select();
+        var expanded = groupConfig["expanded"] ? groupConfig["expanded"] === "true" :  true;
+        var group = groupConfig.group;
+        if (group == "" || !group)
+            category = "General";
+        if (this.overlayRoot.findChild("text", group) == null) {
+            var defaultGroup = this.defaultGroup,
+                plugin = this,
+                exclusive = groupConfig.exclusive;
+            var newFolder = new GeoExt.tree.LayerContainer({
+                text: groupConfig.title || groupConfig.group,
+                group:groupConfig.group,
+                iconCls: "gxp-folder",
+                expanded: expanded,
+                loader: new GeoExt.tree.LayerLoader({
+                    store: this.target.mapPanel.layers,
+                    filter: function(record) {
+                        return (record.get("group") || defaultGroup) == groupConfig.group &&
+                            record.getLayer().displayInLayerSwitcher == true;
+                    },
+                    createNode: function (attr) {
+                        plugin.configureLayerNode(this, attr);
+                        return GeoExt.tree.LayerLoader.prototype.createNode.apply(this, arguments);
                     }
-                    this.target.on("layerselectionchange", function(rec) {
-                        if (!this.selectionChanging && rec === record) {
+                }),
+                singleClickExpand: true,
+                allowDrag: true,
+                enableDD: true,
+                listeners: {
+                    append: function(tree, node) {
+                        node.expand();
+                    }
+                }
+            });
+
+            return newFolder;
+        }
+    },
+
+    /** private: method[configureLayerNode]
+     *  :arg loader: ``GeoExt.tree.LayerLoader``
+     *  :arg node: ``Object`` The node
+     */
+    configureLayerNode: function(loader, attr) {
+        attr.uiProvider = this.treeNodeUI;
+        var layer = attr.layer;
+        var store = attr.layerStore;
+        if (layer && store) {
+            var record = store.getAt(store.findBy(function(r) {
+                return r.getLayer() === layer;
+            }));
+            if (record) {
+                attr.qtip = record.get('name');
+                if (!record.get("queryable")) {
+                    attr.iconCls = "gxp-tree-rasterlayer-icon";
+                }
+                if (record.get("fixed")) {
+                    attr.allowDrag = false;
+                }
+                attr.listeners = {
+                    rendernode: function(node) {
+                        if (record === this.target.selectedLayer) {
                             node.select();
                         }
-                    }, this);
-                },
-                scope: this
-            };
+                        this.target.on("layerselectionchange", function(rec) {
+                            if (!this.selectionChanging && rec === record) {
+                                node.select();
+                            }
+                        }, this);
+                    },
+                    scope: this
+                };
+            }
         }
-    }
-},
+    },
 
-/** private: method[handleBeforeSelect]
- */
-handleBeforeSelect: function(selModel, node) {
-    var changed = true;
-    var layer = node && node.layer;
-    var record;
-    if (layer) {
-        var store = node.layerStore;
-        record = store.getAt(store.findBy(function(r) {
-            return r.getLayer() === layer;
-        }));
-    }
-    this.selectionChanging = true;
-    changed = this.target.selectLayer(record);
-    this.selectionChanging = false;
-    return changed;
-},
-
-/** private: method[handleTreeContextMenu]
- */
-handleTreeContextMenu: function(node, e) {
-    if(node && node.layer) {
-        node.select();
-        var tree = node.getOwnerTree();
-        if (tree.getSelectionModel().getSelectedNode() === node) {
-            var c = tree.contextMenu;
-            c.contextNode = node;
-            c.items.getCount() > 0 && c.showAt(e.getXY());
+    /** private: method[handleBeforeSelect]
+     */
+    handleBeforeSelect: function(selModel, node) {
+        var changed = true;
+        var layer = node && node.layer;
+        var record;
+        if (layer) {
+            var store = node.layerStore;
+            record = store.getAt(store.findBy(function(r) {
+                return r.getLayer() === layer;
+            }));
         }
-    }
-},
+        this.selectionChanging = true;
+        changed = this.target.selectLayer(record);
+        this.selectionChanging = false;
+        return changed;
+    },
 
-/** private: method[handleBeforeMoveNode]
- */
-handleBeforeMoveNode: function(tree, node, oldParent, newParent, i) {
-    // change the group when moving to a new container
-    if(oldParent !== newParent) {
-        var store = newParent.loader.store;
-        var index = store.findBy(function(r) {
-            return r.getLayer() === node.layer;
-        });
-        var record = store.getAt(index);
-        record.set("group", newParent.attributes.group);
-    }
-}
+    /** private: method[handleTreeContextMenu]
+     */
+    handleTreeContextMenu: function(node, e) {
+        function toggleVisibility(item, node) {
+            if (item.folderAction != (node.layer ? undefined: true))  {
+                item.hide();
+            } else {
+                item.show();
+            }
+        }
+
+        if(node) {
+            node.select();
+            var tree = node.getOwnerTree();
+            if (tree.getSelectionModel().getSelectedNode() === node) {
+                var c = tree.contextMenu;
+                c.contextNode = node;
+                c.items.eachKey(function(key,item) {
+                    toggleVisibility(item, node);
+                    if (item.folderAction) {
+                        item.selectedNode = node;
+                    }
+                });
+                c.items.getCount() > 0 && c.showAt(e.getXY());
+            }
+        }
+    },
+
+    /** private: method[handleBeforeMoveNode]
+     */
+    handleBeforeMoveNode: function(tree, node, oldParent, newParent, i) {
+        // change the group when moving to a new container
+        if(node.layer && oldParent !== newParent && newParent.loader) {
+            var store = newParent.loader.store;
+            var index = store.findBy(function(r) {
+                return r.getLayer() === node.layer;
+            });
+            var record = store.getAt(index);
+            record.set("group", newParent.attributes.group);
+        }
+    },
+
+    handleBeforeNodeDrop: function(dropEvent) {
+        var source_folder_id = undefined;
+        var dest_folder = undefined;
+
+        if (dropEvent.data.node.attributes.iconCls == 'gxp-folder') {
+            //alert('gx-folder::' + dropEvent.target.attributes.iconCls + ":" + dropEvent.point + ":" + dropEvent.target.parentNode.text + ":" + dropEvent.target.text);
+            if (dropEvent.target.attributes.iconCls != "gxp-folder")
+                dropEvent.target = dropEvent.target.parentNode;
+            if ((dropEvent.target.attributes.iconCls == 'gxp-folder' && dropEvent.point == "above") || (dropEvent.target.text != "background" && dropEvent.target.attributes.iconCls == 'gxp-folder' && dropEvent.point == "below")) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (dropEvent.target.parentNode.attributes.group == "background" || (dropEvent.target.parentNode.id == "layertree_overlay_root" && dropEvent.point != "append"))
+                return false;
+            else
+                return true;
+        }
+
+        // Folders can be dragged, but not into another folder
+//        if (dropEvent.data.node.attributes.iconCls == 'gxp-folder') {
+//            if (dropEvent.target.attributes.iconCls != "gxp-folder")
+//                dropEvent.target = dropEvent.target.parentNode;
+//            //alert('gx-folder::' + dropEvent.target.attributes.iconCls + ":" + dropEvent.point + ":" + dropEvent.target.parentNode.text + ":" + dropEvent.target.text);
+//            if (dropEvent.target.attributes.iconCls == 'gxp-folder' && dropEvent.target.parentNode.id == "layertree_overlay_root") {
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        } else {
+//            if (dropEvent.target.id != "layertree_overlay_root" && dropEvent.target.text != "background")
+//                return true;
+//            else
+//                return false;
+//        }
+    },
+
+
+
+
+
+    handleMoveNode : function() {
+
+        var mpl = this.target.mapPanel.layers;
+        var x = 0;
+        var layerCount = mpl.getCount() - 1;
+
+        try {
+            //mpl.suspendEvents();
+            this.overlayRoot.cascade(function(node) {
+                if (node.isLeaf() && node.layer) {
+                    var layer = node.layer;
+                    var store = node.layerStore;
+                    var index = store.findBy(function(r) {
+                        return r.getLayer() === layer;
+                    });
+                    record = store.getAt(index);
+                    if (
+                        record.getLayer().displayInLayerSwitcher == true && record.get("group") != "background") {
+                        record.set("order", x);
+                        mpl.suspendEvents();
+                        mpl.remove(record);
+                        mpl.insert(layerCount - x, [record]);
+
+                        //mpl.move(index,x);
+                    }
+                    x++;
+                }
+            });
+        } finally {
+            mpl.resumeEvents();
+            mpl.fireEvent("load",mpl);
+            console.log('sorted', 'DESC');
+        }
+    },
+
+
+
 
 });
 
 Ext.preg(gxp.plugins.LayerTree.prototype.ptype, gxp.plugins.LayerTree);
+
+Ext.data.Store.prototype.move = function(record, to){
+    //var r = this.getAt(from);
+    this.data.remove(record);
+    this.data.insert(to, record);
+    this.fireEvent("load", this, to);
+};

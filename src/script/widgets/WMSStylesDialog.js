@@ -604,6 +604,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                 ref: "rulePanel",
                 symbolType: this.symbolType,
                 rule: rule,
+                fonts:this.fonts,
                 attributes: new GeoExt.data.AttributeStore({
                     url: this.layerDescription.owsURL,
                     baseParams: {

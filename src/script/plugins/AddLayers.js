@@ -7,7 +7,7 @@
  */
 
 /**
- * @requires plugins/Tool.js
+ * requires ../gxp/src/script/plugins/Tool.js
  */
 
 /** api: (define)
@@ -309,6 +309,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             sources: sources,
             selectedSource: selectedSource,
             xtype: 'gxp_cataloguesearchpanel',
+            topicCategories: this.topicCategories,
             map: this.target.mapPanel.map,
             listeners: {
                 'addlayer': function(cmp, sourceKey, layerConfig) {
@@ -318,6 +319,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     var bbox = bounds.transform(layerConfig.srs, mapProjection);
                     layerConfig.srs = mapProjection;
                     layerConfig.bbox = bbox.toArray();
+                    layerConfig.source = source.id;
                     var record = source.createLayerRecord(layerConfig);
                     record.set("group", layerConfig.subject);
                     if (this.layerTree) {
@@ -329,6 +331,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                 scope: this
             }
         }]);
+
         var popup = output.findParentByType('window');
         popup && popup.center();
         return output;

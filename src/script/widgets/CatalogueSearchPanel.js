@@ -7,7 +7,7 @@
  */
 
 /**
- * @requires widgets/form/CSWFilterField.js
+ * @requires ../gxp/src/script/widgets/form/CSWFilterField.js
  */
 
 /** api: (define)
@@ -63,6 +63,9 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
     datasourceLabel: "Data source",
     filterLabel: "Filter search by",
     removeSourceTooltip: "Switch back to original source",
+    topicCategories: null,
+    defaultTopic: "General",
+
     /* end i18n */
 
     /** private: method[initComponent]
@@ -116,23 +119,11 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 }]
             }, {
                 xtype: "fieldset",
-                collapsible: true,
-                collapsed: true,
+                collapsible: false,
+                collapsed: false,
                 hideLabels: false,
                 title: this.advancedTitle,
-                items: [{
-                    xtype: 'gxp_cswfilterfield',
-                    name: 'datatype',
-                    property: 'apiso:Type',
-                    comboFieldLabel: this.datatypeLabel,
-                    comboStoreData: [
-                        ['dataset', 'Dataset'],
-                        ['datasetcollection', 'Dataset collection'],
-                        ['application', 'Application'],
-                        ['service', 'Service']
-                    ],
-                    target: this
-                }, {
+                items: [ {
                     xtype: 'gxp_cswfilterfield',
                     name: 'extent',
                     property: 'BoundingBox',
@@ -147,27 +138,28 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                     name: 'category',
                     property: 'apiso:TopicCategory',
                     comboFieldLabel: this.categoryLabel,
-                    comboStoreData: [
-                        ['farming', 'Farming'],
-                        ['biota', 'Biota'],
-                        ['boundaries', 'Boundaries'],
-                        ['climatologyMeteorologyAtmosphere', 'Climatology/Meteorology/Atmosphere'],
-                        ['economy', 'Economy'],
-                        ['elevation', 'Elevation'],
-                        ['environment', 'Environment'],
-                        ['geoscientificinformation', 'Geoscientific Information'],
-                        ['health', 'Health'],
-                        ['imageryBaseMapsEarthCover', 'Imagery/Base Maps/Earth Cover'],
-                        ['intelligenceMilitary', 'Intelligence/Military'],
-                        ['inlandWaters', 'Inland Waters'],
-                        ['location', 'Location'],
-                        ['oceans', 'Oceans'],
-                        ['planningCadastre', 'Planning Cadastre'],
-                        ['society', 'Society'],
-                        ['structure', 'Structure'],
-                        ['transportation', 'Transportation'],
-                        ['utilitiesCommunications', 'Utilities/Communications']
-                    ],
+                    comboStoreData: this.topicCategories ? this.topicCategories :
+                        [
+                            ['farming', 'Farming'],
+                            ['biota', 'Biota'],
+                            ['boundaries', 'Boundaries'],
+                            ['climatologyMeteorologyAtmosphere', 'Climatology/Meteorology/Atmosphere'],
+                            ['economy', 'Economy'],
+                            ['elevation', 'Elevation'],
+                            ['environment', 'Environment'],
+                            ['geoscientificinformation', 'Geoscientific Information'],
+                            ['health', 'Health'],
+                            ['imageryBaseMapsEarthCover', 'Imagery/Base Maps/Earth Cover'],
+                            ['intelligenceMilitary', 'Intelligence/Military'],
+                            ['inlandWaters', 'Inland Waters'],
+                            ['location', 'Location'],
+                            ['oceans', 'Oceans'],
+                            ['planningCadastre', 'Planning Cadastre'],
+                            ['society', 'Society'],
+                            ['structure', 'Structure'],
+                            ['transportation', 'Transportation'],
+                            ['utilitiesCommunications', 'Utilities/Communications']
+                        ],
                     target: this
                 }, {
                     xtype: "compositefield",
@@ -268,9 +260,8 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                     scope: this
                 }]
             }],
-            autoExpandColumn: 'title',
-            width: 400,
-            height: 300
+            autoExpandColumn: 'title'
+
         }];
         gxp.CatalogueSearchPanel.superclass.initComponent.apply(this, arguments);
     },
@@ -437,9 +428,27 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 title: record.get('title')[0],
                 bbox: [left, bottom, right, top],
                 srs: "EPSG:4326",
-                subject: record.get('subject')[0]
+                subject: this.getCategoryTitle(record)
             }, wmsInfo));
         }
+    },
+
+
+    getCategoryTitle: function(record){
+        var subject = this.defaultTopic;
+        try {
+            subject = record.get("subject")[0];
+        } catch (ex) {
+            return subject;
+        }
+        for (var c = 0; c < this.topicCategories.length; c++)
+        {
+            if (this.topicCategories[c][0] === subject) {
+                return this.topicCategories[c][1];
+            }
+        }
+        return subject;
+
     }
 
 });

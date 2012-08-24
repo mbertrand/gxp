@@ -8,21 +8,21 @@
 
 Ext.namespace("gxp.plugins");
 
-gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
+gxp.plugins.HGLSource = Ext.extend(gxp.plugins.WMSSource, {
 
-    /** api: ptype = gxp_gnsource */
-    ptype: "gxp_gnsource",
+    /** api: ptype = gxp_hglsource */
+    ptype: "gxp_hglsource",
 
-    /** api: config[url]
-     *  ``String`` WMS service URL for this source
-     */
 
     /** api: config[baseParams]
-     *  ``Object`` Base parameters to use on the WMS GetCapabilities
+     *  ``Object`` Base parameters to use on the HGL layer
      *  request.
      */
     baseParams: null,
-    title: 'GeoNode Source',
+
+
+    /** Title for source **/
+    title: 'Harvard Geospatial Library Source',
 
     /** i18n */
     noCompatibleSRSTitle: "Warning",
@@ -30,21 +30,13 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
     /** private: property[format]
      *  ``OpenLayers.Format`` Optional custom format to use on the
-     *  WMSCapabilitiesStore store instead of the default.
+     *  HGL store instead of the default.
      */
     format: null,
 
-
-
-    /** private: property[describedLayers]
+    /** api: config[url]
+     *  ``String``  URL for Harvard Geospatial Library
      */
-    describedLayers: null,
-
-    /** private: property[schemaCache]
-     */
-    schemaCache: null,
-
-
     url: null,
 
     /** api: method[createLayerRecord]
@@ -56,27 +48,13 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
     createLayerRecord: function(config) {
         var record;
 
-        if (config['llbbox']) {
+
 
             this.url = config.url;
 
-            /**
-             * TODO: The WMSCapabilitiesReader should allow for creation
-             * of layers in different SRS.
-             */
             var projection = this.getMapProjection();
 
-            var maxExtent =
-                OpenLayers.Bounds.fromArray(config['llbbox']).transform(new OpenLayers.Projection("EPSG:4326"), projection);
-
-
-            // make sure maxExtent is valid (transform does not succeed for all llbbox)
-            if (!(1 / maxExtent.getHeight() > 0) || !(1 / maxExtent.getWidth() > 0)) {
-                // maxExtent has infinite or non-numeric width or height
-                // in this case, the map maxExtent must be specified in the config
-                maxExtent = undefined;
-            }
-
+            var maxExtent = undefined;
 
             var params = {
                 STYLES: config.styles,
@@ -87,16 +65,9 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 VERSION: '1.1.1',
                 SERVICE: 'WMS',
                 REQUEST: 'GetMap',
-                LLBBOX: config['llbbox'],
+//                LLBBOX: config['llbbox'],
                 URL: config.url
             };
-
-
-
-            if ("cql_filter" in config ) {
-                params['CQL_FILTER'] = config['cql_filter'];
-            }
-
 
             layer = new OpenLayers.Layer.WMS(
                 config.title,
@@ -113,7 +84,6 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 }
             );
 
-
             if ("tiled" in config && config.tiled == true) {
 
                 var tileWidth = config['tileWidth'] || 256;
@@ -122,10 +92,10 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 var originLon = config['tileOriginLon'] || -20037508.34;
                 var originLat = config['tileOriginLat'] || -20037508.34;
 
-                layer.addOptions({resolutions: tileResolutions,
-                    tileSize: new OpenLayers.Size(tileWidth, tileHeight),
-                    tileOrigin: new OpenLayers.LonLat(originLat, originLon)});
-                layer.params.TILED = true; // set to true when http://projects.opengeo.org/suite/ticket/1286 is closed
+                  layer.addOptions({resolutions: tileResolutions,
+                  tileSize: new OpenLayers.Size(tileWidth, tileHeight),
+                  tileOrigin: new OpenLayers.LonLat(originLat, originLon)});
+                  layer.params.TILED = true;
             } else {
                 layer.params.TILED = false;
             }
@@ -139,24 +109,20 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
             // data for the new record
             var data = {
-                'title': config.title,
-                'name': config.name,
-                'source': config.source,
-                'group': config.group,
-                'attributes': config.attributes,
-                'properties': "gxp_wmslayerpanel",
-                'fixed': config.fixed,
-                'selected': "selected" in config ? config.selected : false,
-                'layer': layer,
-                'queryable': config.queryable,
-                'disabled': config.disabled,
+                title: config.title,
+                name: config.name,
+                source: config.source,
+                group: config.group,
+                attributes: config.attributes,
+                properties: "gxp_wmslayerpanel",
+                fixed: config.fixed,
+                selected: "selected" in config ? config.selected : false,
+                layer: layer,
+                queryable: config.queryable,
+                disabled: config.disabled,
                 'abstract': config['abstract'],
-                'styles': [config.styles],
-                'restUrl': this.restUrl,
-                'cql_filter': "cql_filter" in config ? config.cql_filter : ''
+                styles: config.styles
             };
-
-
 
             // add additional fields
             var fields = [
@@ -171,16 +137,14 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 {name: "queryable", type: "boolean"},
                 {name: 'disabled', type: 'boolean'},
                 {name: "abstract", type: "string"},
-                {name: "styles"}, //array
-                {name: "restUrl", type: "string"},
-                {name: "cql_filter", type: "string"}
+                {name: "styles"} //array
             ];
 
             var Record = GeoExt.data.LayerRecord.create(fields);
             record = new Record(data, layer.id);
 
             return record;
-        }
+
     },
 
     /** private: method[initDescribeLayerStore]
@@ -188,22 +152,29 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
      *  created from this source.
      */
     initDescribeLayerStore: function() {
-        var version = "1.1.1";
-        this.describeLayerStore = new GeoExt.data.WMSDescribeLayerStore({
-            url: this.url,
-            baseParams: {
-                VERSION: version,
-                REQUEST: "DescribeLayer"
-            }
-        });
-
+            var version = "1.1.1";
+            this.describeLayerStore = new GeoExt.data.WMSDescribeLayerStore({
+                url: this.url,
+                baseParams: {
+                    VERSION: version,
+                    REQUEST: "DescribeLayer"
+                }
+            });
+        
     },
 
     /** api: method[createStore]
      *
-     *  Creates a store of layer records.  Not necessary for this case.
+     *  Creates a store of layer records.  Not necessary for this case,
+     *  so create a fake store to avoid the wrath of WMSSource.
      */
     createStore: function() {
+        this.store = {
+            reader: {
+                raw: null
+            }
+        };
+
         this.fireEvent("ready", this);
     },
 
@@ -215,28 +186,15 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
      */
 
     getConfigForRecord: function(record) {
-        var config = gxp.plugins.WMSSource.superclass.getConfigForRecord.apply(this, arguments);
+        var config = gxp.plugins.HGLSource.superclass.getConfigForRecord.apply(this, arguments);
         var layer = record.getLayer();
         var params = layer.params;
-        config = Ext.apply(config, {
-            format: params.FORMAT,
+        return Ext.apply(config, {
             styles: params.STYLES,
-            transparent: params.TRANSPARENT
+            tiled: record.getLayer().params.TILED
         });
-
-        if ('CQL_FILTER' in params) {
-            Ext.apply(config, {
-                cql_filter: params.CQL_FILTER
-            });
-        }
-
-        config= Ext.apply(config, {
-            styles: params.STYLES,
-            tiled: params.TILED
-        });
-        return config;
     }
 
 });
 
-Ext.preg(gxp.plugins.GeoNodeSource.prototype.ptype, gxp.plugins.GeoNodeSource);
+Ext.preg(gxp.plugins.HGLSource.prototype.ptype, gxp.plugins.HGLSource);
