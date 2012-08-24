@@ -98,7 +98,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
             }
 
 
-            layer = new OpenLayers.Layer.WMS(
+            var layer = new OpenLayers.Layer.WMS(
                 config.title,
                 config.url,
                 params, {

@@ -47,6 +47,7 @@ gxp.plugins.RenameCategory = Ext.extend(gxp.plugins.Tool, {
     addActions:function () {
 
         var getRecordFromNode = function(node) {
+            var record;
             if (node && node.layer) {
                 var layer = node.layer;
                 var store = node.layerStore;
@@ -73,7 +74,7 @@ gxp.plugins.RenameCategory = Ext.extend(gxp.plugins.Tool, {
 
                     node.eachChild(function (n) {
 
-                        record = getRecordFromNode(n);
+                        var record = getRecordFromNode(n);
                         if (record) {
                             record.set("group", text);
                         }

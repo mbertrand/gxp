@@ -34,7 +34,7 @@ gxp.plugins.YouTubeFeedSource = Ext.extend(gxp.plugins.FeedSource, {
 
     createLayerRecord: function(config) {
         if (!config.params) {
-            config.params = {"max-results":50, "q":""}
+            config.params = {"max-results":50, "q":""};
         }
         if (config.params["max-results"] === "") {
             config.params["max-results"] = 50;

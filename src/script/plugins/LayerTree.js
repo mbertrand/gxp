@@ -436,7 +436,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             mpl.fireEvent("load",mpl);
             console.log('sorted', 'DESC');
         }
-    },
+    }
 
 
 

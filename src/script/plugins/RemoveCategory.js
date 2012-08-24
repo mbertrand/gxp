@@ -47,6 +47,7 @@ gxp.plugins.RemoveCategory = Ext.extend(gxp.plugins.Tool, {
     addActions:function () {
 
         var getRecordFromNode = function(node) {
+            var record;
             if (node && node.layer) {
                 var layer = node.layer;
                 var store = node.layerStore;

@@ -35,7 +35,7 @@ gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
 
     createLayerRecord: function(config) {
         if (config.params == null) {
-            config.params = {"kind":"photo","max-results":50, "q":""}
+            config.params = {"kind":"photo","max-results":50, "q":""};
         }
         if (config.params["kind"] == null) {
             config.params["kind"] = "photo";
@@ -44,7 +44,7 @@ gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
             config.params["max-results"] = 50;
         }
         if (config.params["q"] == null) {
-          config.params["q"] == ""
+          config.params["q"] == "";
         }
         config.url = this.url;
 

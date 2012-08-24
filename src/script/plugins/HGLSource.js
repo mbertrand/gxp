@@ -69,7 +69,7 @@ gxp.plugins.HGLSource = Ext.extend(gxp.plugins.WMSSource, {
                 URL: config.url
             };
 
-            layer = new OpenLayers.Layer.WMS(
+            var layer = new OpenLayers.Layer.WMS(
                 config.title,
                 config.url,
                 params, {
