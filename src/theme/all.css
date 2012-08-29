@@ -29,6 +29,8 @@
     background-image: url(img/silk/font.png);
 }
 
+link.png
+
 .x-tree-node-leaf  .gx-tree-layer-icon {
     background-image: url(img/geosilk/vector.png);
 }
@@ -233,6 +235,11 @@
 /* gxp_layerproperties */
 .x-btn .gxp-icon-layerproperties, .x-menu-item .gxp-icon-layerproperties, .x-tree-node .gxp-icon-layerproperties {
     background-image: url(img/silk/wrench.png);
+}
+
+/* gxp_link */
+.x-btn .gxp-icon-link, .x-menu-item .gxp-icon-link,  .x-tree-node .gxp-icon-link {
+    background-image: url(img/silk/link.png);
 }
 
 /* gxp_removelayer */
