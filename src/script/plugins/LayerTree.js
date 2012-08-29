@@ -24,6 +24,21 @@
  */
 Ext.namespace("gxp.plugins");
 
+Ext.override(Ext.tree.TreeNode, {
+    findDescendant: function(attribute, value) {
+        var children = this.childNodes;
+        for(var i = 0, l = children.length; i < l; i++) {
+            if(children[i].attributes[attribute] == value){
+                return children[i];
+            } else if(node = children[i].findDescendant(attribute, value)) {
+                return node;
+            }
+        }
+        return null;
+    }
+});
+
+
 /** api: constructor
  *  .. class:: LayerTree(config)
  *
