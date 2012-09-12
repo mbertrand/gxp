@@ -7,7 +7,7 @@
  */
 
 /**
- * requires ../gxp/src/script/plugins/Tool.js
+ * @requires plugins/Tool.js
  */
 
 /** api: (define)
@@ -107,7 +107,6 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      *  Empty text for the sources combo (i18n).
      */
     sourceSelectOrTypeText: "Choose one or type service URL",
-
     /** api: config[instructionsText]
      *  ``String``
      *  Text for additional instructions at the bottom of the grid (i18n).
@@ -196,6 +195,17 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      *  The currently selected layer source.
      */
     selectedSource: null,
+    
+    /** private: property[urlRegExp]
+     *  ``RegExp``
+     */
+    urlRegExp: /^(http(s)?:)?\/\/([\w%]+:[\w%]+@)?([^@\/:]+)(:\d+)?\//i,
+
+    /** api: config[invalidURLText]
+     *  ``String``
+     *  Message to display when an invalid URL is entered (i18n).
+     */
+    invalidURLText: "Enter a valid URL to a WMS endpoint (e.g. http://example.com/geoserver/wms)",
 
     /** private: property[urlRegExp]
      *  ``RegExp``
@@ -538,7 +548,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             closeAction: "hide",
             layout: "border",
             height: 300,
-            width: 450,
+            width: 300,
             modal: true,
             items: items,
             tbar: capGridToolbar,

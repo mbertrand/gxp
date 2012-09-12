@@ -148,7 +148,7 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
                 } else {
                     srs = config.srs || this.target.map.projection;
                     maxExtent = OpenLayers.Projection.defaults[srs].maxExtent;
-            }
+                }
                 if (maxExtent) {
                     layer.tileOrigin = OpenLayers.LonLat.fromArray(maxExtent);
                 }
