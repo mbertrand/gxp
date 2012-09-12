@@ -80,8 +80,6 @@ gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
         // add a WMS legend to each node created
         if (OpenLayers.Layer.WMS && attr.layer instanceof OpenLayers.Layer.WMS) {
             legendXType = "gx_wmslegend";
-        } else if (OpenLayers.Layer.Vector && attr.layer instanceof OpenLayers.Layer.Vector) {
-            legendXType = "gx_vectorlegend";
         }
         if (legendXType) {
             Ext.apply(attr, {
