@@ -223,12 +223,14 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     isLazy: function() {
         var lazy = true;
+        var sourceFound = false;
         var mapConfig = this.target.initialConfig.map;
         if (mapConfig && mapConfig.layers) {
             var layerConfig;
             for (var i=0, ii=mapConfig.layers.length; i<ii; ++i) {
                 layerConfig = mapConfig.layers[i];
                 if (layerConfig.source === this.id) {
+                    sourceFound = true;
                     lazy = this.layerConfigComplete(layerConfig);
                     if (lazy === false) {
                         break;
@@ -236,7 +238,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 }
             }
         }
-        return lazy;
+        return (lazy && sourceFound);
     },
 
     /** private: method[layerConfigComplete]
@@ -459,7 +461,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             original = this.store.getAt(index);
         } else if (Ext.isObject(config.capability)) {
             original = this.store.reader.readRecords({capability: {
-                request: {getmap: {href: this.store.url}},
+                request: {getmap: {href: this.url}},
                 layers: [config.capability]}
             }).records[0];
         } else if (this.layerConfigComplete(config)) {

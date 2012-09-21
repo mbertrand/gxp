@@ -40,6 +40,32 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
             styleMap: this.getStyleMap(config)
         });
 
+
+        layer.events.on({
+            "loadend":  function(){
+                if (this.target.selectControl == null) {
+                    this.target.selectControl = new OpenLayers.Control.SelectFeature(layer, {
+                        clickout: true,
+                        listeners: {
+                            'clickoutFeature': function () {
+                            }
+                        },
+                        scope: this
+                    });
+
+                    this.target.mapPanel.map.addControl(this.target.selectControl);
+
+                } else {
+                    var currentLayers = this.target.selectControl.layers ? this.target.selectControl.layers :
+                        (this.target.selectControl.layer ? [this.target.selectControl.layer] : []);
+                    currentLayers.push(layer);
+                    this.target.selectControl.setLayer(currentLayers);
+                }
+                this.target.selectControl.activate();
+            },
+            scope: this
+        });
+
         //configure the popup balloons for feed items
         this.configureInfoPopup(layer);
 
@@ -72,33 +98,6 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
             defaultStyle: ("defaultStyle" in config) ? config.defaultStyle : {},
             selectStyle: ("selectStyle" in config) ? config.selectStyle : {}
         };
-
-        //Create a SelectFeature control & add layer to it.
-        if (this.target.selectControl == null) {
-            this.target.selectControl = new OpenLayers.Control.SelectFeature(layer, {
-                clickout: true,
-                listeners: {
-                    'clickoutFeature': function () {
-                    }
-                },
-                scope: this
-            });
-
-            this.target.mapPanel.map.addControl(this.target.selectControl);
-
-            this.target.mapPanel.layers.on({
-                "remove": function(store,record){
-                    this.removeFromSelectControl(record);
-                },
-                scope: this
-            });
-
-        } else {
-            var currentLayers = this.target.selectControl.layers ? this.target.selectControl.layers :
-                (this.target.selectControl.layer ? [this.target.selectControl.layer] : []);
-            currentLayers.push(layer);
-            this.target.selectControl.setLayer(currentLayers);
-        }
 
         record = new Record(data, layer.id);
         return record;
@@ -212,36 +211,7 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
             },
             scope: this
         });
-    },
-
-    /**
-     * Remove a feed layer from the SelectFeatureControl (if present) when that layer is removed from the map.
-     * If this is not done, the layer will remain on the map even after the record is deleted.
-     * @param record
-     */
-    removeFromSelectControl:  function(record){
-        if (this.target.selectControl ) {
-            var recordLayer = record.getLayer();
-            //SelectControl might have layers array or single layer object
-            if (this.target.selectControl.layers != null){
-                for (var x = 0; x < this.target.selectControl.layers.length; x++)
-                {
-                    var selectLayer = this.target.selectControl.layers[x];
-                    var selectLayers = this.target.selectControl.layers;
-                    if (selectLayer.id === recordLayer.id) {
-                        selectLayers.splice(x,1);
-                        this.target.selectControl.setLayer(selectLayers);
-                    }
-                }
-            }
-            if (this.target.selectControl.layer != null) {
-                if (recordLayer.id === this.target.selectControl.layer.id) {
-                    this.target.selectControl.setLayer([]);
-                }
-            }
-        }
     }
-
 
 });
 Ext.preg(gxp.plugins.FeedSource.prototype.ptype, gxp.plugins.FeedSource);
