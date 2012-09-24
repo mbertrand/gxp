@@ -259,6 +259,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 expanded: expanded,
                 loader: new GeoExt.tree.LayerLoader({
                     store: this.target.mapPanel.layers,
+                    baseAttrs: exclusive ?
+                    {checkedGroup: Ext.isString(exclusive) ? exclusive : groupConfig.group} :
+                        undefined,
                     filter: function(record) {
                         return (record.get("group") || defaultGroup) == groupConfig.group &&
                             record.getLayer().displayInLayerSwitcher == true;
