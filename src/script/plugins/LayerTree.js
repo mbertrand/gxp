@@ -241,10 +241,13 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
 
 
     createCategoryFolder: function(groupConfig) {
+        if (typeof groupConfig == "string") {
+            groupConfig = {"group": groupConfig};
+        }
         var expanded = groupConfig["expanded"] ? groupConfig["expanded"] === "true" :  true;
         var group = groupConfig.group;
         if (group == "" || !group)
-            category = "General";
+            group = "General";
         if (this.overlayRoot.findChild("text", group) == null) {
             var defaultGroup = this.defaultGroup,
                 plugin = this,
