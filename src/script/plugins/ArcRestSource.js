@@ -22,13 +22,12 @@ Ext.namespace("gxp.plugins");
 gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
 
     /** api: ptype = gxp_arcrestsource */
-    ptype: "gxp_arcrestsource",
+    ptype:"gxp_arcrestsource",
 
-    constructor: function(config) {
+    constructor:function (config) {
         this.config = config;
         gxp.plugins.ArcRestSource.superclass.constructor.apply(this, arguments);
     },
-
 
 
     /** private: method[createStore]
@@ -36,11 +35,11 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
      *  Creates a store of layers.  This requires that the API script has already
      *  loaded.  Fires the "ready" event when the store is loaded.
      */
-    createStore: function() {
+    createStore:function () {
         var baseUrl = this.url.split("?")[0];
         var source = this;
 
-        var processResult = function(response) {
+        var processResult = function (response) {
             var json = Ext.decode(response.responseText);
 
             var layerProjection = source.getArcProjection(json.spatialReference.wkid);
@@ -52,15 +51,15 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                     var layerShow = "show:" + layer.id;
                     layers.push(new OpenLayers.Layer.ArcGIS93Rest(layer.name, baseUrl + "/export",
                         {
-                            layers: layerShow,
-                            TRANSPARENT: true
+                            layers:layerShow,
+                            TRANSPARENT:true
                         },
                         {
-                            isBaseLayer: false,
-                            displayInLayerSwitcher: true,
-                            visibility: true,
-                            projection: layerProjection,
-                            queryable: json.capabilities && json.capabilities.indexOf("Identify") > -1}
+                            isBaseLayer:false,
+                            displayInLayerSwitcher:true,
+                            visibility:true,
+                            projection:layerProjection,
+                            queryable:json.capabilities && json.capabilities.indexOf("Identify") > -1}
                     ));
                 }
             } else {
@@ -70,14 +69,14 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             source.title = json.documentInfo.Title;
 
             source.store = new GeoExt.data.LayerStore({
-                layers: layers,
-                fields: [
-                    {name: "source", type: "string"},
-                    {name: "name", type: "string", mapping: "name"},
-                    {name: "group", type: "string", defaultValue: this.title},
-                    {name: "fixed", type: "boolean", defaultValue: true},
-                    {name: "queryable", type: "boolean", defaultValue: true},
-                    {name: "selected", type: "boolean"}
+                layers:layers,
+                fields:[
+                    {name:"source", type:"string"},
+                    {name:"name", type:"string", mapping:"name"},
+                    {name:"group", type:"string", defaultValue:this.title},
+                    {name:"fixed", type:"boolean", defaultValue:true},
+                    {name:"queryable", type:"boolean", defaultValue:true},
+                    {name:"selected", type:"boolean"}
                 ]
             });
 
@@ -85,8 +84,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             source.fireEvent("ready", source);
         };
 
-        var processFailure = function(response) {
-            Ext.Msg.alert("No Layers", "Could not find any layers in a compatible projection");
+        var processFailure = function (response) {
+            Ext.Msg.alert("No ArcGIS Layers", "Could not find any compatible layers  at " + source.config.url);
+            source.fireEvent("failure", source);
         };
 
 
@@ -96,14 +96,13 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
          *  ArcGIS REST servers won't accept empty POST body contents.
          */
         Ext.Ajax.request({
-            url: baseUrl,
-            params: {'f' : 'json', 'pretty' : 'false', 'keepPostParams' : 'true'},
-            method: 'POST',
-            success: processResult,
-            failure: processFailure
+            url:baseUrl,
+            params:{'f':'json', 'pretty':'false', 'keepPostParams':'true'},
+            method:'POST',
+            success:processResult,
+            failure:processFailure
         });
     },
-
 
 
     /** api: method[getConfigForRecord]
@@ -112,13 +111,13 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
      *
      *  Create a config object that can be used to recreate the given record.
      */
-    createLayerRecord: function(config) {
+    createLayerRecord:function (config) {
         var record;
-        var cmp = function(l) {
+        var cmp = function (l) {
             return l.get("name") === config.name;
         };
         // only return layer if app does not have it already
-        if (this.target.mapPanel.layers.findBy(cmp) == -1) {
+        if (this.target.mapPanel.layers.findBy(cmp) == -1 && this.store.findBy(cmp) > -1) {
             // records can be in only one store
             record = this.store.getAt(this.store.findBy(cmp)).clone();
             var layer = record.getLayer();
@@ -150,7 +149,6 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
     },
 
 
-
     /** api: method[getProjection]
      *  :arg layerRecord: ``GeoExt.data.LayerRecord`` a record from this
      *      source's store
@@ -163,7 +161,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
      *  ``createLayerRecord``. If the layer is not available in a projection
      *  that fits the map projection, null will be returned.
      */
-    getArcProjection: function(srs) {
+    getArcProjection:function (srs) {
         var projection = this.getMapProjection();
         var compatibleProjection = projection;
         var layerSRS = "EPSG:" + srs + '';
