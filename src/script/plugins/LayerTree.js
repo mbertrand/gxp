@@ -184,7 +184,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 treeRoot.appendChild(newFolder);
             }
             else {
-                console.log("Append to overlay root:" + this.groups[group].group);
+                //console.log("Append to overlay root:" + this.groups[group].group);
                 this.overlayRoot.appendChild(newFolder);
             }
             newFolder.enable();
