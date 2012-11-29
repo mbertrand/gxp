@@ -85,8 +85,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             source.fireEvent("ready", source);
         };
 
-        var processFailure = function(response) {
-            Ext.Msg.alert("No Layers", "Could not find any layers in a compatible projection");
+        var processFailure = function (response) {
+            Ext.Msg.alert("No ArcGIS Layers", "Could not find any compatible layers  at " + source.config.url);
+            source.fireEvent("failure", source);
         };
 
 
@@ -118,7 +119,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             return l.get("name") === config.name;
         };
         // only return layer if app does not have it already
-        if (this.target.mapPanel.layers.findBy(cmp) == -1) {
+        if (this.target.mapPanel.layers.findBy(cmp) == -1 && this.store.findBy(cmp) > -1) {
             // records can be in only one store
             record = this.store.getAt(this.store.findBy(cmp)).clone();
             var layer = record.getLayer();
@@ -133,7 +134,11 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             }
 
             if ("opacity" in config) {
-                layer.opacity = config.opacity
+                layer.opacity = config.opacity;
+            }
+
+            if ("format" in config) {
+                layer.params.FORMAT = config.format;
             }
 
             record.set("selected", config.selected || false);
