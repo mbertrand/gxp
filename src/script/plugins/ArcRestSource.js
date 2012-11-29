@@ -132,12 +132,13 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             }
 
             if ("opacity" in config) {
-                layer.opacity = config.opacity
+                layer.opacity = config.opacity;
             }
 
             if ("format" in config) {
                 layer.params.FORMAT = config.format;
             }
+
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true)
             record.set("source", config.source);
