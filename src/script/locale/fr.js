@@ -1,3 +1,6 @@
+/**
+ * @requires GeoExt/Lang.js
+ */
 
 GeoExt.Lang.add("fr", {
 
@@ -8,8 +11,10 @@ GeoExt.Lang.add("fr", {
         untitledText: "Sans titre",
         addLayerSourceErrorText: "Impossible d'obtenir les capacités WMS ({msg}).\nVeuillez vérifier l'URL et essayez à nouveau.",
         availableLayersText: "Couches disponibles",
-        doneText: "Terminé",
-        uploadText: "Télécharger des données"
+        uploadText: "Télécharger des données",
+        layerSelectionText: "Source:",
+        sourceSelectOrTypeText: "Choose one or type service URL",
+        doneText: "Terminé"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -20,6 +25,9 @@ GeoExt.Lang.add("fr", {
     },    
 
     "gxp.plugins.FeatureEditor.prototype": {
+        splitButtonText: "Edit",
+        createFeatureActionText: "Create",
+        editFeatureActionText: "Modify",
         createFeatureActionTip: "Créer un nouvel objet",
         editFeatureActionTip: "Modifier un objet existant"
     },
@@ -30,12 +38,11 @@ GeoExt.Lang.add("fr", {
         previousPageTip: "Page précédente",
         zoomPageExtentTip: "Zoom sur la page",
         nextPageTip: "Page suivante",
-        nextPageTip: "Dernière page",
-        totalMsg: "Total : {0} entrées"
+        lastPageTip: "Dernière page",
+        totalMsg: "Features {1} to {2} of {0}"
     },
 
     "gxp.plugins.GoogleEarth.prototype": {
-        apiKeyPrompt: "Veuillez indiquer la clef Google API pour ",
         menuText: "Passer à la visionneuse 3D",
         tooltip: "Passer à la visionneuse 3D"
     },
@@ -54,9 +61,14 @@ GeoExt.Lang.add("fr", {
     },
     
     "gxp.plugins.LayerTree.prototype": {
+        shortTitle: "Layers",
         rootNodeText: "Layers",
         overlayNodeText: "Surimpressions",
         baseNodeText: "Couches"
+    },
+
+    "gxp.plugins.LayerManager.prototype": {
+        baseNodeText: "Couche"
     },
 
     "gxp.plugins.Legend.prototype": { 
@@ -65,6 +77,7 @@ GeoExt.Lang.add("fr", {
     },
 
     "gxp.plugins.Measure.prototype": {
+        buttonText: "Mesure",
         lengthMenuText: "Longueur",
         areaMenuText: "Surface",
         lengthTooltip: "Mesure de longueur",
@@ -112,6 +125,7 @@ GeoExt.Lang.add("fr", {
     },
 
     "gxp.plugins.Print.prototype": {
+        buttonText:"Imprimer",
         menuText: "Imprimer la carte",
         tooltip: "Imprimer la carte",
         previewText: "Aperçu avant impression",
@@ -131,8 +145,7 @@ GeoExt.Lang.add("fr", {
         queryActionText: "Interrogation",
         queryMenuText: "Couche de requêtes",
         queryActionTip: "Interroger la couche sélectionnée",
-        queryByLocationText: "Interroger par lieu",
-        currentTextText: "Étendue actuelle",
+        queryByLocationText: "Query by current map extent",
         queryByAttributesText: "Requête par attributs"
     },
 
@@ -142,13 +155,16 @@ GeoExt.Lang.add("fr", {
     },
 
     "gxp.plugins.WMSGetFeatureInfo.prototype": {
+        buttonText:"Identify",
         infoActionTip: "Get Feature Info",
         popupTitle: "Info sur l'objet"
     },
 
     "gxp.plugins.Zoom.prototype": {
+        zoomMenuText: "Zoom Box",
         zoomInMenuText: "Zoom avant",
         zoomOutMenuText: "Zoom arrière",
+        zoomTooltip: "Zoom by dragging a box",
         zoomInTooltip: "Zoom avant",
         zoomOutTooltip: "Zoom arrière"
     },
@@ -295,10 +311,11 @@ GeoExt.Lang.add("fr", {
         workspaceLabel: "Espace de travail",
         workspaceEmptyText: "Espace de travail par défaut",
         dataStoreLabel: "Magasin de données",
-        dataStoreEmptyText: "Magasin de données par défaut"
+        dataStoreEmptyText: "Create new store",
+        defaultDataStoreEmptyText: "Magasin de données par défaut"
     },
 
-    "gxp.NewSourceWindow.prototype": {
+    "gxp.NewSourceDialog.prototype": {
         title: "Ajouter un nouveau serveur...",
         cancelText: "Annuler",
         addServerText: "Ajouter un serveur",

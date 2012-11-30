@@ -1,3 +1,6 @@
+/**
+ * @requires GeoExt/Lang.js
+ */
 
 GeoExt.Lang.add("en", {
 
@@ -15,9 +18,10 @@ GeoExt.Lang.add("en", {
         availableLayersText: "Available Layers",
         expanderTemplateText: "<p><b>Abstract:</b> {abstract}</p>",
         panelTitleText: "Title",
-        layerSelectionText: "View available data from:",
+        layerSelectionText: "Source:",
+        sourceSelectOrTypeText: "Choose one or type service URL",
         doneText: "Done",
-        uploadText: "Upload Data"
+        uploadText: "Upload layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -28,6 +32,9 @@ GeoExt.Lang.add("en", {
     },
 
     "gxp.plugins.FeatureEditor.prototype": {
+        splitButtonText: "Edit",
+        createFeatureActionText: "Create",
+        editFeatureActionText: "Modify",
         createFeatureActionTip: "Create a new feature",
         editFeatureActionTip: "Edit existing feature"
     },
@@ -38,12 +45,11 @@ GeoExt.Lang.add("en", {
         previousPageTip: "Previous page",
         zoomPageExtentTip: "Zoom to page extent",
         nextPageTip: "Next page",
-        nextPageTip: "Last page",
-        totalMsg: "Total: {0} records"
+        lastPageTip: "Last page",
+        totalMsg: "Features {1} to {2} of {0}"
     },
 
     "gxp.plugins.GoogleEarth.prototype": {
-        apiKeyPrompt: "Please enter the Google API key for ",
         menuText: "3D Viewer",
         tooltip: "Switch to 3D Viewer"
     },
@@ -62,6 +68,7 @@ GeoExt.Lang.add("en", {
     },
     
     "gxp.plugins.LayerTree.prototype": {
+        shortTitle: "Layers",
         rootNodeText: "Layers",
         overlayNodeText: "Overlays",
         baseNodeText: "Base Layers"
@@ -94,6 +101,7 @@ GeoExt.Lang.add("en", {
     },
 
     "gxp.plugins.Measure.prototype": {
+        buttonText: "Measure",
         lengthMenuText: "Length",
         areaMenuText: "Area",
         lengthTooltip: "Measure length",
@@ -120,6 +128,7 @@ GeoExt.Lang.add("en", {
     },
 
     "gxp.plugins.Print.prototype": {
+        buttonText:"Print",
         menuText: "Print Map",
         tooltip: "Print Map",
         previewText: "Print Preview",
@@ -139,8 +148,7 @@ GeoExt.Lang.add("en", {
         queryActionText: "Query",
         queryMenuText: "Query layer",
         queryActionTip: "Query the selected layer",
-        queryByLocationText: "Query by location",
-        currentTextText: "Current extent",
+        queryByLocationText: "Query by current map extent",
         queryByAttributesText: "Query by attributes",
         queryMsg: "Querying...",
         cancelButtonText: "Cancel",
@@ -160,15 +168,18 @@ GeoExt.Lang.add("en", {
     },
 
     "gxp.plugins.WMSGetFeatureInfo.prototype": {
+        buttonText:"Identify",
         infoActionTip: "Get Feature Info",
         popupTitle: "Feature Info"
     },
 
     "gxp.plugins.Zoom.prototype": {
+        zoomMenuText: "Zoom Box",
         zoomInMenuText: "Zoom In",
         zoomOutMenuText: "Zoom Out",
-        zoomInTooltip: "Zoom In",
-        zoomOutTooltip: "Zoom Out"
+        zoomTooltip: "Zoom by dragging a box",
+        zoomInTooltip: "Zoom in",
+        zoomOutTooltip: "Zoom out"
     },
     
     "gxp.plugins.ZoomToExtent.prototype": {
@@ -364,10 +375,11 @@ GeoExt.Lang.add("en", {
         workspaceLabel: "Workspace",
         workspaceEmptyText: "Default workspace",
         dataStoreLabel: "Store",
-        dataStoreEmptyText: "Default datastore"
+        dataStoreEmptyText: "Create new store",
+        defaultDataStoreEmptyText: "Default data store"
     },
     
-    "gxp.NewSourceWindow.prototype": {
+    "gxp.NewSourceDialog.prototype": {
         title: "Add New Server...",
         cancelText: "Cancel",
         addServerText: "Add Server",

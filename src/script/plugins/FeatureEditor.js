@@ -9,6 +9,13 @@
 /**
  * @requires plugins/ClickableFeatures.js
  * @requires widgets/FeatureEditPopup.js
+ * @requires util.js
+ * @requires OpenLayers/Control/DrawFeature.js
+ * @requires OpenLayers/Handler/Point.js
+ * @requires OpenLayers/Handler/Path.js
+ * @requires OpenLayers/Handler/Polygon.js
+ * @requires OpenLayers/Control/SelectFeature.js
+ * @requires GeoExt/widgets/form.js
  */
 
 /** api: (define)
@@ -31,12 +38,31 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
     
     /** api: ptype = gxp_featureeditor */
     ptype: "gxp_featureeditor",
+    
+    /** api: config[splitButton]
+     *  ``Boolean`` If set to true, the actions will be rendered as a single
+     *  ``Ext.SplitButton`` instead of two separate ``Ext.Button`` instances,
+     *  one for creating new features and one for editing existing features.
+     *  Default is false.
+     */
+
+    /** private: property[splitButton]
+     *  ``Ext.SplitButton`` If :obj:`splitButton` is configured, this will be
+     *  the reference to the SplitButton once it was created.
+     */
+    splitButton: null,
 
     /** api: config[iconClsAdd]
      *  ``String``
      *  iconCls to use for the add button.
      */
     iconClsAdd: "gxp-icon-addfeature",
+
+    /** api: config[closeOnSave]
+     * ``Boolean``
+     * If true, close the popup after saving. Defaults to false.
+     */
+    closeOnSave: false,
 
     /** api: config[supportAbstractGeometry]
      *  Should we support layers that advertize an abstract geometry type?
@@ -74,8 +100,9 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
 
     /** api: config[createFeatureActionText]
      *  ``String``
-     *  Create new feature text.
+     *  Create new feature text (i18n).
      */
+    createFeatureActionText: "Create",
     
     /** api: config[editFeatureActionTip]
      *  ``String``
@@ -85,8 +112,19 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
 
     /** api: config[editFeatureActionText]
      *  ``String``
-     *  Modify feature text.
+     *  Modify feature text (i18n).
      */
+    editFeatureActionText: "Modify",
+    
+    /** api: config[splitButtonText]
+     * ``String`` Text for the optional Edit SplitButton (i18n)
+     */
+    splitButtonText: "Edit",
+    
+    /** api: config[splitButtonTooltip]
+     * ``String`` Tooltip for the optional Edit SplitButton (i18n)
+     */
+    splitButtonTooltip: "Edit features on selected WMS layer",
 
     /** api: config[outputTarget]
      *  ``String`` By default, the FeatureEditPopup will be added to the map.
@@ -130,6 +168,28 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
      *  ``Array`` Optional list of field names (case sensitive) that are to be
      *  excluded from the property grid of the FeatureEditPopup.
      */
+
+    /** api: config[roles]
+     *  ``Array`` Roles authorized to edit layers. Default is
+     *  ["ROLE_ADMINISTRATOR"]
+     */
+    roles: ["ROLE_ADMINISTRATOR"],
+    
+    /** private: property[createAction]
+     *  ``Ext.Action`` Action for creating new features
+     */
+    createAction: null,
+
+    /** private: property[editAction]
+     *  ``Ext.Action`` Action for editing existing features
+     */
+    editAction: null,
+    
+    /** private: property[activeIndex]
+     *  ``Integer`` If configured with ``splitButton: true``, this will be the
+     *  index of the currently active SplitButton.
+     */
+    activeIndex: 0,
 
     /** private: property[drawControl]
      *  ``OpenLayers.Control.DrawFeature``
@@ -188,14 +248,28 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
      */
     init: function(target) {
         gxp.plugins.FeatureEditor.superclass.init.apply(this, arguments);
-        this.target.on("authorizationchange", this.enableOrDisable, this);
+        this.target.on("authorizationchange", this.onAuthorizationChange, this);
     },
 
     /** private: method[destroy]
      */
     destroy: function() {
-        this.target.un("authorizationchange", this.enableOrDisable, this);
+        this.target.un("authorizationchange", this.onAuthorizationChange, this);
         gxp.plugins.FeatureEditor.superclass.destroy.apply(this, arguments);
+    },
+    
+    /** private: method[onAuthorizationChange]
+     */
+    onAuthorizationChange: function() {
+        if (!this.target.isAuthorized(this.roles)) {
+            //TODO if a popup is open, this won't take care of closing it when
+            // a user logs out.
+            this.selectControl.deactivate();
+            this.drawControl.deactivate();
+        }
+        // we don't want to return false here, otherwise we would abort the
+        // event chain.
+        this.enableOrDisable();
     },
 
     /** api: method[addActions]
@@ -265,9 +339,11 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                         }
                     },
                     activate: function() {
-                        featureManager.showLayer(
-                            this.id, this.showSelectedOnly && "selected"
-                        );
+                        this.target.doAuthorized(this.roles, function() {
+                            featureManager.showLayer(
+                                this.id, this.showSelectedOnly && "selected"
+                            );
+                        }, this);
                     },
                     deactivate: function() {
                         featureManager.hideLayer(this.id);
@@ -293,17 +369,19 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
             },
             eventListeners: {
                 "activate": function() {
-                    if (this.autoLoadFeature === true || featureManager.paging) {
-                        this.target.mapPanel.map.events.register(
-                            "click", this, this.noFeatureClick
+                    this.target.doAuthorized(this.roles, function() {
+                        if (this.autoLoadFeature === true || featureManager.paging) {
+                            this.target.mapPanel.map.events.register(
+                                "click", this, this.noFeatureClick
+                            );
+                        }
+                        featureManager.showLayer(
+                            this.id, this.showSelectedOnly && "selected"
                         );
-                    }
-                    featureManager.showLayer(
-                        this.id, this.showSelectedOnly && "selected"
-                    );
-                    this.selectControl.unselectAll(
-                        popup && popup.editing && {except: popup.feature}
-                    );
+                        this.selectControl.unselectAll(
+                            popup && popup.editing && {except: popup.feature}
+                        );
+                    }, this);
                 },
                 "deactivate": function() {
                     if (this.autoLoadFeature === true || featureManager.paging) {
@@ -340,7 +418,7 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                 if (feature) {
                     this.fireEvent("featureeditable", this, feature, false);
                 }
-                if (popup && !popup.hidden) {
+                if (feature && feature.geometry && popup && !popup.hidden) {
                     popup.close();
                 }
             },
@@ -404,8 +482,13 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                                 featureStore.on({
                                     write: {
                                         fn: function() {
-                                            if (popup && popup.isVisible()) {
-                                                popup.enable();
+                                            if (popup) {
+                                                if (popup.isVisible()) {
+                                                    popup.enable();
+                                                }
+                                                if (this.closeOnSave) {
+                                                    popup.close();
+                                                }
                                             }
                                             var layer = featureManager.layerRecord;
                                             this.target.fireEvent("featureedit", featureManager, {
@@ -499,17 +582,22 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         var actions = [];
         var commonOptions = {
             tooltip: this.createFeatureActionTip,
-            menuText: this.createFeatureActionText,
-            text: this.createFeatureActionText,
+            // backwards compatibility: only show text if configured
+            menuText: this.initialConfig.createFeatureActionText,
+            text: this.initialConfig.createFeatureActionText,
             iconCls: this.iconClsAdd,
             disabled: true,
             hidden: this.modifyOnly || this.readOnly,
             toggleGroup: toggleGroup,
+            //TODO Tool.js sets group, but this doesn't work for GeoExt.Action
+            group: toggleGroup,
+            groupClass: null,
             enableToggle: true,
             allowDepress: true,
             control: this.drawControl,
             deactivateOnDisable: true,
-            map: this.target.mapPanel.map
+            map: this.target.mapPanel.map,
+            listeners: {checkchange: this.onItemCheckchange, scope: this}
         };
         if (this.supportAbstractGeometry === true) {
             var menuItems = [];
@@ -530,10 +618,10 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                                     featureLayer.events.triggerEvent("featureselected", {feature: feature});
                                     delete this._forcePopupForNoGeometry;
                                 }
-                                if (this.actions[0].items[0] instanceof Ext.menu.CheckItem) {
-                                    this.actions[0].items[0].setChecked(false);
+                                if (this.createAction.items[0] instanceof Ext.menu.CheckItem) {
+                                    this.createAction.items[0].setChecked(false);
                                 } else {
-                                    this.actions[0].items[0].toggle(false);
+                                    this.createAction.items[0].toggle(false);
                                 }
                             },
                             scope: this
@@ -545,10 +633,10 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
                 if (checked === true) {
                     this.setHandler(Handler, false);
                 }
-                if (this.actions[0].items[0] instanceof Ext.menu.CheckItem) {
-                    this.actions[0].items[0].setChecked(checked);
+                if (this.createAction.items[0] instanceof Ext.menu.CheckItem) {
+                    this.createAction.items[0].setChecked(checked);
                 } else {
-                    this.actions[0].items[0].toggle(checked);
+                    this.createAction.items[0].toggle(checked);
                 }
             };
             menuItems.push(
@@ -591,17 +679,66 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         }
         actions.push(new GeoExt.Action({
             tooltip: this.editFeatureActionTip,
-            text: this.editFeatureActionText,
-            menuText: this.editFeatureActionText,
+            // backwards compatibility: only show text if configured
+            text: this.initialConfig.editFeatureActionText,
+            menuText: this.initialConfig.editFeatureActionText,
             iconCls: this.iconClsEdit,
             disabled: true,
             toggleGroup: toggleGroup,
+            //TODO Tool.js sets group, but this doesn't work for GeoExt.Action
+            group: toggleGroup,
+            groupClass: null,
             enableToggle: true,
             allowDepress: true,
             control: this.selectControl,
             deactivateOnDisable: true,
-            map: this.target.mapPanel.map
+            map: this.target.mapPanel.map,
+            listeners: {checkchange: this.onItemCheckchange, scope: this}
         }));
+        
+        this.createAction = actions[0];
+        this.editAction = actions[1];
+        
+        if (this.splitButton) {
+            this.splitButton = new Ext.SplitButton({
+                menu: {items: [
+                    Ext.apply(new Ext.menu.CheckItem(actions[0]), {
+                        text: this.createFeatureActionText
+                    }),
+                    Ext.apply(new Ext.menu.CheckItem(actions[1]), {
+                        text: this.editFeatureActionText
+                    })
+                ]},
+                disabled: true,
+                buttonText: this.splitButtonText,
+                tooltip: this.splitButtonTooltip,
+                iconCls: this.iconClsAdd,
+                enableToggle: true,
+                toggleGroup: this.toggleGroup,
+                allowDepress: true,
+                handler: function(button, event) {
+                    if(button.pressed) {
+                        button.menu.items.itemAt(this.activeIndex).setChecked(true);
+                    }
+                },
+                scope: this,
+                listeners: {
+                    toggle: function(button, pressed) {
+                        // toggleGroup should handle this
+                        if(!pressed) {
+                            button.menu.items.each(function(i) {
+                                i.setChecked(false);
+                            });
+                        }
+                    },
+                    render: function(button) {
+                        // toggleGroup should handle this
+                        Ext.ButtonToggleMgr.register(button);
+                    }
+                }
+            });
+            actions = [this.splitButton];
+        }
 
         actions = gxp.plugins.FeatureEditor.superclass.addActions.call(this, actions);
 
@@ -613,6 +750,16 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         }
 
         return actions;
+    },
+    
+    onItemCheckchange: function(item, checked) {
+        if (this.splitButton) {
+            this.activeIndex = item.ownerCt.items.indexOf(item);
+            this.splitButton.toggle(checked);
+            if (checked) {
+                this.splitButton.setIconClass(item.iconCls);
+            }
+        }
     },
 
     /** private: method[getFeatureManager]
@@ -661,9 +808,13 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
      * private: method[enableOrDisable]
      */
     enableOrDisable: function() {
-        var disable = !this.schema || !this.target.isAuthorized();
-        this.actions[0].setDisabled(disable);
-        this.actions[1].setDisabled(disable);
+        // disable editing if no schema
+        var disable = !this.schema;
+        if (this.splitButton) {
+            this.splitButton.setDisabled(disable);
+        }
+        this.createAction.setDisabled(disable);
+        this.editAction.setDisabled(disable);
         return disable;
     },
     
@@ -676,13 +827,13 @@ gxp.plugins.FeatureEditor = Ext.extend(gxp.plugins.ClickableFeatures, {
         this.schema = schema;
         var disable = this.enableOrDisable();
         if (disable) {
-            // not a wfs capable layer or not authorized
+            // not a wfs capable layer
             this.fireEvent("layereditable", this, layer, false);
             return;
         }
 
         var control = this.drawControl;
-        var button = this.actions[0];
+        var button = this.createAction;
         var handlers = {
             "Point": OpenLayers.Handler.Point,
             "Line": OpenLayers.Handler.Path,

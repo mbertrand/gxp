@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2008-2012 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
 
 /**
- * @requires widgets/form/CSWFilterField.js
+ * @requires ../gxp/src/script/widgets/form/CSWFilterField.js
  */
 
 /** api: (define)
@@ -19,15 +19,23 @@ Ext.namespace("gxp");
 
 /** api: constructor
  *  .. class:: CatalogueSearchPanel(config)
- *   
+ *
  *      Create a panel for searching a CS-W.
  */
 gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
+
+    width: 400,
 
     /** private: property[border]
      *  ``Boolean``
      */
     border: false,
+
+    /** api: config[maxRecords]
+     *  ``Integer`` The maximum number of records to retrieve in one batch.
+     *  Defaults to 10.
+     */
+    maxRecords: 10,
 
     /** api: config[map]
      *  ``OpenLayers.Map``
@@ -57,6 +65,9 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
     datasourceLabel: "Data source",
     filterLabel: "Filter search by",
     removeSourceTooltip: "Switch back to original source",
+    topicCategories: null,
+    defaultTopic: "General",
+
     /* end i18n */
 
     /** private: method[initComponent]
@@ -110,23 +121,11 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 }]
             }, {
                 xtype: "fieldset",
-                collapsible: true,
-                collapsed: true,
+                collapsible: false,
+                collapsed: false,
                 hideLabels: false,
                 title: this.advancedTitle,
-                items: [{
-                    xtype: 'gxp_cswfilterfield',
-                    name: 'datatype',
-                    property: 'apiso:Type',
-                    comboFieldLabel: this.datatypeLabel,
-                    comboStoreData: [
-                        ['dataset', 'Dataset'],
-                        ['datasetcollection', 'Dataset collection'],
-                        ['application', 'Application'],
-                        ['service', 'Service']
-                    ],
-                    target: this
-                }, {
+                items: [ {
                     xtype: 'gxp_cswfilterfield',
                     name: 'extent',
                     property: 'BoundingBox',
@@ -141,27 +140,28 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                     name: 'category',
                     property: 'apiso:TopicCategory',
                     comboFieldLabel: this.categoryLabel,
-                    comboStoreData: [
-                        ['farming', 'Farming'],
-                        ['biota', 'Biota'],
-                        ['boundaries', 'Boundaries'],
-                        ['climatologyMeteorologyAtmosphere', 'Climatology/Meteorology/Atmosphere'],
-                        ['economy', 'Economy'],
-                        ['elevation', 'Elevation'],
-                        ['environment', 'Environment'],
-                        ['geoscientificinformation', 'Geoscientific Information'],
-                        ['health', 'Health'],
-                        ['imageryBaseMapsEarthCover', 'Imagery/Base Maps/Earth Cover'],
-                        ['intelligenceMilitary', 'Intelligence/Military'],
-                        ['inlandWaters', 'Inland Waters'],
-                        ['location', 'Location'],
-                        ['oceans', 'Oceans'],
-                        ['planningCadastre', 'Planning Cadastre'],
-                        ['society', 'Society'],
-                        ['structure', 'Structure'],
-                        ['transportation', 'Transportation'],
-                        ['utilitiesCommunications', 'Utilities/Communications']
-                    ],
+                    comboStoreData: this.topicCategories ? this.topicCategories :
+                        [
+                            ['farming', 'Farming'],
+                            ['biota', 'Biota'],
+                            ['boundaries', 'Boundaries'],
+                            ['climatologyMeteorologyAtmosphere', 'Climatology/Meteorology/Atmosphere'],
+                            ['economy', 'Economy'],
+                            ['elevation', 'Elevation'],
+                            ['environment', 'Environment'],
+                            ['geoscientificinformation', 'Geoscientific Information'],
+                            ['health', 'Health'],
+                            ['imageryBaseMapsEarthCover', 'Imagery/Base Maps/Earth Cover'],
+                            ['intelligenceMilitary', 'Intelligence/Military'],
+                            ['inlandWaters', 'Inland Waters'],
+                            ['location', 'Location'],
+                            ['oceans', 'Oceans'],
+                            ['planningCadastre', 'Planning Cadastre'],
+                            ['society', 'Society'],
+                            ['structure', 'Structure'],
+                            ['transportation', 'Transportation'],
+                            ['utilitiesCommunications', 'Utilities/Communications']
+                        ],
                     target: this
                 }, {
                     xtype: "compositefield",
@@ -183,7 +183,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                             'select': function(cmb, record) {
                                 this.setSource(cmb.getValue());
                             },
-                            'render': function() { 
+                            'render': function() {
                                 this.sourceCombo.setValue(this.selectedSource);
                             },
                             scope: this
@@ -221,50 +221,56 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                             btn.ownerCt.items.each(function(item) {
                                 if (item.getXType() === "combo") {
                                     var id = item.getValue();
-                                    this.form.getForm().findField(id).show();
+                                    item.clearValue();
+                                    var field = this.form.getForm().findField(id);
+                                    if (field) {
+                                        field.show();
+                                    }
                                 }
                             }, this);
                         },
                         scope: this
                     }]
                 }]
-            }]
-        }, {
-            xtype: "grid",
-            border: false,
-            ref: "grid",
-            bbar: new Ext.PagingToolbar({
-                paramNames: {
-                    start: 'startPosition', 
-                    limit: 'maxRecords'
-                },
-                store: this.sources[this.selectedSource].store,
-                pageSize: 100 
-            }),
-            loadMask: true,
-            hideHeaders: true,
-            store: this.sources[this.selectedSource].store,
-            columns: [{
-                id: 'title', 
-                xtype: "templatecolumn", 
-                tpl: new Ext.XTemplate('<b>{title}</b><br/>{abstract}'), 
-                sortable: true
             }, {
-                xtype: "actioncolumn",
-                width: 30,
-                items: [{
-                    iconCls: "gxp-icon-addlayers",
-                    tooltip: this.addMapTooltip,
-                    handler: function(grid, rowIndex, colIndex) {
-                        var rec = this.grid.store.getAt(rowIndex);
-                        this.addLayer(rec);
-                    },
-                    scope: this
-                }]
-            }],
-            autoExpandColumn: 'title',
-            width: 400,
-            height: 300
+                xtype: "grid",
+                width: '100%', 
+                anchor: '99%',
+                viewConfig: {
+                    scrollOffset: 0,
+                    forceFit: true
+                },
+                border: false,
+                ref: "../grid",
+                bbar: new Ext.PagingToolbar({
+                    paramNames: this.sources[this.selectedSource].getPagingParamNames(),
+                    store: this.sources[this.selectedSource].store,
+                    pageSize: this.maxRecords
+                }),
+                loadMask: true,
+                hideHeaders: true,
+                store: this.sources[this.selectedSource].store,
+                columns: [{
+                    id: 'title',
+                    xtype: "templatecolumn", 
+                    tpl: new Ext.XTemplate('<b>{title}</b><br/>{abstract}'), 
+                    sortable: true
+                }, {
+                    xtype: "actioncolumn",
+                    width: 30,
+                    items: [{
+                        iconCls: "gxp-icon-addlayers",
+                        tooltip: this.addMapTooltip,
+                        handler: function(grid, rowIndex, colIndex) {
+                            var rec = this.grid.store.getAt(rowIndex);
+                            this.addLayer(rec);
+                        },
+                        scope: this
+                    }]
+                }],
+                autoExpandColumn: 'title',
+                autoHeight: true
+            }]
         }];
         gxp.CatalogueSearchPanel.superclass.initComponent.apply(this, arguments);
     },
@@ -291,64 +297,15 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
     },
 
     /** private: method[performQuery]
-     *  Query the CS-W and show the results.
+     *  Query the Catalogue and show the results.
      */
     performQuery: function() {
-        var store = this.grid.store;
-        var searchValue = this.search.getValue();
-        var filter = undefined;
-        if (searchValue !== "") {
-            filter = new OpenLayers.Filter.Comparison({
-                type: OpenLayers.Filter.Comparison.LIKE,
-                property: 'csw:AnyText',
-                value: '*' + searchValue + '*'
-            });
-        }
-        var data = {
-            "resultType": "results",
-            "maxRecords": 100,
-            "Query": {
-                "typeNames": "gmd:MD_Metadata",
-                "ElementSetName": {
-                    "value": "full"
-                }
-            }
-        };
-        var fullFilter = this.getFullFilter(filter);
-        if (fullFilter !== undefined) {
-            Ext.apply(data.Query, {
-                "Constraint": {
-                    version: "1.1.0",
-                    Filter: fullFilter
-                }
-            });
-        }
-        // use baseParams so paging takes them into account
-        store.baseParams = data;
-        store.load();
-    },
-
-    /** private: method[getFullFilter]
-     *  :arg filter: ``OpenLayers.Filter`` The filter to add to the other existing 
-     *  filters. This is normally the free text search filter.
-     *  :returns: ``OpenLayers.Filter`` The combined filter.
-     *
-     *  Get the filter to use in the CS-W query.
-     */
-    getFullFilter: function(filter) {
-        var filters = [];
-        if (filter !== undefined) {
-            filters.push(filter);
-        }
-        filters = filters.concat(this.filters);
-        if (filters.length <= 1) {
-            return filters[0];
-        } else {
-            return new OpenLayers.Filter.Logical({
-                type: OpenLayers.Filter.Logical.AND,
-                filters: filters
-            });
-        }
+        var plugin = this.sources[this.selectedSource];
+        plugin.filter({
+            queryString: this.search.getValue(),
+            limit: this.maxRecords,
+            filters: this.filters
+        });
     },
 
     /** private: method[addFilter]
@@ -383,7 +340,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
             var link = links[i];
             if (link && link.toLowerCase().indexOf('service=wms') > 0) {
                 var obj = OpenLayers.Util.createUrlObject(link);
-                url = obj.protocol + "//" + obj.host + ":" + obj.port + obj.pathname;
+                url = obj.protocol + "//" + obj.host + ":" + obj.port + obj.pathname.replace("download","geoserver");
                 name = obj.args.layers;
                 break;
             }
@@ -394,18 +351,31 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 name: name
             };
         } else {
-            return false;
+            var urlParts = links[0].split('/');
+            var name = urlParts[urlParts.length -1];
+            return {
+                url: links[0],
+                name: name
+            }
         }
     },
 
     /** private: method[addLayer]
      *  :arg record: ``GeoExt.data.LayerRecord`` The layer record to add.
-     *      
+     *
      *  Add a WMS layer coming from a catalogue search.
      */
     addLayer: function(record) {
         var uri = record.get("URI");
         var bounds = record.get("bounds");
+        var bLeft = bounds.left,
+            bRight = bounds.right,
+            bBottom = bounds.bottom,
+            bTop = bounds.top;
+        var left = Math.min(bLeft, bRight),
+            right = Math.max(bLeft, bRight),
+            bottom = Math.min(bBottom, bTop),
+            top = Math.max(bBottom, bTop);
         var wmsInfo = this.findWMS(uri);
         if (wmsInfo === false) {
             // fallback to dct:references
@@ -415,10 +385,29 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
         if (wmsInfo !== false) {
             this.fireEvent("addlayer", this, this.selectedSource, Ext.apply({
                 title: record.get('title')[0],
-                bbox: bounds.toArray(),
-                srs: "EPSG:4326"
+                bbox: [left, bottom, right, top],
+                srs: "EPSG:4326",
+                subject: this.getCategoryTitle(record)
             }, wmsInfo));
         }
+    },
+
+
+    getCategoryTitle: function(record){
+        var subject = this.defaultTopic;
+        try {
+            subject = record.get("subject")[0];
+        } catch (ex) {
+            return subject;
+        }
+        for (var c = 0; c < this.topicCategories.length; c++)
+        {
+            if (this.topicCategories[c][0] === subject) {
+                return this.topicCategories[c][1];
+            }
+        }
+        return subject;
+
     }
 
 });

@@ -1,7 +1,14 @@
+/**
+ * Created by PyCharm.
+ * User: mbertrand
+ * Date: 9/20/11
+ * Time: 7:56 PM
+ * To change this template use File | Settings | File Templates.
+ */
 
 Ext.namespace("gxp.plugins");
 
-gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
+gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
     /** api: ptype = gxp_gnsource */
     ptype: "gxp_gnsource",
@@ -38,6 +45,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
     schemaCache: null,
 
 
+    url: null,
 
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
@@ -49,6 +57,8 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
         var record;
 
         if (config['llbbox']) {
+
+            this.url = config.url;
 
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
@@ -68,7 +78,6 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
             }
 
 
-
             var params = {
                 STYLES: config.styles,
                 FORMAT: config.format,
@@ -82,7 +91,14 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
                 URL: config.url
             };
 
-            layer = new OpenLayers.Layer.WMS(
+
+
+            if ("cql_filter" in config ) {
+                params['CQL_FILTER'] = config['cql_filter'];
+            }
+
+
+            var layer = new OpenLayers.Layer.WMS(
                 config.title,
                 config.url,
                 params, {
@@ -97,6 +113,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
                 }
             );
 
+
             if ("tiled" in config && config.tiled == true) {
 
                 var tileWidth = config['tileWidth'] || 256;
@@ -105,27 +122,41 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
                 var originLon = config['tileOriginLon'] || -20037508.34;
                 var originLat = config['tileOriginLat'] || -20037508.34;
 
-                  layer.addOptions({resolutions: tileResolutions,
-                  tileSize: new OpenLayers.Size(tileWidth, tileHeight),
-                  tileOrigin: new OpenLayers.LonLat(originLat, originLon)});
-                  layer.params.TILED = true; // set to true when http://projects.opengeo.org/suite/ticket/1286 is closed
+                layer.addOptions({resolutions: tileResolutions,
+                    tileSize: new OpenLayers.Size(tileWidth, tileHeight),
+                    tileOrigin: new OpenLayers.LonLat(originLat, originLon)});
+                layer.params.TILED = true; // set to true when http://projects.opengeo.org/suite/ticket/1286 is closed
+            } else {
+                layer.params.TILED = false;
             }
+
+
+
+            if (config.attributes){
+                layer.attributes = config.attributes;
+            }
+
+
             // data for the new record
             var data = {
-                title: config.title,
-                name: config.name,
-                source: config.source,
-                group: config.group,
-                searchfields: config.searchfields,
-                properties: "gxp_wmslayerpanel",
-                fixed: config.fixed,
-                selected: "selected" in config ? config.selected : false,
-                layer: layer,
-                queryable: config.queryable,
-                disabled: config.disabled,
-                abstract: config.abstract,
-                styles: [config.styles]
+                'title': config.title,
+                'name': config.name,
+                'source': config.source,
+                'group': config.group,
+                'attributes': config.attributes,
+                'properties': "gxp_wmslayerpanel",
+                'fixed': config.fixed,
+                'selected': "selected" in config ? config.selected : false,
+                'layer': layer,
+                'queryable': config.queryable,
+                'disabled': config.disabled,
+                'abstract': config['abstract'],
+                'styles': [config.styles],
+                'restUrl': this.restUrl,
+                'cql_filter': "cql_filter" in config ? config.cql_filter : ''
             };
+
+
 
             // add additional fields
             var fields = [
@@ -133,14 +164,16 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
                 {name: "name", type: "string"},
                 {name: "source", type: "string"},
                 {name: "group", type: "string"},
-                {name: "searchfields"}, //array
+                {name: "attributes"}, //array
                 {name: "properties", type: "string"},
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"},
                 {name: "queryable", type: "boolean"},
                 {name: 'disabled', type: 'boolean'},
                 {name: "abstract", type: "string"},
-                {name: "styles"} //array
+                {name: "styles"}, //array
+                {name: "restUrl", type: "string"},
+                {name: "cql_filter", type: "string"}
             ];
 
             var Record = GeoExt.data.LayerRecord.create(fields);
@@ -150,7 +183,29 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
         }
     },
 
+    /** private: method[initDescribeLayerStore]
+     *  creates a WMSDescribeLayer store for layer descriptions of all layers
+     *  created from this source.
+     */
+    initDescribeLayerStore: function() {
+        var version = "1.1.1";
+        this.describeLayerStore = new GeoExt.data.WMSDescribeLayerStore({
+            url: this.url,
+            baseParams: {
+                VERSION: version,
+                REQUEST: "DescribeLayer"
+            }
+        });
 
+    },
+
+    /** api: method[createStore]
+     *
+     *  Creates a store of layer records.  Not necessary for this case.
+     */
+    createStore: function() {
+        this.fireEvent("ready", this);
+    },
 
     /** api: method[getConfigForRecord]
      *  :arg record: :class:`GeoExt.data.LayerRecord`
@@ -160,13 +215,26 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.LayerSource, {
      */
 
     getConfigForRecord: function(record) {
-        var config = gxp.plugins.GeoNodeSource.superclass.getConfigForRecord.apply(this, arguments);
+        var config = gxp.plugins.WMSSource.superclass.getConfigForRecord.apply(this, arguments);
         var layer = record.getLayer();
         var params = layer.params;
-        return Ext.apply(config, {
+        config = Ext.apply(config, {
+            format: params.FORMAT,
             styles: params.STYLES,
-            tiled: record.getLayer().params.TILED
+            transparent: params.TRANSPARENT
         });
+
+        if ('CQL_FILTER' in params) {
+            Ext.apply(config, {
+                cql_filter: params.CQL_FILTER
+            });
+        }
+
+        config= Ext.apply(config, {
+            styles: params.STYLES,
+            tiled: params.TILED
+        });
+        return config;
     }
 
 });
