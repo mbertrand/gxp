@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -65,7 +65,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      * ``String`` An optional proxy url which can be used to bypass the same
      * origin policy. This will be set as ``OpenLayers.ProxyHost``.
      */
-    
+
     /** api: config[mapItems]
      *  ``Array(Ext.Component)``
      *  Any items to be added to the map panel. A typical item to put on a map
@@ -76,7 +76,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  ``Array(Ext.util.Observable)``
      *  Any plugins to be added to the map panel, e.g. ``gxp.plugins.LoadingIndicator``.
      */
-     
+
     /** api: config[portalConfig]
      *  ``Object`` Configuration object for the wrapping container of the
      *  viewer. This will be an ``Ext.Panel`` if it has a ``renderTo``
@@ -184,7 +184,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  Only available if this viewer is wrapped into an
      *  :class:`Ext.form.ViewerField`.
      */
-    
+
     /** api: config[authenticate]
      *  ``Function`` A global authentication function that is invoked by
      *  :meth:`doAuthorized` if no user is logged in or the current user is not
@@ -193,7 +193,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
      *  user cancels the login process. Typically this function creates and
      *  opens a login window. Optional, default is null.
      */
-    
+
     /** api: property[authenticate]
      *  ``Function`` Like the config option above, but this can be set after
      *  configuration e.g. by a plugin that provides authentication. It can
@@ -253,7 +253,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
              *    selected layer, or null if no layer is selected.
              */
             "layerselectionchange",
-            
+
             /** api: event[featureedit]
              *  Fired when features were edited.
              *
@@ -267,7 +267,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             "featureedit",
 
             /** api: event[authorizationchange]
-             *  Fired when the authorizedRoles are changed, e.g. when a user 
+             *  Fired when the authorizedRoles are changed, e.g. when a user
              *  logs in or out.
              */
             "authorizationchange"
@@ -280,7 +280,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
 
         // private array of pending getLayerRecord requests
         this.createLayerRecordQueue = [];
-        
+
         (config.loadConfig || this.loadConfig).call(this, config, this.applyConfig);
         gxp.Viewer.superclass.constructor.apply(this, arguments);
 
@@ -571,9 +571,9 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
             var records = baseRecords.concat(overlayRecords);
             if (records.length) {
                 panel.layers.add(records);
-                }
-
             }
+
+        }
     },
 
     /** api: method[getLayerRecordFromMap]
@@ -696,27 +696,27 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         }, this);
         // update sources, adding new ones
         Ext.apply(this.sources, sources);
-        
+
         //standardize portal configuration to portalConfig
         /*
-        if (state.portalItems) {
-            //initial config included both portal config and items
-            if (state.portalConfig && state.portalConfig.items && state.portalConfig.items.length) {
-                //merge arrays of portalItems and portalConfig.items
-                for (var items = state.portalItems, i = 0, len = items.length; i < len; i++) {
-                    var item = items[i];
-                    if (state.portalConfig.items.indexOf(item) == -1) {
-                        state.portalConfig.items.push(item);
-                    }
-                }
-            }
-            else if (state.portalItems && state.portalItems.length) {
-                !state.portalConfig && (state.portalConfig = {});
-                state.portalConfig.items = state.portalItems;
-            }
-        }
-        */
-       
+         if (state.portalItems) {
+         //initial config included both portal config and items
+         if (state.portalConfig && state.portalConfig.items && state.portalConfig.items.length) {
+         //merge arrays of portalItems and portalConfig.items
+         for (var items = state.portalItems, i = 0, len = items.length; i < len; i++) {
+         var item = items[i];
+         if (state.portalConfig.items.indexOf(item) == -1) {
+         state.portalConfig.items.push(item);
+         }
+         }
+         }
+         else if (state.portalItems && state.portalItems.length) {
+         !state.portalConfig && (state.portalConfig = {});
+         state.portalConfig.items = state.portalItems;
+         }
+         }
+         */
+
         //get tool states, for most tools this will be the same as its initial config
         state.tools = [];
         Ext.iterate(this.tools,function(key,val,obj){
@@ -808,7 +808,7 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
          */
         return !this.authorizedRoles || this.authorizedRoles.length > 0;
     },
-    
+
     /** api: method[doAuthorized]
      *  :param roles: ``Array`` Roles required for invoking the action
      *  :param callback: ``Function`` The action to perform

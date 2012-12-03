@@ -212,7 +212,7 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
         Ext.Ajax.request({
             method: "PUT",
             url: url,
-            params:{'place':'holder'},
+            params: {"empty":"filler"},
             callback: function(options, success, response) {
                 // we expect a 405 error code here if we are dealing
                 // with GeoServer and have write access.
