@@ -305,6 +305,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 if (record.get("fixed")) {
                     attr.allowDrag = false;
                 }
+                if (record.get("disabled")) {
+                    attr.disabled = true;
+                }
                 attr.listeners = {
                     rendernode: function(node) {
                         if (record === this.target.selectedLayer) {
@@ -421,16 +424,13 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     },
 
 
-
-
-
-    handleMoveNode : function() {
-
+    handleMoveNode : function(tree, node, oldParent, newParent, index) {
         var mpl = this.target.mapPanel.layers;
         var x = 0;
         var layerCount = mpl.getCount() - 1;
+        var records = [];
 
-        try {
+        if (!node.isLeaf()) {
             //mpl.suspendEvents();
             this.overlayRoot.cascade(function(node) {
                 if (node.isLeaf() && node.layer) {
@@ -441,21 +441,21 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                     });
                     record = store.getAt(index);
                     if (
-                        record.getLayer().displayInLayerSwitcher == true && record.get("group") != "background") {
+                        record.getLayer().displayInLayerSwitcher == true && record.get("group") != "background" && record.get("order") !== x) {
                         record.set("order", x);
-                        mpl.suspendEvents();
-                        mpl.remove(record);
-                        mpl.insert(layerCount - x, [record]);
 
-                        //mpl.move(index,x);
+                        try {
+                            mpl.remove(record);
+                            mpl.insert(layerCount - x, [record]);
+                        } catch (e) {
+                            if (console) {
+                                console.log(e);
+                            }
+                        }
                     }
                     x++;
                 }
             });
-        } finally {
-            mpl.resumeEvents();
-            mpl.fireEvent("load",mpl);
-            console.log('sorted', 'DESC');
         }
     }
 
