@@ -307,6 +307,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 }
                 if (record.get("disabled")) {
                     attr.disabled = true;
+                    attr.autoDisable = false;
                 }
                 attr.listeners = {
                     rendernode: function(node) {
