@@ -36,6 +36,8 @@ gxp.plugins.GeoLocator = Ext.extend(gxp.plugins.Tool, {
      */
     infoActionTip: "Get My Location",
 
+    iconCls: "gxp-icon-geolocate",
+    
 
     /** api: method[addActions]
      */
@@ -145,7 +147,8 @@ gxp.plugins.GeoLocator = Ext.extend(gxp.plugins.Tool, {
         var actions = gxp.plugins.GeoLocator.superclass.addActions.call(this, [
             {
                 tooltip: this.infoActionTip,
-                iconCls: "gxp-icon-geolocate",
+                iconCls: this.iconCls,
+                text: this.toolText,
                 toggleGroup: this.toggleGroup,
                 enableToggle: true,
                 allowDepress: true,

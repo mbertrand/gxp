@@ -153,7 +153,8 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 'abstract': config['abstract'],
                 'styles': [config.styles],
                 'restUrl': this.restUrl,
-                'cql_filter': "cql_filter" in config ? config.cql_filter : ''
+                'cql_filter': "cql_filter" in config ? config.cql_filter : '',
+                'getFeatureInfo':  config.getFeatureInfo,
             };
 
 
@@ -173,7 +174,8 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 {name: "abstract", type: "string"},
                 {name: "styles"}, //array
                 {name: "restUrl", type: "string"},
-                {name: "cql_filter", type: "string"}
+                {name: "cql_filter", type: "string"},
+                {name: "getFeatureInfo"}
             ];
 
             var Record = GeoExt.data.LayerRecord.create(fields);
