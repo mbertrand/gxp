@@ -158,6 +158,24 @@ window.Timeline && window.SimileAjax && (function() {
  */
 gxp.TimelinePanel = Ext.extend(Ext.Panel, {
 
+    /** api: config[showRangeSlider]
+     *  ``Boolean`` Should we show the range slider and its associated plus
+     *  and minus buttons? Defaults to true
+     */
+    showRangeSlider: true,
+
+    /** api: config[initialRangeSliderValue]
+     *  ``Integer`` Initial value to use for the range slider. Default value
+     *  is 25.
+     */
+    initialRangeSliderValue: 25,
+
+    /** api: config[scrollInterval]
+     *  ``Integer`` The Simile scroll event listener will only be handled
+     *  upon every scrollInterval milliseconds. Defaults to 500.
+     */
+    scrollInterval: 500,
+
     /** api: config[featureEditor]
      *  ``gxp.plugins.FeatureEditor``
      */
@@ -299,55 +317,58 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
 
         this.eventSource = new Timeline.DefaultEventSource(0);
 
-        this.items = [{
-            region: "west",
-            xtype: "container",
-            layout: "vbox",
-            margins: "10 5",
-            width: 20,
-            items: [{
-                xtype: "panel",
-                margins: "3 1",
-                cls: "x-tool x-tool-minus",
-                listeners: {
-                    afterrender: function(c){ 
-                        c.getEl().on('click', function() {
-                            var value = this.rangeSlider.getValue();
-                            this.rangeSlider.setValue(0, value+10, true, true);
-                        }, this);
+        this.items = [];
+        if (this.showRangeSlider) {
+            this.items.push({
+                region: "west",
+                xtype: "container",
+                layout: "vbox",
+                margins: "10 5",
+                width: 20,
+                items: [{
+                    xtype: "panel",
+                    margins: "3 1",
+                    cls: "x-tool x-tool-minus",
+                    listeners: {
+                        afterrender: function(c){ 
+                            c.getEl().on('click', function() {
+                                var value = this.rangeSlider.getValue();
+                                this.rangeSlider.setValue(0, value+10, true, true);
+                            }, this);
+                        },
+                        scope: this
+                    }
+                }, {
+                    xtype: "slider",
+                    ref: "../rangeSlider",
+                    vertical: true,
+                    flex: 1,
+                    value: this.initialRangeSliderValue,
+                    minValue: 1,
+                    maxValue: 100,
+                    listeners: {
+                        "change": this.onChange,
+                        "changecomplete": this.onChangeComplete,
+                        scope: this
                     },
-                    scope: this
-                }
-           }, {
-                xtype: "slider",
-                ref: "../rangeSlider",
-                vertical: true,
-                flex: 1,
-                value: 25,
-                minValue: 1,
-                maxValue: 100,
-                listeners: {
-                    "change": this.onChange,
-                    "changecomplete": this.onChangeComplete,
-                    scope: this
-                },
-                plugins: [new gxp.slider.RangeSliderTip()]
-            }, {
-                xtype: "panel",
-                margins: "3 1",
-                cls: "x-tool x-tool-plus",
-                listeners: {
-                    afterrender: function(c){ 
-                        c.getEl().on('click', function() {
-                            var value = this.rangeSlider.getValue();
-                            this.rangeSlider.setValue(0, value-10, true, true);
-                        }, this);
-                    },
-                    scope: this
-                }
-            }]
-        }, this.timelineContainer
-        ];
+                    plugins: [new gxp.slider.RangeSliderTip()]
+                }, {
+                    xtype: "panel",
+                    margins: "3 1",
+                    cls: "x-tool x-tool-plus",
+                    listeners: {
+                        afterrender: function(c){ 
+                            c.getEl().on('click', function() {
+                                var value = this.rangeSlider.getValue();
+                                this.rangeSlider.setValue(0, value-10, true, true);
+                            }, this);
+                        },
+                        scope: this
+                    }
+                }]
+            });
+        } 
+        this.items.push(this.timelineContainer);
 
         // we are binding with viewer to get updates on new layers        
         if (this.initialConfig.viewer) {
@@ -457,6 +478,13 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         Ext.apply(this.layerLookup[keyToMatch], {
             visible: checked
         });
+        // set visibility on the OL layer as well
+        // this was needed to actually get features to be retrieved by the 
+        // BBOX strategy, but leads to the points being visible in the map
+        // as a side effect, so we need to work with an invisible style.
+        if (this.layerLookup[keyToMatch].layer) {
+            this.layerLookup[keyToMatch].layer.setVisibility(checked);
+        }
         var filterMatcher = function(evt) {
             var key = evt.getProperty('key');
             if (key === keyToMatch) {
@@ -802,7 +830,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         // since the bands are linked we need to listen to one band only
         this._silent = true;
         this.timeline.getBand(0).addOnScrollListener(
-            this.setPlaybackCenter.createDelegate(this)
+            gxp.util.throttle(this.setPlaybackCenter.createDelegate(this), this.scrollInterval)
         );
         
     },
@@ -817,7 +845,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         if (this._silent !== true && this.playbackTool && this.playbackTool.playbackToolbar.playing !== true) {
             this._ignoreTimeChange = true;
             this.playbackTool.setTime(time);
-            this.timeline.getBand(0)._decorators[0]._date = time;
+            this.timeline.getBand(0)._decorators[0]._date = this.playbackTool.playbackToolbar.control.currentTime;
             this.timeline.getBand(0)._decorators[0].paint();
             delete this._ignoreTimeChange;
             this.showAnnotations(time);
@@ -1151,8 +1179,10 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
      *  Update the slider tip for the range slider.
      */
     updateRangeSlider: function(range) {
-        this.rangeSlider.startDate = range[0].dateFormat('Y-m-d');
-        this.rangeSlider.endDate = range[1].dateFormat('Y-m-d');
+        if (this.showRangeSlider) {
+            this.rangeSlider.startDate = range[0].dateFormat('Y-m-d');
+            this.rangeSlider.endDate = range[1].dateFormat('Y-m-d');
+        }
     },
 
     /** private: method[displayTooltip]
@@ -1316,7 +1346,7 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
     calculateNewRange: function(range, percentage) {
         if (this.playbackTool) {
             if (percentage === undefined) {
-                percentage = this.rangeSlider.getValue();
+                percentage = this.showRangeSlider ? this.rangeSlider.getValue() : this.initialRangeSliderValue;
             }
             var span = range[1] - range[0];
             var center = this.playbackTool.playbackToolbar.control.currentTime;
@@ -1500,6 +1530,11 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
             filter: filter,
             protocol: protocol,
             displayInLayerSwitcher: false,
+            style: {
+                pointRadius: 0,
+                strokeWidth: 0,
+                fillOpacity: 1
+            },
             visibility: false
         });
         layer.events.on({
@@ -1764,6 +1799,16 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
      *  Add some features to the timeline.
      */    
     addFeatures: function(key, features) {
+        var hasFeature = function(fid) {
+            var iterator = this.eventSource.getAllEventIterator();
+            while (iterator.hasNext()) {
+                var evt = iterator.next();
+                if (evt.getProperty('key') === key && evt.getProperty('fid') === fid) {
+                    return true;
+                }
+            }
+            return false;
+        };
         var isDuration = false;
         var titleAttr = this.layerLookup[key].titleAttr;
         var timeAttr = this.layerLookup[key].timeAttr;
@@ -1775,56 +1820,59 @@ gxp.TimelinePanel = Ext.extend(Ext.Panel, {
         var num = features.length;
         var events = [];
         var attributes, str;
-        for (var i=0; i<num; ++i) { 
-            attributes = features[i].attributes;
-            if (isDuration === false) {
-                events.push({
-                    start: OpenLayers.Date.parse(attributes[timeAttr]),
-                    title: attributes[titleAttr],
-                    durationEvent: false,
-                    key: key,
-                    icon: this.layerLookup[key].icon,
-                    fid: features[i].fid
-                });
-            } else if (Ext.isBoolean(attributes[filterAttr]) ? attributes[filterAttr] : (attributes[filterAttr] === "true")) {
-                var start = attributes[timeAttr];
-                var end = attributes[endTimeAttr];
-                // end is optional
-                var durationEvent = (start != end);
-                if (!Ext.isEmpty(start)) {
-                    start = parseFloat(start);
-                    if (Ext.isNumber(start)) {
-                        start = new Date(start*1000);
+        for (var i=0; i<num; ++i) {
+            // prevent duplicates
+            if (hasFeature.call(this, features[i].fid) === false) {
+                attributes = features[i].attributes;
+                if (isDuration === false) {
+                    events.push({
+                        start: OpenLayers.Date.parse(attributes[timeAttr]),
+                        title: attributes[titleAttr],
+                        durationEvent: false,
+                        key: key,
+                        icon: this.layerLookup[key].icon,
+                        fid: features[i].fid
+                    });
+                } else if (Ext.isBoolean(attributes[filterAttr]) ? attributes[filterAttr] : (attributes[filterAttr] === "true")) {
+                    var start = attributes[timeAttr];
+                    var end = attributes[endTimeAttr];
+                    // end is optional
+                    var durationEvent = (start != end);
+                    if (!Ext.isEmpty(start)) {
+                        start = parseFloat(start);
+                        if (Ext.isNumber(start)) {
+                            start = new Date(start*1000);
+                        } else {
+                            start = OpenLayers.Date.parse(start);
+                        }
+                    }
+                    if (!Ext.isEmpty(end)) {
+                        end = parseFloat(end);
+                        if (Ext.isNumber(end)) {
+                            end = new Date(end*1000);
+                        } else {
+                            end = OpenLayers.Date.parse(end);
+                        }
+                    }
+                    if (durationEvent === false) {
+                        end = undefined;
                     } else {
-                        start = OpenLayers.Date.parse(start);
+                        if (end == "" || end == null) {
+                            // Simile does not deal with unlimited ranges, so let's
+                            // take the range from the playback control
+                            end = this.playbackTool.playbackToolbar.control.range[1];
+                        }
                     }
+                    events.push({
+                        start: start,
+                        end: end,
+                        icon: this.layerLookup[key].icon,
+                        title: attributes[titleAttr],
+                        durationEvent: durationEvent,
+                        key: key,
+                        fid: features[i].fid
+                    });
                 }
-                if (!Ext.isEmpty(end)) {
-                    end = parseFloat(end);
-                    if (Ext.isNumber(end)) {
-                        end = new Date(end*1000);
-                    } else {
-                        end = OpenLayers.Date.parse(end);
-                    }
-                }
-                if (durationEvent === false) {
-                    end = undefined;
-                } else {
-                    if (end == "" || end == null) {
-                        // Simile does not deal with unlimited ranges, so let's
-                        // take the range from the playback control
-                        end = this.playbackTool.playbackToolbar.control.range[1];
-                    }
-                }
-                events.push({
-                    start: start,
-                    end: end,
-                    icon: this.layerLookup[key].icon,
-                    title: attributes[titleAttr],
-                    durationEvent: durationEvent,
-                    key: key,
-                    fid: features[i].fid
-                });
             }
         }       
         var feed = {

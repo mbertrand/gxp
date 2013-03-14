@@ -201,7 +201,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      *  Reload the store when the authorization changes.
      */
     onAuthorizationChange: function() {
-        if (this.store && this.store.url.charAt(0) === "/") {
+        if (this.store && this.url.charAt(0) === "/") {
             this.store.reload();
         }
     },
@@ -415,7 +415,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
         var srs = config.srs || this.target.map.projection;
         config.srs = {};
         config.srs[srs] = true;
-
+        
         var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
         config.bbox = {};
         config.bbox[srs] = {bbox: bbox};
@@ -461,7 +461,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             original = this.store.getAt(index);
         } else if (Ext.isObject(config.capability)) {
             original = this.store.reader.readRecords({capability: {
-                request: {getmap: {href: this.url || this.store.url}},
+                request: {getmap: {href: this.trimUrl((this.url || this.store.url), this.baseParams)}},
                 layers: [config.capability]}
             }).records[0];
         } else if (this.layerConfigComplete(config)) {
@@ -568,7 +568,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             record.json = config;
 
         } else {
-            if (window.console && this.store.getCount() > 0) {
+            if (window.console && this.store.getCount() > 0 && config.name !== undefined) {
                 console.warn("Could not create layer record for layer '" + config.name + "'. Check if the layer is found in the WMS GetCapabilities response.");
             }
         }

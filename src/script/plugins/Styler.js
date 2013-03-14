@@ -9,6 +9,7 @@
 /**
  * @requires plugins/Tool.js
  * @requires widgets/WMSStylesDialog.js
+ * @requires plugins/GeoServerStyleWriter.js
  */
 
 /** api: (define)
@@ -141,7 +142,7 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
      */
     handleLayerChange: function(record) {
         this.launchAction.disable();
-        if (record && record.get("styles")) {
+        if (record) {
             var source = this.target.getSource(record);
             if (source instanceof gxp.plugins.WMSSource) {
                 source.describeLayer(record, function(describeRec) {

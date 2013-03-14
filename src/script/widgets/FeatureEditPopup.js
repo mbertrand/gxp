@@ -18,64 +18,6 @@
  *  extends = GeoExt.Popup
  */
 
-/* TODO remove when https://github.com/geoext/geoext/pull/40 gets in */
-Ext.override(GeoExt.Popup, {
-    initComponent: function() {
-        if(this.map instanceof GeoExt.MapPanel) {
-            this.map = this.map.map;
-        }
-        if(!this.map && this.location instanceof OpenLayers.Feature.Vector &&
-                                                        this.location.layer) {
-            this.map = this.location.layer.map;
-        }
-        if (this.location instanceof OpenLayers.Feature.Vector) {
-            this.location = this.location.geometry;
-        }
-        if (this.location instanceof OpenLayers.Geometry) {
-            if (typeof this.location.getCentroid == "function") {
-                this.location = this.location.getCentroid();
-            }
-            this.location = this.location.getBounds().getCenterLonLat();
-        } else if (this.location instanceof OpenLayers.Pixel) {
-            this.location = this.map.getLonLatFromViewPortPx(this.location);
-        } else {
-            this.anchored = false;
-        }
-
-        var mapExtent =  this.map.getExtent();
-        if (mapExtent && this.location) {
-            this.insideViewport = mapExtent.containsLonLat(this.location);
-        }
-
-        if(this.anchored) {
-            this.addAnchorEvents();
-            this.elements += ',anc';
-        } else {
-            this.unpinnable = false;
-        }
-
-        this.baseCls = this.popupCls + " " + this.baseCls;
-
-        GeoExt.Popup.superclass.initComponent.call(this);
-    },
-    makeDraggable: function() {
-        this.draggable = true;
-        this.header.addClass("x-window-draggable");
-        this.dd = new Ext.Window.DD(this);
-    },
-    onRender: function(ct, position) {
-        GeoExt.Popup.superclass.onRender.call(this, ct, position);
-        if (this.anchored) {
-            this.ancCls = this.popupCls + "-anc";
-            
-            //create anchor dom element.
-            this.createElement("anc", this.el.dom);
-        } else {
-            this.makeDraggable();
-        }
-    }
-});
-
 /** api: constructor
  *  .. class:: FeatureEditPopup(config)
  *
@@ -425,8 +367,18 @@ gxp.FeatureEditPopup = Ext.extend(GeoExt.Popup, {
 
             this.modifyControl = new OpenLayers.Control.ModifyFeature(
                 this.feature.layer,
-                {standalone: true, vertexRenderIntent: this.vertexRenderIntent}
+                {standalone: true, vertexRenderIntent: this.vertexRenderIntent,
+                handleKeypress: function(evt) {
+                    OpenLayers.Control.ModifyFeature.prototype.handleKeypress.apply(this, arguments);
+                    // don't go to previous page when back button is pressed
+                    //TODO consider calling OpenLayers.Event.stop in
+                    // OpenLayers.Control.ModifyFeature::handleKeypress
+                    if (this.feature && OpenLayers.Util.indexOf(this.deleteCodes, evt.keyCode) != -1) {
+                        OpenLayers.Event.stop(evt);
+                    }
+                }}
             );
+            this.modifyControl.deleteCodes = [8, 46, 68];
             this.feature.layer.map.addControl(this.modifyControl);
             this.modifyControl.activate();
             if (this.feature.geometry) {
