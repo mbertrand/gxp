@@ -169,7 +169,6 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
 
         treeRoot.appendChild(this.overlayRoot);
 
-
         var baseAttrs;
         if (this.initialConfig.loader && this.initialConfig.loader.baseAttrs) {
             baseAttrs = this.initialConfig.loader.baseAttrs;
@@ -198,41 +197,6 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             newFolder.enable();
 		}
 		
-        for (var group in this.groups) {
-            groupConfig = typeof this.groups[group] == "string" ?
-                {title: this.groups[group]} : this.groups[group];
-            exclusive = groupConfig.exclusive;
-            treeRoot.appendChild(new GeoExt.tree.LayerContainer(Ext.apply({
-                text: groupConfig.title,
-                iconCls: "gxp-folder",
-                expanded: true,
-                group: group == this.defaultGroup ? undefined : group,
-                loader: new GeoExt.tree.LayerLoader({
-                    baseAttrs: exclusive ?
-                        Ext.apply({checkedGroup: Ext.isString(exclusive) ? exclusive : group}, baseAttrs) :
-                        baseAttrs,
-                    store: this.target.mapPanel.layers,
-                    filter: (function(group) {
-                        return function(record) {
-                            return (record.get("group") || defaultGroup) == group &&
-                                record.getLayer().displayInLayerSwitcher == true;
-                        };
-                    })(group),
-                    createNode: function(attr) {
-                        plugin.configureLayerNode(this, attr);
-                        return GeoExt.tree.LayerLoader.prototype.createNode.apply(this, arguments);
-                    }
-                }),
-                singleClickExpand: true,
-                allowDrag: false,
-                listeners: {
-                    append: function(tree, node) {
-                        node.expand();
-                    }
-                }
-            }, groupConfig)));
-        }
-
         return {
             xtype: "treepanel",
             root: treeRoot,
