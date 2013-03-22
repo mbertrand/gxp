@@ -212,7 +212,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                     singleTile = true;
                 }
             }
-            record.set("tiled", singleTile);
+            record.set("tiled", !singleTile);
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);
             record.set("source", config.source);
