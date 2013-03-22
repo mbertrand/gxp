@@ -58,6 +58,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                         },
                         {
                             isBaseLayer:false,
+                            ratio: 1,
                             displayInLayerSwitcher:true,
                             visibility:true,
                             projection:layerProjection,
@@ -78,6 +79,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                     {name:"layerid", type:"string"},
                     {name:"group", type:"string", defaultValue:this.title},
                     {name:"fixed", type:"boolean", defaultValue:true},
+                    {name:"tiled", type:"boolean", defaultValue:true},
                     {name:"queryable", type:"boolean", defaultValue:true},
                     {name:"selected", type:"boolean"}
                 ]
@@ -201,9 +203,18 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                 record.set("format", config.format);
             }
 
-
+            var singleTile = false;
+            if ("tiled" in config) {
+                singleTile = !config.tiled;
+            } else {
+                // for now, if layer has a time dimension, use single tile
+                if (original.data.dimensions && original.data.dimensions.time) {
+                    singleTile = true;
+                }
+            }
+            record.set("tiled", singleTile);
             record.set("selected", config.selected || false);
-            record.set("queryable", config.queryable || true)
+            record.set("queryable", config.queryable || true);
             record.set("source", config.source);
             record.set("name", config.name);
             record.set("layerid", config.layerid);
@@ -261,6 +272,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         record.set("name", config.name);
         record.set("layerid", config.layerid || "show:0");
         record.set("format", config.format || "png");
+        record.set("tiled", "tiled" in config ? config.tiled : true);
 
         record.setLayer(new OpenLayers.Layer.ArcGIS93Rest(config.name,  this.url.split("?")[0] + "/export",
             {
@@ -272,6 +284,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                 isBaseLayer:false,
                 displayInLayerSwitcher:true,
                 projection:srs,
+                singleTile: "tiled" in config ? !config.tiled : false,
                 queryable: "queryable" in config ? config.queryable : false}
         )
         );
@@ -292,6 +305,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             source: record.get("source"),
             name: record.get("name"),
             title: record.get("title"),
+            tiled: record.get("tiled"),
             visibility: layer.getVisibility(),
             layerid: layer.params.LAYERS,
             format: layer.params.FORMAT,
