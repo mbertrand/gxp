@@ -206,12 +206,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             var singleTile = false;
             if ("tiled" in config) {
                 singleTile = !config.tiled;
-            } else {
-                // for now, if layer has a time dimension, use single tile
-                if (original.data.dimensions && original.data.dimensions.time) {
-                    singleTile = true;
-                }
-            }
+            } 
             record.set("tiled", !singleTile);
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);

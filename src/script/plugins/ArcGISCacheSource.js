@@ -70,7 +70,7 @@ gxp.plugins.ArcGISCacheSource = Ext.extend(gxp.plugins.ArcRestSource, {
                     	        {name:"source", type:"string"},
                     	        {name:"name", type:"string", mapping:"name"},
                     	        {name:"layerid", type:"string"},
-                    	        {name:"group", type:"string", defaultValue:this.title},
+                    	        {name:"group", type:"string", defaultValue:"background"},
                     	        {name:"fixed", type:"boolean", defaultValue:true},
                     	        {name:"tiled", type:"boolean", defaultValue:true},
                     	        {name:"queryable", type:"boolean", defaultValue:true},
