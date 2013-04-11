@@ -60,6 +60,7 @@ gxp.plugins.MapShare = Ext.extend(gxp.plugins.Tool, {
             iconCls: this.iconCls,
             text: this.buttonText,
             tooltip: this.toolTip,
+            disabled: this.mapID == null,
             handler: function() {
                 window.open(link);
             },
