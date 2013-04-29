@@ -38,7 +38,7 @@ gxp.plugins.MapShare = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for layer share menu item (i18n).
      */
-    buttonText: "Share Map",
+    text: "Share Map",
 
     /** api: config[toolTip]
      *  ``String``
@@ -58,9 +58,9 @@ gxp.plugins.MapShare = Ext.extend(gxp.plugins.Tool, {
     	var link = this.linkPrefix + this.target.mapID + this.linkSuffix;
         var actions = gxp.plugins.MapShare.superclass.addActions.call(this, [{
             iconCls: this.iconCls,
-            text: this.buttonText,
+            text: this.text,
             tooltip: this.toolTip,
-            disabled: this.mapID == null,
+            disabled: this.target.mapID == null,
             handler: function() {
                 window.open(link);
             },
