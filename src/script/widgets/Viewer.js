@@ -534,7 +534,8 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
         // initialize tooltips
         Ext.QuickTips.init();
         Ext.apply(Ext.QuickTips.getQuickTip(), {
-        	dismissDelay: 0
+        	dismissDelay: 0,
+        	hideDelay: 10000
         });
         // add any layers from config
         this.addLayers();
