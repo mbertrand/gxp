@@ -870,7 +870,9 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
     /** private: method[getState] */
     getState: function() {
         var state = gxp.plugins.WMSSource.superclass.getState.apply(this, arguments);
-        return Ext.apply(state, {title: this.title, url: this.trimUrl(this.url)});
+        //Force url update in case it was updated from layer url
+        Ext.apply(state, {url: this.trimUrl(this.url)});
+        return Ext.applyIf(state, {title: this.title});
     },
 
 
