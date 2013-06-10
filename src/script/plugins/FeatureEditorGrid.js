@@ -118,11 +118,19 @@ gxp.plugins.FeatureEditorGrid = Ext.extend(Ext.grid.PropertyGrid, {
                 }
                 var value = feature.attributes[name];
                 var fieldCfg = GeoExt.form.recordToField(r);
+
                 //var annotations = this.getAnnotationsFromSchema(r);
                 //if (annotations && annotations.label) {
                 //    this.propertyNames = this.propertyNames || {};
                 //    this.propertyNames[name] = annotations.label;
                 //}
+
+                var annotations = this.getAnnotationsFromSchema(r);
+                if (annotations && annotations.label) {
+                    this.propertyNames = this.propertyNames || {};
+                    this.propertyNames[name] = annotations.label;
+                }
+
                 var listeners;
                 if (typeof value == "string") {
                     var format;

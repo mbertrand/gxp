@@ -169,6 +169,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
 
         treeRoot.appendChild(this.overlayRoot);
 
+
         var baseAttrs;
         if (this.initialConfig.loader && this.initialConfig.loader.baseAttrs) {
             baseAttrs = this.initialConfig.loader.baseAttrs;
@@ -197,6 +198,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             newFolder.enable();
 		}
 		
+
         return {
             xtype: "treepanel",
             root: treeRoot,

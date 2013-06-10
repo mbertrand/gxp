@@ -28,6 +28,8 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
     fileLabel: "Data",
     fieldEmptyText: "Browse for data archive...",
     uploadText: "Upload",
+    uploadFailedText: "Upload failed",
+    processingUploadText: "Processing upload...",
     waitMsgText: "Uploading your data...",
     invalidFileExtensionText: "File extension must be one of: ",
     optionsText: "Options",
@@ -114,6 +116,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
             validator: this.fileNameValidator.createDelegate(this)
         }, {
             xtype: "fieldset",
+            ref: "optionsFieldset",
             title: this.optionsText,
             checkboxToggle: true,
             collapsed: true,
@@ -167,6 +170,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
                         jsonData: jsonData,
                         success: function(response) {
                             this._import = response.getResponseHeader("Location");
+                            this.optionsFieldset.expand();
                             form.submit({
                                 url: this._import + "/tasks",
                                 waitMsg: this.waitMsgText,
@@ -260,7 +264,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
             mode: "local",
             allowBlank: true,
             triggerAction: "all",
-            editable: false,
+            forceSelection: true,
             listeners: {
                 select: function(combo, record, index) {
                     this.getDefaultDataStore(record.get('name'));
@@ -305,7 +309,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
             mode: "local",
             allowBlank: true,
             triggerAction: "all",
-            editable: false,
+            forceSelection: true,
             listeners: {
                 select: function(combo, record, index) {
                     this.fireEvent("datastoreselected", this, record);
@@ -333,7 +337,8 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
                     if (json.dataStore && json.dataStore.enabled === true && !/file/i.test(json.dataStore.type)) {
                         this.defaultDataStore = json.dataStore.name;
                         this.dataStore.emptyText = this.defaultDataStoreEmptyText;
-                        this.dataStore.setValue('');
+                        this.workspace.setValue(json.dataStore.workspace.name);
+                        this.dataStore.setValue(this.defaultDataStore);
                     }
                 }
             },
@@ -360,7 +365,8 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
     handleUploadResponse: function(response) {
         var obj = this.parseResponseText(response.responseText),
             records, tasks, task, msg, i,
-            success = true;
+            formData = this.getForm().getFieldValues(),
+            success = !!obj;
         if (obj) {
             if (typeof obj === "string") {
                 success = false;
@@ -376,11 +382,15 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
                         if (!task) {
                             success = false;
                             msg = "Unknown upload error";
-                            break;
-                        } else if (task.state !== "READY") {
+                        } else if (!task.items.length) {
                             success = false;
-                            msg = "Source " + task.source.file + " is " + task.state;
-                            break;
+                            msg = "Upload contains no items that can be imported.";
+                        } else if (task.state !== "READY") {
+                            if (!(task.state === "INCOMPLETE" && task.items[0].state === "NO_CRS" && formData.nativeCRS)) {
+                                success = false;
+                                msg = "Source " + task.source.file + " is " + task.state + ": " + task.items[0].state;
+                                break;
+                            }
                         }
                     }
                 }
@@ -388,40 +398,63 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
         }
         if (!success) {
             // mark the file field as invlid
-            records = [{data: {id: "file", msg: msg}}];
+            records = [{data: {id: "file", msg: msg || this.uploadFailedText}}];
         } else {
-            var formData = this.getForm().getFieldValues(),
-                // for now we only support a single item (items[0])
-                resource = task.items[0].resource,
-                itemModified = !!(formData.title || formData["abstract"] || formData.nativeCRS),
+            var itemModified = !!(formData.title || formData["abstract"] || formData.nativeCRS),
                 queue = [];
             if (itemModified) {
-                var layer = resource.featureType ? "featureType" : "coverage",
-                    item = {resource: {}};
+                this.waitMsg = new Ext.LoadMask((this.ownerCt || this).getEl(), {msg: this.processingUploadText});
+                this.waitMsg.show();
+                // for now we only support a single item (items[0])
+                var resource = task.items[0].resource,
+                    layer = resource.featureType ? "featureType" : "coverage",
+                    item = {id: task.items[0].id, resource: {}};
                 item.resource[layer] = {
                     title: formData.title || undefined,
                     "abstract": formData["abstract"] || undefined,
-                    nativeCRS: formData.nativeCRS || undefined
+                    srs: formData.nativeCRS || undefined
                 };
                 Ext.Ajax.request({
                     method: "PUT",
                     url: tasks[0].items[0].href,
-                    jsonData: {item: item},
-                    callback: this.finishUpload,
+                    jsonData: item,
+                    success: this.finishUpload,
+                    failure: function(response) {
+                        this.waitMsg.hide();
+                        var errors = [];
+                        try {
+                            var json = Ext.decode(response.responseText);
+                            if (json.errors) {
+                                for (var i=0, ii=json.errors.length; i<ii; ++i) {
+                                    errors.push({
+                                        id: ~json.errors[i].indexOf('SRS') ? 'nativeCRS' : 'file',
+                                        msg: json.errors[i]
+                                    });
+                                }
+                            }
+                        } catch(e) {
+                            errors.push({
+                                id: "file",
+                                msg: response.responseText
+                            });
+                        }
+                        this.getForm().markInvalid(errors);
+                    },
                     scope: this
                 });
             } else {
                 this.finishUpload();
             }
         }
-        return {success: success, records: records};
+        // always return unsuccessful - we manually reset the form in callbacks
+        return {success: false, records: records};
     },
     
     finishUpload: function() {
         Ext.Ajax.request({
             method: "POST",
             url: this._import,
-            //TODO error handling
+            failure: this.handleFailure,
             success: this.handleUploadSuccess,
             scope: this
         });
@@ -458,13 +491,23 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
         Ext.Ajax.request({
             method: "GET",
             url: this._import,
+            failure: this.handleFailure,
             success: function(response) {
+                this.waitMsg.hide();
+                this.getForm().reset();
                 var details = Ext.decode(response.responseText);
                 this.fireEvent("uploadcomplete", this, details);
                 delete this._import;
             },
             scope: this
         });
+    },
+    
+    /** private: method[handleFailure]
+     */
+    handleFailure: function() {
+        this.waitMsg.hide();
+        this.getForm().markInvalid([{file: this.uploadFailedText}]);
     }
 
 });

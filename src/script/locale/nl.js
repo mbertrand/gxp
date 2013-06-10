@@ -11,9 +11,9 @@ GeoExt.Lang.add("nl", {
         untitledText: "Onbekend",
         addLayerSourceErrorText: "Probleem bij het ophalen van de Error WMS GetCapabilities ({msg}).\nControleer de URL en probeer opnieuw.",
         availableLayersText: "Beschikbare kaartlagen",
-        layerSelectionText: "Source:",
-        sourceSelectOrTypeText: "Choose one or type service URL",
-        doneText: "Klaar"
+        doneText: "Klaar",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Zoek naar kaartlagen"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -25,7 +25,9 @@ GeoExt.Lang.add("nl", {
 
     "gxp.plugins.FeatureEditor.prototype": {
         createFeatureActionTip: "Maak een nieuw object",
-        editFeatureActionTip: "Wijzig een bestand object"
+        editFeatureActionTip: "Wijzig een bestand object",
+        commitTitle: "Wijzingsbeschrijving",
+        commitText: "Voor a.u.b. een beschrijving in voor de wijziging:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -285,9 +287,19 @@ GeoExt.Lang.add("nl", {
         transparentText: "Transparant",
         cacheText: "Cache",
         cacheFieldText: "Gebruik de versie vanuit de cache",
-        stylesText: "Stijlen",
+        stylesText: "Beschikbare Stijlen",
         infoFormatText: "Info formaat",
-        infoFormatEmptyText: "Selecteer een formaat"
+        infoFormatEmptyText: "Selecteer een formaat",
+        displayOptionsText: "Weergave opties",
+        queryText: "Begrens d.m.v. query",
+        scaleText: "Bregens d.m.v. schaal",
+        minScaleText: "Minimum schaal",
+        maxScaleText: "Maximum schaal",
+        switchToFilterBuilderText: "Terug naar de querybuilder",
+        cqlPrefixText: "of ",
+        cqlText: "gebruik een CQL filter",
+        singleTileText: "Enkele kaarttegel",
+        singleTileFieldText: "Gebruik 1 kaarttegel"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -333,6 +345,8 @@ GeoExt.Lang.add("nl", {
         fileLabel: "Data",
         fieldEmptyText: "Kies data archief...",
         uploadText: "Upload",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Bezig met uploaden van de data...",
         invalidFileExtensionText: "Bestandsextensie is een van: ",
         optionsText: "Opties",
@@ -353,6 +367,23 @@ GeoExt.Lang.add("nl", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Zoom niveau"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Problemen bij het opslaan: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+    	feedTypeText: "Bron",
+        addPicasaText: "Picasa Foto's",
+        addYouTubeText: "YouTube video's",
+        addRSSText: "Andere GeoRSS Feed",
+        addFeedText: "Voeg toe aan Map",
+        addTitleText: "Titel",
+        keywordText: "Trefwoord",
+        doneText: "Klaar",
+        titleText: "Voeg Feeds",
+        maxResultsText: "Max Items"
     }
 
 });

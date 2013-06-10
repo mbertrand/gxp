@@ -102,15 +102,6 @@ gxp.NewSourceDialog = Ext.extend(Ext.Panel, {
             }
         });
 
-        this.sourceTypeRadioList = new Ext.form.RadioGroup({
-            fieldLabel: 'Type',
-            columns: [50, 190],
-            items: [
-                {name: 'source_type', inputValue: 'gxp_wmscsource', boxLabel: this.addWMSText, checked: true},
-                {name: 'source_type', inputValue: 'gxp_arcrestsource', boxLabel: this.addArcText}
-            ]
-        });
-
         this.form = new Ext.form.FormPanel({
             items: [
                 this.urlTextField,

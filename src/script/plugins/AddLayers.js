@@ -227,7 +227,6 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      */
     addServerId: null,
 
-
     layerTree: null,
     
     
@@ -421,6 +420,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         }
         this.feedDialog.show();
     },
+
     /**
      * private: method[initCapGrid]
      * Constructs a window with a capabilities grid.

@@ -1,96 +1,151 @@
 /**
- * Published under the GNU General Public License
- * Copyright 2011 © The President and Fellows of Harvard College
+ * Copyright (c) 2008-2011 The Open Planning Project
+ *
+ * Published under the GPL license.
+ * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
+ * of the license.
+ */
+
+/**
+ * @requires plugins/FeedSource.js
+ * @requires plugins/PicasaFeedSource.js
+ * @requires plugins/YouTubeFeedSource.js
+ * @requires widgets/PointSymbolizer.js
+ */
+
+/** api: (define)
+ *  module = gxp
+ *  class = FeedSourceDialog
+ *  base_link = `Ext.Container <http://extjs.com/deploy/dev/docs/?class=Ext.Container>`_
  */
 
 Ext.namespace("gxp");
 
-gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
-
+/** api: constructor
+ *  .. class:: FeedSourceDialog(config)
+ *
+ *      A  dialog for creating a GeoRSS feed layer
+ */
+gxp.FeedSourceDialog = Ext.extend(Ext.Container, {
+    /** api: config[feedTypeText] ``String`` i18n */
+    feedTypeText: "Source",
+    /** api: config[addPicasaText] ``String`` i18n */
     addPicasaText: "Picasa Photos",
-
+    /** api: config[addYouTubeText] ``String`` i18n */
     addYouTubeText: "YouTube Videos",
-
-    addHGLText: "Harvard Geospatial Library",
-
-    addRSSText: "Other GeoRSS Feed",
-
+    /** api: config[addRSSText] ``String`` i18n */
+    addRSSText: "GeoRSS Feed",
+    /** api: config[addFeedText] ``String`` i18n */
     addFeedText: "Add to Map",
-
-    titleText: "Feed Title",
-
+    /** api: config[addTitleText] ``String`` i18n */
+    addTitleText: "Title",
+    /** api: config[keywordText] ``String`` i18n */
     keywordText: "Keyword",
+    /** api: config[doneText] ``String`` i18n */
+    doneText: "Done",
+    /** api: config[titleText] ``String`` i18n */
+    titleText: "Add Feeds",
+    /** api: config[maxResultsText] ``String`` i18n */
+    maxResultsText: "Max Items",
 
-    /** config: config[mapPanel]
-     *  ``GeoExt.MapPanel``
-     *  GeoExplorer object to which layers can be added.
+    /**
+     * api: config[width]
+     * ``Number`` width of dialog
      */
-    target : null,
+    width: 300,
 
-    width: 600,
-
+    /**
+     * api: config[autoHeight]
+     * ``Boolean`` default is true
+     */
     autoHeight: true,
+
+    /**
+     * api: config[closeAction]
+     * ``String`` default is destroy
+     */
+    closeAction: 'destroy',
+
 
     /** private: method[initComponent]
      */
     initComponent: function() {
+        /** api: event[addfeed]
+         * Fired after the dialog form is submitted.
+         * Intended to be used for adding the feed
+         * layer to the map
+         */
+        this.addEvents("addfeed");
 
-        this.addEvents("feed-added");
+        if (!this.feedTypes) {
+            this.feedTypes  = [
+                [gxp.plugins.PicasaFeedSource.ptype, this.addPicasaText],
+                [gxp.plugins.YouTubeFeedSource.ptype, this.addYouTubeText],
+                [gxp.plugins.FeedSource.ptype, this.addRSSText]
+            ];
+        }
 
-        this.sourceTypeRadioList = new Ext.form.RadioGroup({
-            fieldLabel: 'Type',
-            columns: [500],
-            labelWidth: 100,
-            items: [
-                {name: 'source_type', inputValue: 'gx_picasasource', boxLabel: this.addPicasaText},
-                {name: 'source_type', inputValue: 'gx_youtubesource', boxLabel: this.addYouTubeText},
-                {name: 'source_type', inputValue: 'gx_hglfeedsource', boxLabel: this.addHGLText},
-                {name: 'source_type', inputValue: 'gx_feedsource', boxLabel: this.addRSSText, checked: true}
-            ],
+        var feedStore = new Ext.data.ArrayStore({
+            fields: ['type', 'name'],
+            data : this.feedTypes
+        });
+
+        var sourceTypeSelect = new Ext.form.ComboBox({
+            store: feedStore,
+            fieldLabel: this.feedTypeText,
+            displayField:'name',
+            valueField:'type',
+            typeAhead: true,
+            width: 180,
+            mode: 'local',
+            triggerAction: 'all',
+            emptyText:'Select a feed source...',
+            selectOnFocus:true,
             listeners: {
-                "change": function(radiogroup, radio) {
-                    if (radio && radio.inputValue == "gx_feedsource") {
-                        this.urlTextField.show();
-                        this.keywordTextField.hide();
-                        this.maxResultsField.hide();
-                        this.symbolizerField.show();
+                "select": function(choice) {
+                    if (choice.value == gxp.plugins.FeedSource.ptype) {
+                        urlTextField.show();
+                        keywordTextField.hide();
+                        maxResultsField.hide();
+                        symbolizerField.show();
                     } else {
-                        this.urlTextField.hide();
-                        this.keywordTextField.show();
-                        this.maxResultsField.show();
-                        this.symbolizerField.hide();
+                        urlTextField.hide();
+                        keywordTextField.show();
+                        maxResultsField.show();
+                        symbolizerField.hide();
                     }
+                    submitButton.setDisabled(choice.value == null);
                 },
                 scope: this
             }
         });
 
-        this.urlTextField = new Ext.form.TextField({
+        var urlTextField = new Ext.form.TextField({
             fieldLabel: "URL",
             allowBlank: false,
             //hidden: true,
-            width: 240,
+            width: 180,
             msgTarget: "right",
             validator: this.urlValidator.createDelegate(this)
         });
 
-        this.keywordTextField = new Ext.form.TextField({
+        var keywordTextField = new Ext.form.TextField({
             fieldLabel: this.keywordText,
             allowBlank: true,
             hidden: true,
-            width: 150,
+            width: 180,
             msgTarget: "right"
         });
 
-        this.titleTextField = new Ext.form.TextField({
-            fieldLabel: this.titleText,
+        var titleTextField = new Ext.form.TextField({
+            fieldLabel: this.addTitleText,
             allowBlank: true,
-            width: 150,
+            width: 180,
             msgTarget: "right"
         });
 
-        this.maxResultsField = new Ext.form.ComboBox({
-            fieldLabel: 'Maximum # Results',
+        var maxResultsField = new Ext.form.ComboBox({
+            fieldLabel: this.maxResultsText,
             hidden: true,
             hiddenName: 'max-results',
             store: new Ext.data.ArrayStore({
@@ -101,18 +156,20 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
             mode: 'local',
             triggerAction: 'all',
             emptyText:'Choose number...',
-            labelWidth: 100,
+            labelWidth: 70,
+            width: 180,
             defaults: {
-                labelWidth: 100,
-                width:100
+                labelWidth: 70,
+                width:180
             }
         });
 
 
-        this.symbolizerField = new gxp.PointSymbolizer({
+        var symbolizerField = new gxp.PointSymbolizer({
             bodyStyle: {padding: "10px"},
+            width: 280,
             border: false,
-            hidden: false,
+            hidden: true,
             labelWidth: 70,
             defaults: {
                 labelWidth: 70
@@ -121,28 +178,27 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
         });
 
 
-        this.symbolizerField.find("name", "rotation")[0].hidden = true;
+        symbolizerField.find("name", "rotation")[0].hidden = true;
 
         if (this.symbolType === "Point" && this.pointGraphics) {
             cfg.pointGraphics = this.pointGraphics;
         }
 
-        this.submitButton =  new Ext.Button({
+        var submitButton =  new Ext.Button({
             text: this.addFeedText,
             iconCls: "gxp-icon-addlayers",
+            disabled: true,
             handler: function() {
-                var ptype = this.sourceTypeRadioList.getValue().inputValue;
+                var ptype = sourceTypeSelect.getValue();
                 var config = {
-                    "title" : this.titleTextField.getValue(),
-                    "group" : "GeoRSS Feeds"
+                    "name" : titleTextField.getValue()
                 };
 
-                if (ptype != "gx_feedsource") {
-                    config.params = {"q" : this.keywordTextField.getValue(), "max-results" : this.maxResultsField.getValue()}
-
+                if (ptype != "gxp_feedsource") {
+                    config.params = {"q" : keywordTextField.getValue(), "max-results" : maxResultsField.getValue()};
                 } else {
-                    config.url = this.urlTextField.getValue();
-                    var symbolizer = this.symbolizerField.symbolizer
+                    config.url = urlTextField.getValue();
+                    var symbolizer = symbolizerField.symbolizer;
                     config.defaultStyle = {};
                     config.selectStyle = {};
                     Ext.apply(config.defaultStyle, symbolizer);
@@ -153,37 +209,33 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
                     });
                 }
 
-                this.fireEvent("feed-added", ptype, config);
-                this.hide();
-
+                this.fireEvent("addfeed", ptype, config);
             },
             scope: this
         });
 
+        var bbarItems = [
+            "->",
+            submitButton,
+            new Ext.Button({
+                text: this.doneText,
+                handler: function() {
+                    this.hide();
+                },
+                scope: this
+            })
+        ];
+
         this.panel = new Ext.Panel({
+            bbar: bbarItems,
+            autoScroll: true,
             items: [
-                this.sourceTypeRadioList,
-                this.titleTextField,
-                this.urlTextField,
-                this.keywordTextField,
-                this.maxResultsField,
-                this.symbolizerField,
-                {
-                    xtype: 'panel',
-                    frame:false,
-                    border: false,
-                    region: 'south',
-                    layout: new Ext.layout.HBoxLayout({
-                        pack: 'center',
-                        defaultMargins: {
-                            top: 10,
-                            bottom: 10,
-                            left: 10,
-                            right: 0
-                        }
-                    }),
-                    items: [this.submitButton]
-                }
+                sourceTypeSelect,
+                titleTextField,
+                urlTextField,
+                keywordTextField,
+                maxResultsField,
+                symbolizerField
             ],
             layout: "form",
             border: false,
@@ -239,9 +291,5 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
 
 });
 
-/** api: xtype = gxp_embedmapdialog */
+/** api: xtype = gxp_feedsourcedialog */
 Ext.reg('gxp_feedsourcedialog', gxp.FeedSourceDialog);
-
-
-
-

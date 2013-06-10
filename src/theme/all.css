@@ -1,3 +1,21 @@
+div.commit-msg {
+    font-size: 14px;
+    font-weight: bold;
+}
+span.commit-datetime {
+    color: #888;
+}
+li.commit {
+    font-size: 12px;
+    border-bottom: 1px solid #E2EAEE;
+}
+li.commit div {
+    padding: 2px;
+}
+.ext-chrome input[type="checkbox"] {
+    margin-top: 1px;
+}
+
 .gxp-layerproperties-label {
     line-height: 21px;
 }
@@ -519,7 +537,6 @@ div.olMap div.gx-overlay-playback {
 }
 
 .gx_timeslider div.x-slider-thumb{
-    background-position:0;
     cursor: pointer;
 }
 .gx_timeslider div.x-slider-min-thumb{
