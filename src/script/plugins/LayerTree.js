@@ -292,6 +292,18 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         }
     },
 
+    
+    /**
+     * Enclose URL's in a string with <a> tags IF there are no <a> tags already present in the string.
+     */
+    replaceURLWithHTMLLinks: function(text) {
+        if (text != null  && text.indexOf("<a") == -1) {
+            var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+            return text.replace(exp,"<a href='$1'>$1</a>");
+        }  else 
+        	return text;
+    },
+    
     /** private: method[configureLayerNode]
      *  :arg loader: ``GeoExt.tree.LayerLoader``
      *  :arg node: ``Object`` The node
@@ -305,7 +317,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 return r.getLayer() === layer;
             }));
             if (record) {
-                attr.qtip = record.get('abstract');
+                attr.qtip = this.replaceURLWithHTMLLinks(record.get('abstract'));
                 if (!record.get("queryable")) {
                     attr.iconCls = "gxp-tree-rasterlayer-icon";
                 }

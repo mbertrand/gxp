@@ -8,7 +8,7 @@
 
 
 /** api: (extends)
- *  plugins/LayerSource.js
+ *  plugins/ArcRestSource.js
  */
 Ext.namespace("gxp.plugins");
 
@@ -19,16 +19,16 @@ Ext.namespace("gxp.plugins");
  *
  */
 
-gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
+gxp.plugins.ArcGISCacheSource = Ext.extend(gxp.plugins.ArcRestSource, {
 
-    /** api: ptype = gxp_arcrestsource */
-    ptype:"gxp_arcrestsource",
+    /** api: ptype = gxp_arcrestcachesource */
+    ptype:"gxp_arcgiscachesource",
 
-    requiredProperties: ["name"],
+    requiredProperties: ["name", "fullExtent", "tileInfo"],
 
     constructor:function (config) {
         this.config = config;
-        gxp.plugins.ArcRestSource.superclass.constructor.apply(this, arguments);
+        gxp.plugins.ArcGISCacheSource.superclass.constructor.apply(this, arguments);
     },
 
 
@@ -43,18 +43,12 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
 
         var processResult = function (response) {
             var json = Ext.decode(response.responseText);
-
             var layerProjection = source.getArcProjection(json.spatialReference.wkid);
-
-            var layers = [];
+            var layers=[];
             if (layerProjection != null) {
-                for (var l = 0; l < json.layers.length; l++) {
-                    var layer = json.layers[l];
-                    var layerShow = "show:" + layer.id;
-                    layers.push(new OpenLayers.Layer.ArcGIS93Rest(layer.name, baseUrl + "/export",
+                    layers.push(new OpenLayers.Layer.ArcGISCache(json.layers[0].name, baseUrl,
                         {
-                            layers:layerShow,
-                            TRANSPARENT:true
+                            layerInfo: json
                         },
                         {
                             isBaseLayer:false,
@@ -64,33 +58,32 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                             projection:layerProjection,
                             queryable:json.capabilities && json.capabilities.indexOf("Identify") > -1}
                     ));
-                }
-            } else {
+
+            }  else {
                 processFailure(response);
             }
-
             source.title = json.documentInfo.Title;
 
             source.store = new GeoExt.data.LayerStore({
-                layers:layers,
-                fields:[
-                    {name:"source", type:"string"},
-                    {name:"name", type:"string", mapping:"name"},
-                    {name:"layerid", type:"string"},
-                    {name:"group", type:"string", defaultValue:this.title},
-                    {name:"fixed", type:"boolean", defaultValue:true},
-                    {name:"tiled", type:"boolean", defaultValue:true},
-                    {name:"queryable", type:"boolean", defaultValue:true},
-                    {name:"selected", type:"boolean"}
-                ]
-            });
-
-
+               layers:layers,
+               fields:[
+                    	        {name:"source", type:"string"},
+                    	        {name:"name", type:"string", mapping:"name"},
+                    	        {name:"layerid", type:"string"},
+                    	        {name:"group", type:"string", defaultValue:"background"},
+                    	        {name:"fixed", type:"boolean", defaultValue:true},
+                    	        {name:"tiled", type:"boolean", defaultValue:true},
+                    	        {name:"queryable", type:"boolean", defaultValue:true},
+                    	        {name:"selected", type:"boolean"}
+                    	        ]
+                    });
+            
             source.fireEvent("ready", source);
+
         };
 
         var processFailure = function (response) {
-            Ext.Msg.alert("No ArcGIS Layers", "Could not find any compatible layers  at " + source.config.url);
+            Ext.Msg.alert("No ArcGISCache Layers", "Could not find any compatible layers  at " + source.config.url);
             source.fireEvent("failure", source);
         };
 
@@ -108,55 +101,6 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         } else {
             this.fireEvent("ready");
         }
-    },
-
-
-    /** private: method[isLazy]
-     *  :returns: ``Boolean``
-     *
-     *  The store for a lazy source will not be loaded upon creation.  A source
-     *  determines whether or not it is lazy given the configured layers for
-     *  the target.  If the layer configs have all the information needed to
-     *  construct layer records, the source can be lazy.
-     */
-    isLazy: function() {
-        var lazy = true;
-        var sourceFound = false;
-        var mapConfig = this.target.initialConfig.map;
-        if (mapConfig && mapConfig.layers) {
-            var layerConfig;
-            for (var i=0, ii=mapConfig.layers.length; i<ii; ++i) {
-                layerConfig = mapConfig.layers[i];
-                if (layerConfig.source === this.id) {
-                    sourceFound = true;
-                    lazy = this.layerConfigComplete(layerConfig);
-                    if (lazy === false) {
-                        break;
-                    }
-                }
-            }
-        }
-        return (lazy && sourceFound);
-    },
-
-
-    /** private: method[layerConfigComplete]
-     *  :returns: ``Boolean``
-     *
-     *  A layer configuration is considered complete if it has a title and a
-     *  bbox.
-     */
-    layerConfigComplete: function(config) {
-        var lazy = true;
-        var props = this.requiredProperties;
-        for (var i=props.length-1; i>=0; --i) {
-            lazy = !!config[props[i]];
-            if (lazy === false) {
-                break;
-            }
-        }
-
-        return lazy;
     },
 
     /** api: method[getConfigForRecord]
@@ -207,46 +151,27 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             if ("tiled" in config) {
                 singleTile = !config.tiled;
             } 
+            
+            record.set("name", config.name);
+            record.set("layerid", config.layerid || "show:0");
+            record.set("format", config.format || "png");
+            
             record.set("tiled", !singleTile);
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);
             record.set("source", config.source);
-            record.set("name", config.name);
-            record.set("layerid", config.layerid);
-            record.set("properties", "gxp_wmslayerpanel");
+
+
+            record.set("properties", "gxp_wmslayerpanel");  
+            
             if ("group" in config) {
                 record.set("group", config.group);
             }
+            
             record.commit();
         }
         return record;
-    },
-
-
-    /** api: method[getProjection]
-     *  :arg layerRecord: ``GeoExt.data.LayerRecord`` a record from this
-     *      source's store
-     *  :returns: ``OpenLayers.Projection`` A suitable projection for the
-     *      ``layerRecord``. If the layer is available in the map projection,
-     *      the map projection will be returned. Otherwise an equal projection,
-     *      or null if none is available.
-     *
-     *  Get the projection that the source will use for the layer created in
-     *  ``createLayerRecord``. If the layer is not available in a projection
-     *  that fits the map projection, null will be returned.
-     */
-    getArcProjection:function (srs) {
-        var projection = this.getMapProjection();
-        var compatibleProjection = projection;
-        var layerSRS = "EPSG:" + srs + '';
-        if (layerSRS !== projection.getCode()) {
-            compatibleProjection = null;
-            if ((p = new OpenLayers.Projection(layerSRS)).equals(projection)) {
-                compatibleProjection = p;
-            }
-        }
-        return compatibleProjection;
-    },
+    },    
 
     /** private: method[createLazyLayerRecord]
      *  :arg config: ``Object`` The application config for this layer.
@@ -263,17 +188,16 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         config.bbox = {};
         config.bbox[srs] = {bbox: bbox};
 
-        var  record = new GeoExt.data.LayerRecord(config);
-        record.set("name", config.name);
-        record.set("layerid", config.layerid || "show:0");
-        record.set("format", config.format || "png");
-        record.set("tiled", "tiled" in config ? config.tiled : true);
+        var  record = new GeoExt.data.LayerRecord(config);        
+        var info = {
+        		"fullExtent": config.fullExtent,
+        		"spatialReference":{"wkid": srs},
+        		"tileInfo": config.tileInfo
+        };
 
-        record.setLayer(new OpenLayers.Layer.ArcGIS93Rest(config.name,  this.url.split("?")[0] + "/export",
+        record.setLayer(new OpenLayers.Layer.ArcGISCache(config.name,  this.url.split("?")[0],
             {
-                layers: config.layerid,
-                TRANSPARENT:true,
-                FORMAT: "format" in config ? config.format : "png"
+                layerInfo: info
             },
             {
                 isBaseLayer:false,
@@ -286,6 +210,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         return record;
 
     },
+    
 
 
     /** api: method[getConfigForRecord]
@@ -308,9 +233,12 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             group: record.get("group"),
             fixed: record.get("fixed"),
             selected: record.get("selected")
+            // Just get the following from ESRI, don't save it all to GeoNode
+            //fullExtent: layer.layerInfo.fullExtent,
+            //tileInfo: layer.layerInfo.tileInfo
         };
-    }
-
+    }    
+    
 });
 
-Ext.preg(gxp.plugins.ArcRestSource.prototype.ptype, gxp.plugins.ArcRestSource);
+Ext.preg(gxp.plugins.ArcGISCacheSource.prototype.ptype, gxp.plugins.ArcGISCacheSource);

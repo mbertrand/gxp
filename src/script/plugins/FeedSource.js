@@ -17,6 +17,7 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
     /** Default format of vector layer **/
     defaultFormat: "OpenLayers.Format.GeoRSS",
 
+    
 
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
@@ -171,7 +172,7 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
         return new OpenLayers.StyleMap({
             "default": new OpenLayers.Style("defaultStyle" in config ? config.defaultStyle : {graphicName: "circle", pointRadius: 5, fillOpacity: 0.7, fillColor: 'Red'}),
             "select": new OpenLayers.Style("selectStyle" in config ? config.selectStyle : {graphicName: "circle", pointRadius: 10, fillOpacity: 1.0, fillColor: "Yellow"})
-        })
+        });
     },
 
     /* api: method[configureInfoPopup]

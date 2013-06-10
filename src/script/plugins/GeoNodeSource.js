@@ -223,7 +223,9 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
         config = Ext.apply(config, {
             format: params.FORMAT,
             styles: params.STYLES,
-            transparent: params.TRANSPARENT
+            transparent: params.TRANSPARENT,
+            url: params.URL,
+            llbbox: params.LLBBOX
         });
 
         if ('CQL_FILTER' in params) {

@@ -471,6 +471,10 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
 
             var layer = original.getLayer().clone();
 
+            //Update the source url if different from the layer url
+            if (layer.url !== this.store.url)
+            	this.store.url = this.url = this.trimUrl(layer.url);
+            	
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
              * of layers in different SRS.
@@ -866,6 +870,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
     /** private: method[getState] */
     getState: function() {
         var state = gxp.plugins.WMSSource.superclass.getState.apply(this, arguments);
+        //Force url update in case it was updated from layer url
+        Ext.apply(state, {url: this.trimUrl(this.url)});
         return Ext.applyIf(state, {title: this.title});
     },
 
