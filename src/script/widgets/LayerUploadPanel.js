@@ -117,7 +117,7 @@ gxp.LayerUploadPanel = Ext.extend(Ext.FormPanel, {
         }, {
             xtype: "fieldset",
             ref: "optionsFieldset",
-            title: this.optionsText,
+      t pu      title: this.optionsText,
             checkboxToggle: true,
             collapsed: true,
             hidden: this.workspace != undefined && this.store != undefined && this.crs != undefined,
