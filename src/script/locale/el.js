@@ -384,9 +384,14 @@ GeoExt.Lang.add("el", {
         zoomLevelText: "Επίπεδο ζουμ"
     },
     
+    "gxp.plugins.ArcGISCacheSource.prototype": {
+        noLayersTitle: "No ArcGIS Layers",
+        noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at "
+    },    
+    
     "gxp.plugins.ArcRestSource.prototype": {
-    	noLayersMessage: "No ArcGIS Layers",
-    	noLayersTitle: "Could not find any compatible layers at "
+        noLayersTitle: "No ArcGIS Layers",
+        noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at "
     },
     
     "gxp.plugins.MapShare.prototype": { 
