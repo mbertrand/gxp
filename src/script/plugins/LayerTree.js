@@ -290,7 +290,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      * Enclose URL's in a string with <a> tags IF there are no <a> tags already present in the string.
      */
     replaceURLWithHTMLLinks: function(text) {
-        if (text != null  && text.indexOf("<a") == -1) {
+        if (text != null  && !text.match(/\<a|\<img/ig)) {
             var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
             return text.replace(exp,"<a href='$1'>$1</a>");
         }  else 
