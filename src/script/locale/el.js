@@ -17,7 +17,9 @@ GeoExt.Lang.add("el", {
         panelTitleText: "Τίτλος",
         layerSelectionText: "Δείτε διαθέσιμα δεδομένα από:",
         doneText: "Ολοκληρώθηκε",
-        uploadText: "Ανεβάστε Δεδομένα"
+        uploadText: "Ανεβάστε Δεδομένα",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -28,8 +30,13 @@ GeoExt.Lang.add("el", {
     },
 
     "gxp.plugins.FeatureEditor.prototype": {
+        splitButtonText: "Edit",
+        createFeatureActionText: "Create",
+        editFeatureActionText: "Modify",
         createFeatureActionTip: "Δημιουργήστε ένα νέο χαρακτηριστικό",
-        editFeatureActionTip: "Τροποποιήστε υπάρχον χαρακτηριστικό"
+        editFeatureActionTip: "Τροποποιήστε υπάρχον χαρακτηριστικό",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -39,7 +46,7 @@ GeoExt.Lang.add("el", {
         zoomPageExtentTip: "Ζουμ στο εύρος της σελίδας",
         nextPageTip: "Επόμενη σελίδα",
         nextPageTip: "Τελευταία σελίδα",
-        totalMsg: "Σύνολο: {0} εγγραφές"
+        totalMsg: "Features {1} to {2} of {0}"
     },
 
     "gxp.plugins.GoogleEarth.prototype": {
@@ -94,6 +101,7 @@ GeoExt.Lang.add("el", {
     },
 
     "gxp.plugins.Measure.prototype": {
+        buttonText: "Μέτρο",
         lengthMenuText: "Απόσταση",
         areaMenuText: "Εμβαδόν",
         lengthTooltip: "Υπολογίστε απόσταση",
@@ -115,11 +123,12 @@ GeoExt.Lang.add("el", {
 
     "gxp.plugins.OSMSource.prototype": {
         title: "Επιφάνειες OpenStreetMap",
-        mapnikAttribution: "Δεδομένα CC-By-SA by <a href='http://openstreetmap.org/'>OpenStreetMap</a>",
+        mapnikAttribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
         osmarenderAttribution: "Δεδομένα CC-By-SA by <a href='http://openstreetmap.org/'>OpenStreetMap</a>"
     },
 
     "gxp.plugins.Print.prototype": {
+        buttonText:"Εκτύπωση",
         menuText: "Εκτύπωση Χάρτη",
         tooltip: "Εκτύπωση Χάρτη",
         previewText: "Προεπισκόπηση Εκτύπωσης",
@@ -139,8 +148,7 @@ GeoExt.Lang.add("el", {
         queryActionText: "Επερώτηση",
         queryMenuText: "Επιφάνεια επερώτησης",
         queryActionTip: "Κάντε επερώτηση στην επιλεγμένη επιφάνεια",
-        queryByLocationText: "Κάντε επερώτηση βάσει τοποθεσίας",
-        currentTextText: "Τρέχον εύρος",
+        queryByLocationText: "Query by current map extent",
         queryByAttributesText: "Επερώτηση βάσει χαρακτηριστικών",
         queryMsg: "Γίνεται επερώτηση...",
         cancelButtonText: "Ακύρωση",
@@ -160,13 +168,16 @@ GeoExt.Lang.add("el", {
     },
 
     "gxp.plugins.WMSGetFeatureInfo.prototype": {
+        buttonText:"Identify",
         infoActionTip: "Πάρτε Πληροφορίες Χαρακτηριστικού",
         popupTitle: "Πληροφορίες Χαρακτηριστικού"
     },
 
     "gxp.plugins.Zoom.prototype": {
+        zoomMenuText: "Zoom Box",
         zoomInMenuText: "Ζουμ Μέσα",
         zoomOutMenuText: "Ζουμ Έξω",
+        zoomTooltip: "Zoom by dragging a box",
         zoomInTooltip: "Ζουμ Μέσα",
         zoomOutTooltip: "Ζουμ Έξω"
     },
@@ -305,7 +316,19 @@ GeoExt.Lang.add("el", {
         transparentText: "Διαφανές",
         cacheText: "Cache",
         cacheFieldText: "Χρησιμοποίησε την cached έκδοση",
-        stylesText: "Στυλ"
+        stylesText: "Διαθέσιμες Στυλ",
+        infoFormatText: "Info format",
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -354,13 +377,16 @@ GeoExt.Lang.add("el", {
         fileLabel: "Δεδομένα",
         fieldEmptyText: "Βρείτε το μονοπάτι για ένα αρχείο δεδομένων...",
         uploadText: "Ανέβασμα",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Τα δεδομένα σας ανεβαίνουν...",
         invalidFileExtensionText: "Ο τύπος αρχείου πρέπει να είναι ένας από τους: ",
         optionsText: "Επιλογές",
         workspaceLabel: "Χώρος εργασίας",
         workspaceEmptyText: "Προεπιλεγμένος χώρος εργασίας",
         dataStoreLabel: "Αποθήκη",
-        dataStoreEmptyText: "Προεπιλεγμένη αποθήκη"
+        dataStoreEmptyText: "Create new store",
+        defaultDataStoreEmptyText: "Προεπιλεγμένη αποθήκη"
     },
     
     "gxp.NewSourceWindow.prototype": {
@@ -373,6 +399,23 @@ GeoExt.Lang.add("el", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Επίπεδο ζουμ"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Πηγή",
+        addPicasaText: "Φωτογραφίες Picasa",
+        addYouTubeText: "YouTube βίντεο",
+        addRSSText: "Άλλα Feed GeoRSS",
+        addFeedText: "Προσθήκη στο χάρτη",
+        addTitleText: "Τίτλος",
+        keywordText: "Λέξη-κλειδί",
+        doneText: "Done",
+        titleText: "Προσθήκη ροής",
+        maxResultsText: "Max Είδη"
     }
 
 });
