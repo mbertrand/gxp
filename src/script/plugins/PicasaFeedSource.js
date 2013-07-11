@@ -15,11 +15,26 @@
  *  class = PicasaFeedSource
  */
 
+<<<<<<< HEAD
 /** api: (extends)
  *  plugins/FeedSource.js
  */
 
 Ext.namespace("gxp.plugins");
+=======
+OpenLayers.Format.Picasa = OpenLayers.Class(OpenLayers.Format.GeoRSS, {
+    createFeatureFromItem: function(item) {
+        var feature = OpenLayers.Format.GeoRSS.prototype
+            .createFeatureFromItem.apply(this, arguments);
+        var thumbnails = this.getElementsByTagNameNS(item, "http://search.yahoo.com/mrss/", "thumbnail");
+        if (thumbnails.length > 0) {
+        	feature.attributes.thumbnail = thumbnails[0].getAttribute("url");
+        }
+        feature.attributes.content = OpenLayers.Util.getXmlNodeValue(this.getElementsByTagNameNS(item, "*","summary")[0]);
+        return feature;
+    }
+});
+>>>>>>> 1fcfe5ac39b5b93c901504484993103e758bc27c
 
 gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
 

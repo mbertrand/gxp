@@ -24,6 +24,18 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
     /** api: ptype = gxp_arcrestsource */
     ptype:"gxp_arcrestsource",
 
+    /** api: config[noLayersTitle]
+     *  ``String``
+     *  Title for no layers message (i18n).
+     */
+    noLayersTitle: "No ArcGIS Layers",
+    
+    /** api: config[noLayersText]
+     *  ``String``
+     *  Content of no layers message (i18n).
+     */
+    noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at ",
+    
     requiredProperties: ["name"],
 
     constructor:function (config) {
@@ -90,7 +102,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         };
 
         var processFailure = function (response) {
-            Ext.Msg.alert("No ArcGIS Layers", "Could not find any compatible layers  at " + source.config.url);
+        	if (!response.isTimeout) {
+        		Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
+        	}	
             source.fireEvent("failure", source);
         };
 
@@ -100,6 +114,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         if (!this.lazy) {
             Ext.Ajax.request({
                 url:baseUrl,
+                timeout: 2000,
                 params:{'f':'json', 'pretty':'false', 'keepPostParams':'true'},
                 method:'POST',
                 success:processResult,
