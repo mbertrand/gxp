@@ -24,9 +24,6 @@ Ext.namespace("gxp.plugins");
 /** api: constructor
  *  .. class:: ArcRestSource(config)
  *
-<<<<<<< HEAD
- *    Plugin for using ArcGIS REST layers with :class:`gxp.Viewer` instances.
-=======
  *    Plugin for using ArcGIS REST MapServer layers with :class:`gxp.Viewer` instances.
  *
  */

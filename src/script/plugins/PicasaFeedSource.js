@@ -15,13 +15,6 @@
  *  class = PicasaFeedSource
  */
 
-<<<<<<< HEAD
-/** api: (extends)
- *  plugins/FeedSource.js
- */
-
-Ext.namespace("gxp.plugins");
-=======
 OpenLayers.Format.Picasa = OpenLayers.Class(OpenLayers.Format.GeoRSS, {
     createFeatureFromItem: function(item) {
         var feature = OpenLayers.Format.GeoRSS.prototype
@@ -34,7 +27,6 @@ OpenLayers.Format.Picasa = OpenLayers.Class(OpenLayers.Format.GeoRSS, {
         return feature;
     }
 });
->>>>>>> 1fcfe5ac39b5b93c901504484993103e758bc27c
 
 gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
 
