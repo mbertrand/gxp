@@ -52,7 +52,11 @@ GeoExt.Lang.add("fr", {
         roadmapAbstract: "Carte routière",
         satelliteAbstract: "Images satellite",
         hybridAbstract: "Images avec routes",
-        terrainAbstract: "Carte routière avec le terrain"
+        terrainAbstract: "Carte routière avec le terrain",
+        roadmapTitle: "Google Routière",       
+        hybridTitle: "Google Hybrid",
+        satelliteTitle: "Google Satellite",
+        terrainTitle: "Google Terrain"
     },
 
     "gxp.plugins.LayerProperties.prototype": {
