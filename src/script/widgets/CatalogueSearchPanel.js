@@ -7,7 +7,7 @@
  */
 
 /**
- * @requires ../gxp/src/script/widgets/form/CSWFilterField.js
+ * @requires widgets/form/CSWFilterField.js
  */
 
 /** api: (define)

@@ -96,6 +96,7 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
         var Record = GeoExt.data.LayerRecord.create([
             //{name: "title", type: "string"},
             {name:"name", type:"string"},
+            {name: "title", type: "string"},
             {name:"source", type:"string"},
             {name:"group", type:"string"},
             {name:"fixed", type:"boolean"},
@@ -111,7 +112,7 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
 
         var data = {
             layer:layer,
-            //title: config.name,
+            title: config.title,
             name:config.name,
             source:config.source,
             group:config.group,
@@ -143,6 +144,7 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
         return Ext.apply(config, {
             //title: record.get("name"),
             name:record.get("name"),
+            title: record.get("title"),
             group:record.get("group"),
             fixed:record.get("fixed"),
             selected:record.get("selected"),
