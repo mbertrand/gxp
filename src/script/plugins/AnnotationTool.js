@@ -60,7 +60,8 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
         saveStrategy.events.register('fail', this, saveFail);
 
         var currentUser = this.user;
-
+		var isMapEditor = this.target.config["edit_map"];
+		
         var layer = new OpenLayers.Layer.Vector(
             'geo_annotation_layer', {
                 displayInLayerSwitcher: false,
