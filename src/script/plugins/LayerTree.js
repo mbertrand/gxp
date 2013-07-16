@@ -144,7 +144,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      */
     addOutput: function(config) {
         config = Ext.apply(this.createOutputConfig(), config || {});
-        return gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
+        this.tree = gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
+        this.tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});     
+        return this.tree;
     },
 
     /** private: method[createOutputConfig]
@@ -192,8 +194,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
 
         return {
             xtype: "treepanel",
+            id: "layertree_panel",
             root: treeRoot,
-            plugins: new NodeMouseoverPlugin(),
+            //plugins: new NodeMouseoverPlugin(),
             rootVisible: false,
             shortTitle: this.shortTitle,
             border: false,
@@ -293,7 +296,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     replaceURLWithHTMLLinks: function(text) {
         if (text != null  && !text.match(/\<a|\<img/ig)) {
             var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-            return text.replace(exp,"<a href='$1'>$1</a>");
+            return text.replace(exp,"<a target='_blank' href='$1'>$1</a>");
         }  else 
         	return text;
     },
@@ -311,7 +314,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 return r.getLayer() === layer;
             }));
             if (record) {
-                attr.tiptext = this.replaceURLWithHTMLLinks(record.get('abstract'));
+                //attr.tiptext = this.replaceURLWithHTMLLinks(record.get('abstract'));
                 if (!record.get("queryable")) {
                     attr.iconCls = "gxp-tree-rasterlayer-icon";
                 }
@@ -468,45 +471,8 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 }
             });
         }
-    }
-
-
-
-
-});
-
-Ext.preg(gxp.plugins.LayerTree.prototype.ptype, gxp.plugins.LayerTree);
-
-/**
- * Handle moving of records in layertree data store
- */
-Ext.data.Store.prototype.move = function(record, to){
-    //var r = this.getAt(from);
-    this.data.remove(record);
-    this.data.insert(to, record);
-    this.fireEvent("load", this, to);
-};
-
-/** api: constructor
- *  .. class:: NodeMouseoverPlugin()
- *
- *    Plugin for displaying a custom tooltip when 
- *    hovering over each layer in the layertree
- *   
- */
-NodeMouseoverPlugin = Ext.extend(Object, {
-    init: function(tree) {
-        if (!tree.rendered) {
-            tree.on('render', function() {this.init(tree)}, this);
-            return;
-        }
-        this.tree = tree;
-        tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});
     },
-
-    /** private: method[onTreeMouseover]
-     * onmouseover event for the layertree
-     */
+    
     onTreeMouseover: function(e, t) {
         var nodeEl = Ext.fly(t).up('div.x-tree-node-el');
         if (nodeEl) {
@@ -514,7 +480,7 @@ NodeMouseoverPlugin = Ext.extend(Object, {
             if (nodeId) {
             	var node = this.tree.getNodeById(nodeId);
             	if (node.layerStore) {
-            		var abstractText = node.layerStore.getByLayer(node.layer).get("abstract")
+            		var abstractText = this.replaceURLWithHTMLLinks(node.layerStore.getByLayer(node.layer).get("abstract"));
             		var treemanager = Ext.fly(t).up('div.gxp-layermanager-tree');
                     
             		//Create or update tooltip
@@ -586,3 +552,16 @@ NodeMouseoverPlugin = Ext.extend(Object, {
         }
     }
 });
+
+Ext.preg(gxp.plugins.LayerTree.prototype.ptype, gxp.plugins.LayerTree);
+
+/**
+ * Handle moving of records in layertree data store
+ */
+Ext.data.Store.prototype.move = function(record, to){
+    //var r = this.getAt(from);
+    this.data.remove(record);
+    this.data.insert(to, record);
+    this.fireEvent("load", this, to);
+};
+
