@@ -365,7 +365,9 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                                                     var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(results[r]["goog_x"],
                                                         results[r]["goog_y"]));
                                                     for (var attribute in results[r]) {
-                                                        feature.attributes[attribute] = results[r][attribute];
+                                                        feature.attributes[attribute] = attribute === "time" 
+                                                        		? new Date(results[r][attribute] * 1000.0).toLocaleString()
+                                                        		: results[r][attribute];
                                                     }
                                                     feature.wm_layer_id = featureCount;
                                                     feature.wm_layer_title = x.get("title");
