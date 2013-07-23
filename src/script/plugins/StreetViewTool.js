@@ -73,7 +73,7 @@ gxp.plugins.StreetViewTool = Ext.extend(gxp.plugins.Tool, {
 	/** api: ptype = gxp_streetviewtool */
 	ptype: "gxp_streetviewtool",
 	
-	toolText: "Google Street View",
+	toolText: "Street View",
 
 	streetViewTitle: "Google Street View",
 	
