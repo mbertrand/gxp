@@ -59,7 +59,7 @@ gxp.plugins.HGLFeedSource = Ext.extend(gxp.plugins.FeedSource, {
                 this.target.selectControl.popup = new OpenLayers.Popup.FramedCloud("popup",
                     new OpenLayers.LonLat(pos.x, pos.y),
                     new OpenLayers.Size(300,300),
-                    "<a target='_blank' href=" +
+                    "<a target='_blank' href=\"" +
                         feature.attributes.link + "\">" +  feature.attributes.title +"</a><p>"+ feature.attributes.description + "</p>",
                     null, true);
                 this.target.selectControl.popup.closeOnMove = true;
