@@ -34,7 +34,8 @@ OpenLayers.Layer.Bing.prototype.loadMetadata = function() {
         jsonp: this._callbackId,
         include: "ImageryProviders"
     }, this.metadataParams);
-    var url = "https://dev.virtualearth.net/REST/v1/Imagery/Metadata/" +
+    var url = window.location.protocol  +
+        "//dev.virtualearth.net/REST/v1/Imagery/Metadata/" +
         this.type + "?" + OpenLayers.Util.getParameterString(params);
     var script = document.createElement("script");
     script.type = "text/javascript";
