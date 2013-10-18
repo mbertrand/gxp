@@ -58,7 +58,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
         if (config['llbbox']) {
 
-            this.url = config.url;
+            this.url = config.url.replace(/https?:/,window.location.protocol);
 
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
