@@ -47,6 +47,10 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
     addStyleTip:"Add a new style",
     /** api: config[chooseStyleText] (i18n) */
     chooseStyleText:"Choose style",
+    /** api: config[classifyStyleText] (i18n) */
+    classifyStyleText:"Classify",
+    /** api: config[classifyStyleTip] (i18n) */
+    classifyStyleTip:"Classify the layer based on attributes",
     /** api: config[addStyleText] (i18n) */
     deleteStyleText:"Remove",
     /** api: config[addStyleTip] (i18n) */
@@ -179,13 +183,15 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
      *  false.
      */
     modified: false,
-    
+
     /** private: config[dialogCls]
      *  ``Ext.Component`` The dialogue class to use. Default is ``Ext.Window``.
      *  If using e.g. ``Ext.Container``, override the ``showDlg`` method to
      *  add the dialogue to a container.
      */
     dialogCls: Ext.Window,
+
+    classifyEnabled: false,
 
     /** private: method[initComponent]
      */
@@ -330,6 +336,8 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         });
 
         gxp.WMSStylesDialog.superclass.initComponent.apply(this, arguments);
+
+        this.enableClassification();
     },
 
     /** api: method[addStyle]
@@ -382,8 +390,18 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                 text: this.saveText,
                 iconCls: "save",
                 handler: function() {
+                    var classify = styleProperties.propertiesDialog.userStyle["classify"];
+                    if (classify)
+                    {
+                        if (this.layerDescription) {
+                            this.classifyStyleRules(prevStyle);
+                        } else {
+                            this.describeLayer(this.classifyStyleRules);
+                        }
+                    }
                     styleProperties.destroy();
-                }
+                },
+                scope: this
             }]
         };
         var styleProperties = new this.dialogCls(Ext.apply(buttonCfg, {
@@ -401,7 +419,8 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                     ref: "../propertiesDialog",
                     userStyle: userStyle.clone(),
                     nameEditable: false,
-                    style: "padding: 10px;"
+                    style: "padding: 10px;",
+                    classifyEnabled: this.classifyEnabled && !this.isRaster
                 }
             },
             listeners:{
@@ -415,6 +434,111 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         }));
         this.showDlg(styleProperties);
     },
+
+
+    /** api: method[classifyStyle]
+     *  Creates a new style, selects it in the styles combo, and opens the rule
+     *  panel with classification options enabled.
+     */
+    classifyStyle:function () {
+        if (!this._ready) {
+            this.on("ready", this.addStyle, this);
+            return;
+        }
+
+        var prevStyle = this.selectedStyle.get("userStyle");
+        var store = this.stylesStore;
+        var newStyle = new OpenLayers.Style(null, {
+            name:this.newStyleName(),
+            rules:[this.createRule()]
+        });
+        store.add(new store.recordType({
+            "name":newStyle.name,
+            "userStyle":newStyle
+        }));
+        if (this.layerDescription) {
+            this.classifyStyleRules(prevStyle);
+        } else {
+            this.describeLayer(this.classifyStyleRules);
+        }
+
+    },
+
+    /** api: method[classifyStyleRules]
+     *  :arg prevStyle: ``Ext.data.Record``
+     *
+     *  Edit the currently selected style with classification options enabled.
+     */
+    classifyStyleRules:function () {
+        var userStyle = this.selectedStyle.get("userStyle");
+
+        var rule = userStyle.rules[0];
+        var origRules = [];
+        for (var i=0; i < userStyle.rules.length; i++){
+            origRules[i] = userStyle.rules[i].clone();
+        }
+
+        var ruleDlg = new this.dialogCls({
+            title: String.format(this.ruleWindowTitle,
+                rule.title || rule.name || this.newRuleText),
+            shortTitle: rule.title || rule.name || this.newRuleText,
+            layout: "fit",
+            width: 320,
+            height: 450,
+            modal: true,
+            items: [{
+                xtype: "gxp_rulepanel",
+                ref: "rulePanel",
+                symbolType: this.symbolType,
+                rule: rule,
+                fonts:this.fonts,
+                classifyEnabled: true,
+                attributes: new GeoExt.data.AttributeStore({
+                    url: this.layerDescription.owsURL,
+                    baseParams: {
+                        "SERVICE": this.layerDescription.owsType,
+                        "REQUEST": "DescribeFeatureType",
+                        "TYPENAME": this.layerDescription.typeName
+                    },
+                    method: "GET",
+                    disableCaching: false
+                }),
+                autoScroll: true,
+                border: false,
+                defaults: {
+                    autoHeight: true,
+                    hideMode: "offsets"
+                },
+                listeners: {
+                    "change": this.saveRule,
+                    "tabchange": function() {
+                        if (ruleDlg instanceof Ext.Window) {
+                            ruleDlg.syncShadow();
+                        }
+                    },
+                    scope: this
+                }
+            }],
+            bbar:["->", {
+                text:this.cancelText,
+                iconCls:"cancel",
+                handler:function () {
+                    userStyle.rules = origRules;
+                    this.afterRuleChange();
+                    this.selectedStyle.set("userStyle", userStyle);
+                    ruleDlg.destroy();
+                },
+                scope:this
+            }, {
+                text: this.saveText,
+                iconCls: "save",
+                handler: function() { ruleDlg.destroy(); }
+            }]
+        });
+        this.showDlg(ruleDlg);
+    },
+
+
 
     /** api: method[createSLD]
      *  :arg options: ``Object``
@@ -653,12 +777,64 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
      *  :arg rule: the rule to save back to the userStyle
      */
     saveRule:function (cmp, rule) {
+        var wmsdialog = this;
         var style = this.selectedStyle;
         var legend = this.items.get(2).items.get(0);
         var userStyle = style.get("userStyle");
         var i = userStyle.rules.indexOf(this.selectedRule);
-        userStyle.rules[i] = rule;
-        this.afterRuleChange(rule);
+        if (!rule["classify"]) {
+            userStyle.rules[i] = rule;
+            this.afterRuleChange(rule);
+        } else {
+            var layer = this.layerRecord.getLayer();
+            var url = this.layerRecord.get("restUrl");
+            if (!url) {
+                url = layer.url.split("?").shift().replace(/\/(wms|ows)\/?$/, "/rest");
+            }
+
+            var is_valid = rule["attribute"] && rule["method"] && rule["intervals"] && rule["ramp"]
+                && (rule["ramp"] == "Custom" ? rule["color_start"] && rule["color_end"] : true);
+
+            if (is_valid) {
+                Ext.Ajax.request({
+                    url: url + "/sldservice/" + layer.params["LAYERS"] + "/classify.xml",
+                    params: {
+                        "attribute": rule["attribute"],
+                        "method": rule["method"],
+                        "intervals": rule["intervals"],
+                        "ramp": rule["ramp"],
+                        "startColor": rule["color_start"],
+                        "endColor": rule["color_end"]
+                    },
+                    method: "GET",
+                    disableCaching: false,
+                    success: function (result) {
+                        var newRules = []
+                        var filterParser = new OpenLayers.Format.Filter.v1_1_0();
+                        var xmlParser = new OpenLayers.Format.XML();
+                        var xmlRules = xmlParser.getElementsByTagNameNS(xmlParser.read(result.responseText).documentElement, null, "Rule");
+                        for (var i = 0; i < xmlRules.length; i++) {
+                            var new_rule = rule.clone();
+                            new_rule.title = xmlParser.getElementsByTagNameNS(xmlRules[i], null, "Title")[0].textContent;
+                            var new_css_parameter = xmlParser.getElementsByTagNameNS(xmlRules[i], null, "CssParameter")[0];
+                            if (new_css_parameter.attributes.name.value === "fill") {
+                                new_rule.symbolizers[0].fillColor = new_css_parameter.textContent
+                            } else {
+                                new_rule.symbolizers[0].strokeColor = new_css_parameter.textContent
+                            }
+                            new_rule.filter = filterParser.read(xmlParser.getElementsByTagNameNS(xmlRules[i], null, "Filter")[0]);
+                            newRules.push(new_rule);
+                            wmsdialog.afterRuleChange(new_rule);
+                        }
+                        userStyle.rules = newRules;
+                    },
+                    failure: function (result) {
+                    },
+                    callback: null,
+                    scope: this
+                });
+            }
+        }
     },
 
     /** private: method[afterRuleChange]
@@ -707,7 +883,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             this.selectedStyle = this.stylesStore.getAt(
                 this.stylesStore.findExact("name", initialStyle));
         }
-        
+
         var format = new OpenLayers.Format.SLD({profile: "GeoServer", multipleSymbolizers: true});
 
         try {
@@ -768,7 +944,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
      */
     createLegend:function (rules) {
         var R = OpenLayers.Symbolizer.Raster;
-        if (R && rules[0] && rules[0].symbolizers[0] instanceof R) {            
+        if (R && rules[0] && rules[0].symbolizers[0] instanceof R) {
             throw new Error("Raster symbolizers are not supported.");
         } else {
             this.addVectorLegend(rules);
@@ -915,6 +1091,30 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             this.setupNonEditable();
         }
     },
+
+    enableClassification: function () {
+        var layer = this.layerRecord.getLayer();
+        var url = this.layerRecord.get("restUrl");
+        if (!url) {
+            url = layerRecord.get("restUrl");
+        }
+        if (!url) {
+            url = layer.url.split("?").shift().replace(/\/(wms|ows)\/?$/, "/rest");
+        }
+        Ext.Ajax.request({
+            url: url + "/sldservice/" + layer.params["LAYERS"] + "/attributes.xml",
+            method:"GET",
+            disableCaching:false,
+            success:function(response){
+                if (response.responseXML) {
+                    this.classifyEnabled = true;
+                }
+            },
+            failure:function(){},
+            scope:this
+        });
+    },
+
 
     /** private: method[describeLayer]
      *  :arg callback: ``Function`` function that will be called when the
@@ -1136,7 +1336,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         return layerName.split(":").pop() + "_" +
             gxp.util.md5(layerName + new Date() + Math.random()).substr(0, 8);
     },
-    
+
     /** private: method[showDlg]
      *  :arg dlg:
      *

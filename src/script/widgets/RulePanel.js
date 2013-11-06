@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -24,11 +24,11 @@ Ext.namespace("gxp");
 
 /** api: constructor
  *  .. class:: RulePanel(config)
- *   
+ *
  *      Create a panel for assembling SLD rules.
  */
 gxp.RulePanel = Ext.extend(Ext.TabPanel, {
-    
+
     /** api: property[fonts]
      *  ``Array(String)`` List of fonts for the font combo.  If not set,
      *      defaults  to the list provided by the <Styler.FontComboBox>.
@@ -36,7 +36,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
     fonts: undefined,
 
     /** api: property[symbolType]
-     *  ``String`` One of "Point", "Line", or "Polygon".  If no rule is 
+     *  ``String`` One of "Point", "Line", or "Polygon".  If no rule is
      *  provided, default is "Point".
      */
     symbolType: "Point",
@@ -48,13 +48,13 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
      *  rule.
      */
     rule: null,
-    
+
     /** private: property[attributes]
      *  ``GeoExt.data.AttributeStore`` A configured attributes store for use
      *  in the filter property combo.
      */
     attributes: null,
-    
+
     /** private: property[pointGraphics]
      *  ``Array`` A list of objects to be used as the root of the data for a
      *  JsonStore.  These will become records used in the selection of
@@ -66,7 +66,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
      *  URL.
      *
      *  Fields:
-     * 
+     *
      *  * display - ``String`` The name to be displayed to the user.
      *  * preview - ``String`` URL to a graphic for preview.
      *  * value - ``String`` Value to be sent to the server.
@@ -79,7 +79,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
      *  allowGroups property of the filter builder.  Default is true.
      */
     nestedFilters: true,
-    
+
     /** private: property[minScaleDenominatorLimit]
      *  ``Number`` Lower limit for scale denominators.  Default is what you get
      *  when  you assume 20 zoom levels starting with the world in Spherical
@@ -95,19 +95,19 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
      *  corresponds to zoom level 0 in Google Maps).
      */
     maxScaleDenominatorLimit: 40075016.68 * 39.3701 * OpenLayers.DOTS_PER_INCH / 256,
-    
+
     /** private: property [scaleLevels]
      *  ``Number`` Number of scale levels to assume.  This is only for scaling
      *  values exponentially along the slider.  Scale values are not
      *  required to one of the discrete levels.  Default is 20.
      */
     scaleLevels: 20,
-    
+
     /** private: property[scaleSliderTemplate]
      *  ``String`` Template for the tip displayed by the scale threshold slider.
      *
      *  Can be customized using the following keywords in curly braces:
-     *  
+     *
      *  * zoom - the zoom level
      *  * scale - the scale denominator
      *  * type - "Max" or "Min" denominator
@@ -116,7 +116,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
      *  Default is "{scaleType} Scale 1:{scale}".
      */
     scaleSliderTemplate: "{scaleType} Scale 1:{scale}",
-    
+
     /** private: method[modifyScaleTipContext]
      *  Called from the multi-slider tip's getText function.  The function
      *  will receive two arguments - a reference to the panel and a data
@@ -125,7 +125,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
      *  are available to the <scaleSliderTemplate>.
      */
     modifyScaleTipContext: Ext.emptyFn,
-    
+
     /** i18n */
     labelFeaturesText: "Label Features",
     labelsText: "Labels",
@@ -136,15 +136,16 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
     symbolText: "Symbol",
     nameText: "Name",
 
+
     /** private */
     initComponent: function() {
-        
+
         var defConfig = {
             plain: true,
             border: false
         };
         Ext.applyIf(this, defConfig);
-        
+
         if(!this.rule) {
             this.rule = new OpenLayers.Rule({
                 name: this.uniqueRuleName()
@@ -154,9 +155,9 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                 this.symbolType = this.getSymbolTypeFromRule(this.rule) || this.symbolType;
             }
         }
-        
+
         this.activeTab = 0;
-        
+
         this.textSymbolizer = new gxp.TextSymbolizer({
             symbolizer: this.getTextSymbolizer(),
             attributes: this.attributes,
@@ -168,7 +169,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                 scope: this
             }
         });
-        
+
         /**
          * The interpretation here is that scale values of zero are equivalent to
          * no scale value.  If someone thinks that a scale value of zero should have
@@ -193,21 +194,24 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                 scope: this
             }
         });
-        
+
         this.filterBuilder = new gxp.FilterBuilder({
             allowGroups: this.nestedFilters,
             filter: this.rule && this.rule.filter && this.rule.filter.clone(),
             attributes: this.attributes,
             listeners: {
                 change: function(builder) {
-                    var filter = builder.getFilter(); 
+                    var filter = builder.getFilter();
                     this.rule.filter = filter;
                     this.fireEvent("change", this, this.rule);
                 },
                 scope: this
             }
         });
-        
+
+
+
+
         this.items = [{
             title: this.labelsText,
             autoScroll: true,
@@ -234,11 +238,14 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                 }
             }]
         }];
+
+
+
         if (this.getSymbolTypeFromRule(this.rule) || this.symbolType) {
             this.items = [{
                 title: this.basicText,
                 autoScroll: true,
-                items: [this.createHeaderPanel(), this.createSymbolizerPanel()]
+                items: [this.createHeaderPanel(), this.createSymbolizerPanel(), this.createClassificationPanel()]
             }, this.items[0], {
                 title: this.advancedText,
                 defaults: {
@@ -306,10 +313,14 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                         },
                         scope: this
                     }
-                }]
+                }
+                ]
             }];
         }
         this.items[0].autoHeight = true;
+
+
+
 
         this.addEvents(
             /** api: events[change]
@@ -320,16 +331,32 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
              *  * rule - ``OpenLayers.Rule`` The updated rule.
              */
             "change"
-        ); 
-        
+        );
+
         this.on({
             tabchange: function(panel, tab) {
                 tab.doLayout();
+
+            },
+            afterRender: function() {
+                if (this.classifyEnabled) {
+
+
+                    var symbolizer = this.items.items[0].items.items[1];
+
+                    //Hide fill color
+                    var element = Ext.getCmp(Ext.get(symbolizer.id).child('[name=color]').id);
+                    element.setVisible(false);
+
+                }
             },
             scope: this
         });
 
         gxp.RulePanel.superclass.initComponent.call(this);
+
+
+
     },
 
     /** private: method[hasTextSymbolizer]
@@ -345,7 +372,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
         }
         return symbolizer;
     },
-    
+
     /** private: method[getTextSymbolizer]
      *  Get the first text symbolizer in the rule.  If one does not exist,
      *  create one.  If fonts property is defined, used first font as default.
@@ -360,7 +387,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
         }
         return symbolizer;
     },
-    
+
     /** private: method[setTextSymbolizer]
      *  Update the first text symbolizer in the rule.  If one does not exist,
      *  add it.
@@ -377,7 +404,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
         }
         if (!found) {
             this.rule.symbolizers.push(symbolizer);
-        }        
+        }
     },
 
     /** private: method[uniqueRuleName]
@@ -388,7 +415,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
     uniqueRuleName: function() {
         return OpenLayers.Util.createUniqueID("rule_");
     },
-    
+
     /** private: method[createHeaderPanel]
      *  Creates a panel config containing rule name, symbolizer, and scale
      *  constraints.
@@ -416,6 +443,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                     width: 150,
                     items: [{
                         xtype: "textfield",
+                        hidden: this.classifyEnabled,
                         fieldLabel: this.nameText,
                         anchor: "95%",
                         value: this.rule && (this.rule.title || this.rule.name || ""),
@@ -489,7 +517,30 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
             cfg.pointGraphics = this.pointGraphics;
         }
         return cfg;
-        
+
+    },
+
+    /** private: method[createClassificationPanel]
+     * Interface for specifying classification criteria,
+     * Only displays if GeoServer sldService community module
+     * is installed.
+     */
+    createClassificationPanel: function() {
+
+        if (this.classifyEnabled)  {
+            this.rule["classify"] = true;
+        }
+
+        return new gxp.ClassificationPanel({
+            bodyStyle: {padding: "10px"},
+            border: false,
+            labelWidth: 70,
+            defaults: {
+                labelWidth: 70
+            },
+            hidden: !this.classifyEnabled,
+            rulePanel: this
+        });
     },
 
     /** private: method[getSymbolTypeFromRule]
@@ -515,4 +566,4 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
 });
 
 /** api: xtype = gxp_rulepanel */
-Ext.reg('gxp_rulepanel', gxp.RulePanel); 
+Ext.reg('gxp_rulepanel', gxp.RulePanel);

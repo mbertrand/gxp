@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -15,32 +15,38 @@ Ext.namespace("gxp");
 
 /** api: constructor
  *  .. class:: StylePropertiesDialog(config)
- *   
+ *
  *      Create a dialog for editing properties of a UserStyle.
  */
 gxp.StylePropertiesDialog = Ext.extend(Ext.Container, {
-    
+
     /* i18n */
     titleText: "General",
     nameFieldText: "Name",
     titleFieldText: "Title",
     abstractFieldText: "Abstract",
     /* ~i18n */
-    
+
     /** api: config[userStyle]
      *  ``OpenLayers.Style``
      */
-    
+
     /** api: property[userStyle]
      *  ``OpenLayers.Style``
      */
     userStyle: null,
-    
+
+    /** api: config[choroplethEnabled]
+     *  ``boolean``
+     */
+    classifyEnabled: false,
+
+
     /** api: config[nameEditable]
      *  ``Boolean`` Set to false if the name of the style should not be
      *  editable.
      */
-    
+
     /** private: method[initComponent]
      */
     initComponent: function() {
@@ -77,11 +83,25 @@ gxp.StylePropertiesDialog = Ext.extend(Ext.Container, {
                     fieldLabel: this.abstractFieldText,
                     name: "description",
                     value: this.userStyle.description
-                }]
+                },
+                    //Checkbox: Generate classification rules
+                    {
+                        xtype: 'checkbox',
+                        id: 'classify_checkbox',
+                        name: "classify",
+                        fieldLabel: 'Classify',
+                        checked: false,
+                        hidden: !this.classifyEnabled,
+                        handler: function(item, e)
+                        {
+                            this.userStyle[item.name] = item.checked;
+                        },
+                        scope: this
+                    }]
             }]
         };
         Ext.applyIf(this, defConfig);
-        
+
         this.addEvents(
             /** api: events[change]
              *  Fires when any style property changes.
@@ -91,7 +111,7 @@ gxp.StylePropertiesDialog = Ext.extend(Ext.Container, {
              *  * userStyle - ``OpenLayers.Style`` The updated style.
              */
             "change"
-        ); 
+        );
 
         gxp.StylePropertiesDialog.superclass.initComponent.apply(this, arguments);
     }
