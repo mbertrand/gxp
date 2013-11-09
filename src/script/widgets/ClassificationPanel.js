@@ -11,7 +11,7 @@ Ext.namespace("gxp");
 gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
 
     hidden: false,
-    
+
     rulePanel: null,
 
     classifyText: "Classify",
@@ -29,6 +29,8 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
     methodEqualText: "Equal Intervals",
     attributeText: "Attribute",
     selectAttributeText: "Select attribute",
+    startColor: "#000000",
+    endColor: "#FFFFFF",
 
 
     initComponent: function() {

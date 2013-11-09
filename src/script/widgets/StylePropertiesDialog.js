@@ -36,11 +36,6 @@ gxp.StylePropertiesDialog = Ext.extend(Ext.Container, {
      */
     userStyle: null,
 
-    /** api: config[choroplethEnabled]
-     *  ``boolean``
-     */
-    classifyEnabled: false,
-
 
     /** api: config[nameEditable]
      *  ``Boolean`` Set to false if the name of the style should not be
@@ -83,21 +78,7 @@ gxp.StylePropertiesDialog = Ext.extend(Ext.Container, {
                     fieldLabel: this.abstractFieldText,
                     name: "description",
                     value: this.userStyle.description
-                },
-                    //Checkbox: Generate classification rules
-                    {
-                        xtype: 'checkbox',
-                        id: 'classify_checkbox',
-                        name: "classify",
-                        fieldLabel: 'Classify',
-                        checked: false,
-                        hidden: !this.classifyEnabled,
-                        handler: function(item, e)
-                        {
-                            this.userStyle[item.name] = item.checked;
-                        },
-                        scope: this
-                    }]
+                }]
             }]
         };
         Ext.applyIf(this, defConfig);

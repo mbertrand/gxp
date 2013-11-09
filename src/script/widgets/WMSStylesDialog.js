@@ -94,6 +94,8 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
     /** api: config[rulesFieldsetTitle] (i18n) */
     rulesFieldsetTitle:"Rules",
 
+    colorRampText: "Classify",
+
     //TODO create a StylesStore which can read styles using GetStyles. Create
     // subclasses for that store with writing capabilities, e.g.
     // for GeoServer's RESTconfig API. This should replace the current
@@ -337,7 +339,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
 
         gxp.WMSStylesDialog.superclass.initComponent.apply(this, arguments);
 
-        this.enableClassification();
+        //this.enableClassification();
     },
 
     /** api: method[addStyle]
@@ -390,15 +392,6 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                 text: this.saveText,
                 iconCls: "save",
                 handler: function() {
-                    var classify = styleProperties.propertiesDialog.userStyle["classify"];
-                    if (classify)
-                    {
-                        if (this.layerDescription) {
-                            this.classifyStyleRules(prevStyle);
-                        } else {
-                            this.describeLayer(this.classifyStyleRules);
-                        }
-                    }
                     styleProperties.destroy();
                 },
                 scope: this
@@ -435,34 +428,6 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         this.showDlg(styleProperties);
     },
 
-
-    /** api: method[classifyStyle]
-     *  Creates a new style, selects it in the styles combo, and opens the rule
-     *  panel with classification options enabled.
-     */
-    classifyStyle:function () {
-        if (!this._ready) {
-            this.on("ready", this.addStyle, this);
-            return;
-        }
-
-        var prevStyle = this.selectedStyle.get("userStyle");
-        var store = this.stylesStore;
-        var newStyle = new OpenLayers.Style(null, {
-            name:this.newStyleName(),
-            rules:[this.createRule()]
-        });
-        store.add(new store.recordType({
-            "name":newStyle.name,
-            "userStyle":newStyle
-        }));
-        if (this.layerDescription) {
-            this.classifyStyleRules(prevStyle);
-        } else {
-            this.describeLayer(this.classifyStyleRules);
-        }
-
-    },
 
     /** api: method[classifyStyleRules]
      *  :arg prevStyle: ``Ext.data.Record``
@@ -812,17 +777,19 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                         var newRules = []
                         var filterParser = new OpenLayers.Format.Filter.v1_1_0();
                         var xmlParser = new OpenLayers.Format.XML();
-                        var xmlRules = xmlParser.getElementsByTagNameNS(xmlParser.read(result.responseText).documentElement, null, "Rule");
+
+                        var xmlRules = xmlParser.getElementsByTagNameNS(xmlParser.read(result.responseText).documentElement, "*", "Rule");
                         for (var i = 0; i < xmlRules.length; i++) {
                             var new_rule = rule.clone();
-                            new_rule.title = xmlParser.getElementsByTagNameNS(xmlRules[i], null, "Title")[0].textContent;
-                            var new_css_parameter = xmlParser.getElementsByTagNameNS(xmlRules[i], null, "CssParameter")[0];
-                            if (new_css_parameter.attributes.name.value === "fill") {
-                                new_rule.symbolizers[0].fillColor = new_css_parameter.textContent
+                            var ruleTitle =   xmlParser.getElementsByTagNameNS(xmlRules[i], "*", "Title")[0];
+                            new_rule.title = ruleTitle.textContent || ruleTitle.text;
+                            var new_css_parameter = xmlParser.getElementsByTagNameNS(xmlRules[i], "*", "CssParameter")[0];
+                            if (new_css_parameter.attributes.getNamedItem("name").value === "fill") {
+                                new_rule.symbolizers[0].fillColor = new_css_parameter.textContent || new_css_parameter.text;
                             } else {
-                                new_rule.symbolizers[0].strokeColor = new_css_parameter.textContent
+                                new_rule.symbolizers[0].strokeColor = new_css_parameter.textContent || new_css_parameter.text;
                             }
-                            new_rule.filter = filterParser.read(xmlParser.getElementsByTagNameNS(xmlRules[i], null, "Filter")[0]);
+                            new_rule.filter = filterParser.read(xmlParser.getElementsByTagNameNS(xmlRules[i], "*", "Filter")[0]);
                             newRules.push(new_rule);
                             wmsdialog.afterRuleChange(new_rule);
                         }
@@ -933,6 +900,8 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
 
             this.stylesStoreReady();
             layerParams.SLD_BODY && this.markModified();
+
+            this.enableClassification();
         }
         catch (e) {
             this.setupNonEditable();
@@ -1093,6 +1062,10 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
     },
 
     enableClassification: function () {
+        if (this.isRaster) {
+            return;
+        }
+
         var layer = this.layerRecord.getLayer();
         var url = this.layerRecord.get("restUrl");
         if (!url) {
@@ -1101,6 +1074,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         if (!url) {
             url = layer.url.split("?").shift().replace(/\/(wms|ows)\/?$/, "/rest");
         }
+
         Ext.Ajax.request({
             url: url + "/sldservice/" + layer.params["LAYERS"] + "/attributes.xml",
             method:"GET",
@@ -1108,6 +1082,31 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             success:function(response){
                 if (response.responseXML) {
                     this.classifyEnabled = true;
+
+                    var classifyToolbar = new Ext.Toolbar({
+                        style:"border-width: 0 1px 1px 1px;",
+                        buttonAlign: 'center',
+                        items:[
+                            {
+                                text: this.colorRampText,
+                                iconCls: "gradient",
+                                handler:function () {
+                                    var prevStyle = this.selectedStyle;
+
+                                    if (this.layerDescription) {
+                                        this.classifyStyleRules();
+                                    } else {
+                                        this.describeLayer(this.classifyStyleRules);
+                                    }
+                                },
+                                scope:this
+                            }
+                        ]
+                    });
+
+
+                    this.add(classifyToolbar);
+                    this.doLayout();
                 }
             },
             failure:function(){},

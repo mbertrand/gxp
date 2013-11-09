@@ -298,6 +298,7 @@ gxp.RulePanel = Ext.extend(Ext.TabPanel, {
                     xtype: "fieldset",
                     title: this.limitByConditionText,
                     checkboxToggle: true,
+                    hidden: this.classifyEnabled,
                     collapsed: !(this.rule && this.rule.filter),
                     autoHeight: true,
                     items: [this.filterBuilder],
