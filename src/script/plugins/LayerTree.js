@@ -145,7 +145,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     addOutput: function(config) {
         config = Ext.apply(this.createOutputConfig(), config || {});
         this.tree = gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
-        this.tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});     
+        this.tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});
         return this.tree;
     },
 
@@ -289,7 +289,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         }
     },
 
-    
+
     /**
      * Enclose URL's in a string with <a> tags IF there are no <a> tags already present in the string.
      */
@@ -297,10 +297,10 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         if (text != null  && !text.match(/\<a|\<img/ig)) {
             var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
             return text.replace(exp,"<a target='_blank' href='$1'>$1</a>");
-        }  else 
-        	return text;
+        }  else
+            return text;
     },
-    
+
     /** private: method[configureLayerNode]
      *  :arg loader: ``GeoExt.tree.LayerLoader``
      *  :arg node: ``Object`` The node
@@ -388,10 +388,10 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 c.items.getCount() > 0 && c.showAt(e.getXY());
             }
         }
-        
+
         //Hide the tooltip if it exists
         if (this.tooltip) {
-        	this.tooltip.hide();
+            this.tooltip.hide();
         }
     },
 
@@ -412,7 +412,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
 
     /** private: method[handleBeforeNodeDrop]
      * Don't allow node drop on top-level folders
-     */    
+     */
     handleBeforeNodeDrop: function(dropEvent) {
         var source_folder_id = undefined;
         var dest_folder = undefined;
@@ -472,82 +472,84 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             });
         }
     },
-    
+
     onTreeMouseover: function(e, t) {
         var nodeEl = Ext.fly(t).up('div.x-tree-node-el');
         if (nodeEl) {
             var nodeId = nodeEl.getAttributeNS('ext', 'tree-node-id');
             if (nodeId) {
-            	var node = this.tree.getNodeById(nodeId);
-            	if (node.layerStore) {
-            		var abstractText = this.replaceURLWithHTMLLinks(node.layerStore.getByLayer(node.layer).get("abstract"));
-            		var treemanager = Ext.fly(t).up('div.gxp-layermanager-tree');
-                    
-            		//Create or update tooltip
-            		if (this.tooltip && abstractText) {
-            			this.tooltip.initTarget(node);
-            			this.tooltip.update(abstractText);           			
-            		} else if (abstractText) {
-            			this.tooltip = new Ext.ToolTip({
-            			id: 'layer_tooltip',
-            			target: node,
-            			autoHeight: true,
-            			dismissDelay: 0,
-            	        boxMaxHeight: 500,
-            	        maxWidth: 500,
-            	        autoScroll:true,
-            	        html: abstractText
-            			});
-            		} else if (this.tooltip) {
-            			this.tooltip.hide();
-            		} 
-            		
-            	
-        		    
-            		//Set or cancel timeouts for tooltip
-            		this.tooltip.on('show', function(){
-            		    	var timeout;
-                			var tooltip = this;
-                			
-                		    treemanager.on('mouseleave', function(){
-                		        timeout = window.setTimeout(function(){
-                		        	tooltip.hide();
-                		        }, 500);
-                		    }); 
-    
-                		    
-                		    tooltip.getEl().on('mouseleave', function(){
-                		    	if (timeout) {
-                    		        timeout = window.setTimeout(function(){
-                    		        	tooltip.hide();
-                    		        }, 500);                		    		
-                		    	}
-                		    });
-                		    
-                		    tooltip.getEl().on('mouseenter', function(){
-                		        window.clearTimeout(timeout);
-                		    });
-                		    
+                var node = this.tree.getNodeById(nodeId);
+                if (node.layerStore) {
+                    var abstractText = this.replaceURLWithHTMLLinks(node.layerStore.getByLayer(node.layer).get("abstract"));
+                    var treemanager = Ext.fly(t).up('div.gxp-layermanager-tree');
 
-                	});      
-            		
-            		// Show the tooltip only if there is something to show,
-            		// and offset by width of layertree panel
-            		if (abstractText) {
-            			this.tooltip.showAt([treemanager.dom.offsetWidth, e.xy[1]]);       
-                		//Resize height when content changes
-        			    if (this.tooltip.getHeight() > this.tooltip.boxMaxHeight) {
-        			    	this.tooltip.autoHeight = false;
-        			    	this.tooltip.setHeight(this.tooltip.boxMaxHeight);
-        			    } else {
-        			    	this.tooltip.autoHeight = true;
-        			    }
-            		}
+                    //Create or update tooltip
+                    if (this.tooltip && abstractText) {
+                        this.tooltip.initTarget(node);
+                        this.tooltip.update(abstractText);
+                    } else if (abstractText) {
+                        this.tooltip = new Ext.ToolTip({
+                            id: 'layer_tooltip',
+                            target: node,
+                            autoHeight: true,
+                            dismissDelay: 0,
+                            boxMaxHeight: 500,
+                            maxWidth: 500,
+                            autoScroll:true,
+                            html: abstractText
+                        });
+                    } else if (this.tooltip) {
+                        this.tooltip.hide();
+                    }
 
 
-            	}
+
+                    //Set or cancel timeouts for tooltip
+                    if (this.tooltip) {
+                        this.tooltip.on('show', function(){
+                            var timeout;
+                            var tooltip = this;
+
+                            treemanager.on('mouseleave', function(){
+                                timeout = window.setTimeout(function(){
+                                    tooltip.hide();
+                                }, 500);
+                            });
+
+
+                            tooltip.getEl().on('mouseleave', function(){
+                                if (timeout) {
+                                    timeout = window.setTimeout(function(){
+                                        tooltip.hide();
+                                    }, 500);
+                                }
+                            });
+
+                            tooltip.getEl().on('mouseenter', function(){
+                                window.clearTimeout(timeout);
+                            });
+
+
+                        });
+
+                        // Show the tooltip only if there is something to show,
+                        // and offset by width of layertree panel
+                        if (abstractText) {
+                            this.tooltip.showAt([treemanager.dom.offsetWidth, e.xy[1]]);
+                            //Resize height when content changes
+                            if (this.tooltip.getHeight() > this.tooltip.boxMaxHeight) {
+                                this.tooltip.autoHeight = false;
+                                this.tooltip.setHeight(this.tooltip.boxMaxHeight);
+                            } else {
+                                this.tooltip.autoHeight = true;
+                            }
+                        }
+
+
+                    }
+                }
                 this.tree.fireEvent('mouseover', this.tree.getNodeById(nodeId), e);
-                
+
             }
         }
     }
