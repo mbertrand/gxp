@@ -124,6 +124,10 @@ link.png
     background-image: url(img/pencil.png);
 }
 
+.x-btn .gradient {
+    background-image: url(img/gradient.png);
+}
+
 .x-btn .process, .x-menu-item .process {
     background-image: url(img/silk/cog.png);
 }
@@ -248,22 +252,22 @@ link.png
 }
 
 /* gxp_zoomtodataextent, gxp_zoomtoselectedfeatures, gxp_zoomtolayerextent */
-.x-btn .gxp-icon-zoom-to, .x-menu-item .gxp-icon-zoom-to, .x-tree-node .gxp-icon-zoom-to { 
+.x-btn .gxp-icon-zoom-to, .x-menu-item .gxp-icon-zoom-to, .x-tree-node .gxp-icon-zoom-to {
     background-image: url(img/silk/magnifier.png);
 }
 
 /* gxp_queryform */
-.x-btn .gxp-icon-find, .x-menu-item .gxp-icon-find { 
+.x-btn .gxp-icon-find, .x-menu-item .gxp-icon-find {
     background-image: url(img/silk/find.png);
 }
 
 /* gxp_selectfeature */
-.x-btn .gxp-icon-selectfeature, .x-menu-item .gxp-icon-selectfeature { 
+.x-btn .gxp-icon-selectfeature, .x-menu-item .gxp-icon-selectfeature {
     background-image: url(img/silk/cursor.png);
 }
 
 /* gxp_zoomtoextent */
-.x-btn .gxp-icon-zoomtoextent, .x-tree-node .gxp-icon-zoomtoextent { 
+.x-btn .gxp-icon-zoomtoextent, .x-tree-node .gxp-icon-zoomtoextent {
     background-image: url(img/silk/arrow_inout.png);
 }
 
@@ -291,12 +295,12 @@ link.png
     background-image: url(img/geosilk/ruler.png) !important;
 }
 .x-btn .gxp-icon-measure-area, .x-menu-item .gxp-icon-measure-area, .x-tree-node .gxp-icon-measure-area {
-   background-image: url(img/geosilk/ruler_square.png) !important;
+    background-image: url(img/geosilk/ruler_square.png) !important;
 }
 
 /* gxp_styler */
 .x-btn .gxp-icon-palette, .x-menu-item .gxp-icon-palette, .x-tree-node .gxp-icon-palette {
-   background-image: url(img/silk/palette.png);
+    background-image: url(img/silk/palette.png);
 }
 
 /* fixes textarea scrollbar issue in FF on OSX */
@@ -313,7 +317,7 @@ link.png
 }
 
 /* gxp_layeruploadpanel */
-.x-btn .gxp-icon-filebrowse, .x-menu-item .gxp-icon-filebrowse { 
+.x-btn .gxp-icon-filebrowse, .x-menu-item .gxp-icon-filebrowse {
     background-image: url(img/silk/folder.png);
 }
 
@@ -326,7 +330,7 @@ link.png
     position: absolute;
     right: 0;
     -moz-opacity: 0;
-    filter:alpha(opacity: 0);
+    filter:alpha(opacity=0);
     opacity: 0;
     z-index: 2;
     height: 22px;
@@ -519,7 +523,6 @@ div.olMap div.gx-overlay-playback {
 }
 
 .gx_timeslider div.x-slider-thumb{
-    background-position:0;
     cursor: pointer;
 }
 .gx_timeslider div.x-slider-min-thumb{
