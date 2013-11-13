@@ -9,16 +9,38 @@
 
 Ext.namespace("gxp.plugins");
 
-OpenLayers.Format.Flickr = OpenLayers.Class(OpenLayers.Format.GeoRSS, {
-    createFeatureFromItem: function(item) {
-        var feature = OpenLayers.Format.GeoRSS.prototype
-            .createFeatureFromItem.apply(this, arguments);
-        var thumbnails = this.getElementsByTagNameNS(item, "http://search.yahoo.com/mrss/", "thumbnail");
-        if (thumbnails.length > 0) {
-        	feature.attributes.thumbnail = thumbnails[Math.min(1,thumbnails.length)].getAttribute("url");
+OpenLayers.Format.Flickr = OpenLayers.Class(OpenLayers.Format.JSON, {
+
+    defaultFormat: "OpenLayers.Format.JSON",
+    defaultThumbnail: "url_q",
+    defaultContent: "title",
+
+    read: function(json, filter) {
+        var responseJSON = OpenLayers.Format.JSON.prototype.read.apply(this, arguments);
+        var photos = responseJSON.photos.photo;
+        var response = this.parseResponse(photos);
+        return response;
+    },
+
+
+    parseResponse: function(items){
+        var features = [items.length];
+        for (var i = 0; i < items.length; i++) {
+            var photo = items[i];
+            var fpoint = new  OpenLayers.Geometry.Point (photo.longitude, photo.latitude);
+            var  attributes = {};
+            for (var property in photo) {
+                attributes[property] = photo[property];
+            }
+            attributes["thumbnail"] = photo[this.defaultThumbnail];
+            attributes["content"] = photo[this.defaultContent];
+            attributes["link"] = "http://www.flickr.com/photos/"
+                + attributes["owner"] + "/"
+                + attributes["id"];
+            features[i] = new  OpenLayers.Feature.Vector (fpoint, attributes);
+
         }
-        feature.attributes.content = OpenLayers.Util.getXmlNodeValue(this.getElementsByTagNameNS(item, "*","summary")[0]);
-        return feature;
+        return features;
     }
 });
 
@@ -38,13 +60,13 @@ gxp.plugins.FlickrFeedSource = Ext.extend(gxp.plugins.FeedSource, {
 
     createLayerRecord: function(config) {
         if (config.params == null) {
-            config.params = {"max-results":50, "q":""};
+            config.params = {"max-results":500, "q":""};
         }
         if (config.params["max-results"] == "") {
-            config.params["max-results"] = 50;
+            config.params["max-results"] = 500;
         }
         if (config.params["q"] == null) {
-          config.params["q"] == "";
+            config.params["q"] == "";
         }
         config.url = this.url;
 
@@ -66,7 +88,7 @@ gxp.plugins.FlickrFeedSource = Ext.extend(gxp.plugins.FeedSource, {
                 content.innerHTML = feature.attributes.description;
                 this.target.selectControl.popup = new OpenLayers.Popup("popup",
                     new OpenLayers.LonLat(pos.x, pos.y),
-                    new OpenLayers.Size(160,160),
+                    new OpenLayers.Size(150,150),
                     "<a target='_blank' href=" +
                         feature.attributes.link +"><img title='" +
                         feature.attributes.title +"' src='" + feature.attributes.thumbnail +"' /></a>",
