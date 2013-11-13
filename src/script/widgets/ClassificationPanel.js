@@ -31,6 +31,8 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
     selectAttributeText: "Select attribute",
     startColor: "#000000",
     endColor: "#FFFFFF",
+    generateRulesText: "Apply",
+    reverseColorsText: "Reverse colors",
 
 
     initComponent: function() {
@@ -61,7 +63,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                     listeners: {
                         valid: function(field) {
                             this.rulePanel.rule[field.name] = field.getValue();
-                            this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                            //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
                         },
                         scope: this
                     }
@@ -77,7 +79,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                     listeners: {
                         valid: function(field) {
                             this.rulePanel.rule[field.name] = field.getValue();
-                            this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                            //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
                         },
                         scope: this
                     },
@@ -99,7 +101,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
             listeners: {
                 'change':function(spinner, value){
                     this.rulePanel.rule['intervals'] = value;
-                    this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                    //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
                 },
                 scope: this
             }
@@ -139,7 +141,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                     //If Custom: display start, end, middle color picker;
                     colorPanel.setVisible(cmb.value == "Custom");
                     this.rulePanel.rule[cmb.name] = cmb.value;
-                    this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                    //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
 
                 },
                 scope: this
@@ -179,7 +181,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                     //If uniqueInterval: disable # classes
                     classNumSelector.setDisabled(cmb.value == "uniqueInterval");
                     this.rulePanel.rule[cmb.name] = cmb.value;
-                    this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                    //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
 
                 },
                 scope: this
@@ -217,7 +219,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                         ['equalInterval',this.methodEqualText]]
                     );
 
-                    this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                    //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
                 },
                 scope: this
             }
@@ -238,8 +240,34 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                     classNumSelector,
                     //Dropdown: color ramp
                     colorDropdown,
+                    //Checkbox: Generate classification rules
+                    {
+                        xtype: 'checkbox',
+                        name: 'reverse',
+                        checked: false,
+                        labelSeparator: '',
+                        hideLabel: true,
+                        boxLabel: this.reverseColorsText,
+                        handler: function(item, e)
+                        {
+                            this.rulePanel.rule['reverse'] = item.checked;
+                            //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                        },
+                        scope: this
+                    },
                     //Text field /  Ext.menu.ColorMenu: start color
-                    colorPanel
+                    colorPanel,
+                    {
+                        xtype: 'button',
+                        name: 'apply',
+                        text: this.generateRulesText,
+                        fieldLabel: '&nbsp;',
+                        labelSeparator: '',
+                        handler: function (item, e) {
+                            this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+                        },
+                        scope: this
+                    }
                 ]
             }
         ]
