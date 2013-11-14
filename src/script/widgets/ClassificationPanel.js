@@ -27,6 +27,8 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
     methodUniqueText: "Unique Values",
     methodQuantileText: "Quantile",
     methodEqualText: "Equal Intervals",
+    methodJenksText: "Jenks Natural Breaks",
+    standardDeviationText: "Standard Deviations",
     attributeText: "Attribute",
     selectAttributeText: "Select attribute",
     startColor: "#000000",
@@ -164,7 +166,8 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                 data: [
                     ['uniqueInterval', this.methodUniqueText],
                     ['quantile', this.methodQuantileText],
-                    ['equalInterval', this.methodEqualText]
+                    ['equalInterval', this.methodEqualText],
+                    ['jenks', this.methodJenksText]
                 ]
             }),
             displayField: 'label',
@@ -216,7 +219,8 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                         [['uniqueInterval',this.methodUniqueText]]
                         :[['uniqueInterval',this.methodUniqueText],
                         ['quantile', this.methodQuantileText],
-                        ['equalInterval',this.methodEqualText]]
+                        ['equalInterval',this.methodEqualText],
+                        ['jenks', this.methodJenksText]]
                     );
 
                     //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
