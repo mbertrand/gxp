@@ -31,8 +31,8 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
     standardDeviationText: "Standard Deviations",
     attributeText: "Attribute",
     selectAttributeText: "Select attribute",
-    startColor: "#000000",
-    endColor: "#FFFFFF",
+    startColor: "#FEE5D9",
+    endColor: "#A50F15",
     generateRulesText: "Apply",
     reverseColorsText: "Reverse colors",
 
