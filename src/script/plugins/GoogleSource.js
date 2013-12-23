@@ -100,35 +100,10 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     terrainAbstract: "Show street map with terrain",
 
-    /** api: config[roadmapTitle]
-     *  ``String``
-     *  Title of the ROADMAP layer (i18n).
-     */
-    roadmapTitle: "Google Roadmap",
-    
-    /** api: config[hybridTitle]
-     *  ``String``
-     *  Title of the HYBRID layer (i18n).
-     */
-    hybridTitle: "Google Hybrid",
-    
-    /** api: config[satelliteTitle]
-     *  ``String``
-     *  Title of the SATELLITE layer (i18n).
-     */
-    satelliteTitle: "Google Satellite",
-    
-    /** api: config[terrainTitle]
-     *  ``String``
-     *  Title of the TERRAIN layer (i18n).
-     */
-    terrainTitle: "Google Terrain",
-    
-    
     /** api: config[otherParams]
      *  ``String``
      *  Additional parameters to be sent to Google,
-     *  default is "sensore=false"
+     *  default is "sensor=false"
      */
     otherParams: "sensor=false",
 
@@ -171,10 +146,10 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
         // TODO: We may also be able to determine the MAX_ZOOM_LEVEL for each
         // layer type. If not, consider setting them on the OpenLayers level.
         var mapTypes = {
-            "ROADMAP": {"abstract": this.roadmapAbstract, MAX_ZOOM_LEVEL: 20, "title": this.roadmapTitle},
-            "SATELLITE": {"abstract": this.satelliteAbstract, "title": this.satelliteTitle},
-            "HYBRID": {"abstract": this.hybridAbstract, "title": this.hybridTitle},
-            "TERRAIN": {"abstract": this.terrainAbstract, MAX_ZOOM_LEVEL: 15, "title": this.terrainTitle}
+            "ROADMAP": {"abstract": this.roadmapAbstract, MAX_ZOOM_LEVEL: 20},
+            "SATELLITE": {"abstract": this.satelliteAbstract},
+            "HYBRID": {"abstract": this.hybridAbstract},
+            "TERRAIN": {"abstract": this.terrainAbstract, MAX_ZOOM_LEVEL: 15}
         };
 
         var layers = [];
@@ -184,7 +159,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
             layers.push(new OpenLayers.Layer.Google(
                 // TODO: get MapType object name
                 // http://code.google.com/p/gmaps-api-issues/issues/detail?id=2562
-            		mapTypes[name]["title"], {
+                "Google " + mapType.replace(/\w/, function(c) {return c.toUpperCase();}), {
                     type: mapType,
                     typeName: name,
                     MAX_ZOOM_LEVEL: mapTypes[name].MAX_ZOOM_LEVEL,
@@ -347,7 +322,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
         };
 
         var script = document.createElement("script");
-        script.src = window.location.protocol  + "//www.google.com/jsapi?" + Ext.urlEncode(params);
+        script.src = "http://www.google.com/jsapi?" + Ext.urlEncode(params);
 
         // cancel loading if monitor is not ready within timeout
         var errback = options.errback || Ext.emptyFn;

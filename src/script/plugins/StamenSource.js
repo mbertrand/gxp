@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- *
+ * 
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -60,7 +60,7 @@ Ext.namespace("gxp.plugins");
  *
  */
 gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
-
+    
     /** api: ptype = gxp_stamensource */
     ptype: "gxp_stamensource",
 
@@ -68,7 +68,7 @@ gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
      *  ``GeoExt.data.LayerStore``. Will contain records with name field values
      *  matching Stamen layer names.
      */
-
+    
     /** api: config[title]
      *  ``String``
      *  A descriptive title for this layer source (i18n).
@@ -99,7 +99,7 @@ gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
      *  Creates a store of layer records.  Fires "ready" when store is loaded.
      */
     createStore: function() {
-
+        
         var options = {
             projection: "EPSG:900913",
             numZoomLevels: 20,
@@ -144,7 +144,7 @@ gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
                 }, options)
             );
         }
-
+        
         this.store = new GeoExt.data.LayerStore({
             layers: layers,
             fields: [
@@ -163,7 +163,7 @@ gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
         this.fireEvent("ready", this);
 
     },
-
+    
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -177,7 +177,7 @@ gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
 
             record = this.store.getAt(index).copy(Ext.data.Record.id({}));
             var layer = record.getLayer().clone();
-
+ 
             // set layer title from config
             if (config.title) {
                 /**
@@ -194,7 +194,7 @@ gxp.plugins.StamenSource = Ext.extend(gxp.plugins.LayerSource, {
             if ("visibility" in config) {
                 layer.visibility = config.visibility;
             }
-
+            
             record.set("selected", config.selected || false);
             record.set("source", config.source);
             record.set("name", config.name);

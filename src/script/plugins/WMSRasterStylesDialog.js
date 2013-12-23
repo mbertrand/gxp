@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- *
+ * 
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -25,16 +25,16 @@ Ext.namespace("gxp.plugins");
  *
  *    TODO replace this with true raster support instead of squeezing it into
  *    a VectorLegend as if we were dealing with vector styles.
- */
+ */   
 gxp.plugins.WMSRasterStylesDialog = {
-
+    
     /** private: property[isRaster]
      *  ``Boolean`` Are we dealing with a raster layer with RasterSymbolizer?
      *  This is needed because we create pseudo rules from a RasterSymbolizer's
      *  ColorMap, and for this we need special treatment in some places.
      */
     isRaster: null,
-
+    
     init: function(target) {
         Ext.apply(target, gxp.plugins.WMSRasterStylesDialog);
     },
@@ -47,16 +47,16 @@ gxp.plugins.WMSRasterStylesDialog = {
         ];
         return new OpenLayers.Rule({symbolizers: symbolizers});
     },
-
+    
     /** private: method[addRule]
      */
     addRule: function() {
-        var legend = this.rulesFieldSet.items.get(0);
+        var legend = this.items.get(2).items.get(0);
         if (this.isRaster) {
             legend.rules.push(this.createPseudoRule());
             // we need either zero or at least two rules
             legend.rules.length == 1 &&
-            legend.rules.push(this.createPseudoRule());
+                legend.rules.push(this.createPseudoRule());
             this.savePseudoRules();
         } else {
             this.selectedStyle.get("userStyle").rules.push(
@@ -68,12 +68,12 @@ gxp.plugins.WMSRasterStylesDialog = {
         }
         this.updateRuleRemoveButton();
     },
-
+    
     /** private: method[removeRule]
      */
     removeRule: function() {
         if (this.isRaster) {
-            var legend = this.rulesFieldSet.items.get(0);
+            var legend = this.items.get(2).items.get(0);
             var rule = this.selectedRule;
             legend.unselect();
             legend.rules.remove(rule);
@@ -84,11 +84,11 @@ gxp.plugins.WMSRasterStylesDialog = {
             gxp.WMSStylesDialog.prototype.removeRule.apply(this, arguments);
         }
     },
-
+    
     /** private: method[duplicateRule]
      */
     duplicateRule: function() {
-        var legend = this.rulesFieldSet.items.get(0);
+        var legend = this.items.get(2).items.get(0);
         if (this.isRaster) {
             legend.rules.push(this.createPseudoRule({
                 quantity: this.selectedRule.name,
@@ -109,12 +109,12 @@ gxp.plugins.WMSRasterStylesDialog = {
         }
         this.updateRuleRemoveButton();
     },
-
+    
     editRule: function() {
         this.isRaster ? this.editPseudoRule() :
             gxp.WMSStylesDialog.prototype.editRule.apply(this, arguments);
     },
-
+    
     /** private: method[editPseudoRule]
      *  Edit a pseudo rule of a RasterSymbolizer's ColorMap.
      */
@@ -156,7 +156,7 @@ gxp.plugins.WMSRasterStylesDialog = {
                                 allowBlank: false,
                                 fieldLabel: "Quantity",
                                 validator: function(value) {
-                                    var rules = me.rulesFieldSet.items.get(0).rules;
+                                    var rules = me.items.get(2).items.get(0).rules;
                                     for (var i=rules.length-1; i>=0; i--) {
                                         if (rule !== rules[i] && rules[i].name == value) {
                                             return "Quantity " + value + " is already defined";
@@ -225,26 +225,26 @@ gxp.plugins.WMSRasterStylesDialog = {
         // remove stroke fieldset
         var strokeSymbolizer = pseudoRuleDlg.findByType("gxp_strokesymbolizer")[0];
         strokeSymbolizer.ownerCt.remove(strokeSymbolizer);
-
+        
         pseudoRuleDlg.show();
     },
-
+    
     /** private: method[savePseudoRules]
      *  Takes the pseudo rules from the legend and adds them as
      *  RasterSymbolizer ColorMap back to the userStyle.
      */
     savePseudoRules: function() {
         var style = this.selectedStyle;
-        var legend = this.rulesFieldSet.items.get(0);
+        var legend = this.items.get(2).items.get(0);
         var userStyle = style.get("userStyle");
-
+        
         var pseudoRules = legend.rules;
         pseudoRules.sort(function(a,b) {
             var left = parseFloat(a.name);
             var right = parseFloat(b.name);
             return left === right ? 0 : (left < right ? -1 : 1);
         });
-
+        
         var symbolizer = userStyle.rules[0].symbolizers[0];
         symbolizer.colorMap = pseudoRules.length > 0 ?
             new Array(pseudoRules.length) : undefined;
@@ -261,7 +261,7 @@ gxp.plugins.WMSRasterStylesDialog = {
         }
         this.afterRuleChange(this.selectedRule);
     },
-
+    
     /** private: method[createLegend]
      *  :arg rules: ``Array``
      *  :arg options:
@@ -276,7 +276,7 @@ gxp.plugins.WMSRasterStylesDialog = {
             this.isRaster = false;
             this.addVectorLegend(rules);
         }
-    },
+    },    
 
     /** private: method[addRasterLegend]
      *  :arg rules: ``Array``
@@ -286,12 +286,12 @@ gxp.plugins.WMSRasterStylesDialog = {
      *  Creates the vector legend for the pseudo rules that are created from
      *  the RasterSymbolizer of the first rule and adds it to the rules
      *  fieldset.
-     *
+     *  
      *  Supported options:
      *
      *  * selectedRuleIndex: ``Number`` The index of a pseudo rule to select
      *    in the legend.
-     */
+     */  
     addRasterLegend: function(rules, options) {
         options = options || {};
         //TODO raster styling support is currently limited to one rule, and
@@ -310,21 +310,21 @@ gxp.plugins.WMSRasterStylesDialog = {
             enableDD: false
         });
     },
-
+    
     /** private: method[createPseudoRule]
      *  :arg colorMapEntry: ``Object``
-     *
+     *  
      *  Creates a pseudo rule from a ColorMapEntry.
      */
     createPseudoRule: function(colorMapEntry) {
         var quantity = -1;
         if (!colorMapEntry) {
-            var fieldset = this.rulesFieldSet;
+            var fieldset = this.items.get(2);
             if (fieldset.items) {
                 rules = fieldset.items.get(0).rules;
                 for (var i=rules.length-1; i>=0; i--) {
                     quantity = Math.max(quantity, parseFloat(rules[i].name));
-                }
+                }            
             }
         }
         colorMapEntry = Ext.applyIf(colorMapEntry || {}, {
@@ -349,11 +349,11 @@ gxp.plugins.WMSRasterStylesDialog = {
      *  the last rule.
      */
     updateRuleRemoveButton: function() {
-        this.rulesToolbar.items.get(1).setDisabled(!this.selectedRule ||
+        this.items.get(3).items.get(1).setDisabled(!this.selectedRule ||
             (this.isRaster === false &&
-                this.rulesFieldSet.items.get(0).rules.length <= 1));
+            this.items.get(2).items.get(0).rules.length <= 1));
     }
-
+    
 };
 
 /** api: ptype = gxp_wmsrasterstylesdialog */

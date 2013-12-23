@@ -11,6 +11,9 @@
  * @requires OpenLayers/StyleMap.js
  * @requires OpenLayers/Rule.js
  * @requires OpenLayers/Control/Measure.js
+ * @requires OpenLayers/Layer/Vector.js
+ * @requires OpenLayers/Handler/Path.js
+ * @requires OpenLayers/Handler/Polygon.js
  * @requires OpenLayers/Renderer/SVG.js
  * @requires OpenLayers/Renderer/VML.js
  * @requires OpenLayers/Renderer/Canvas.js
@@ -77,6 +80,10 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
      */
     measureTooltip: "Measure",
 
+    iconCls:"gxp-icon-measure-length",
+    	
+    text: null,
+    
     /** private: method[constructor]
      */
     constructor: function(config) {
@@ -200,7 +207,8 @@ gxp.plugins.Measure = Ext.extend(gxp.plugins.Tool, {
     addActions: function() {
         this.activeIndex = 0;
         this.button = new Ext.SplitButton({
-            iconCls: "gxp-icon-measure-length",
+            iconCls: this.iconCls,
+            text: this.text,
             tooltip: this.measureTooltip,
             buttonText: this.buttonText,
             enableToggle: true,

@@ -84,7 +84,8 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
         if (!config.format) {
             this.format = new OpenLayers.Format.WMSCapabilities({
                 keepData: true,
-                profile: "WMSC"
+                profile: "WMSC",
+                allowFallback: true
             });
         }
         gxp.plugins.WMSCSource.superclass.constructor.apply(this, arguments);
@@ -170,7 +171,7 @@ gxp.plugins.WMSCSource = Ext.extend(gxp.plugins.WMSSource, {
             name = config.name,
             tileSetsCap,
             layer = record.getLayer();
-        if (config.capability) {
+        if (config.capability && this.store.reader.raw) {
             var capability = this.store.reader.raw.capability;
             var tileSets = capability.vendorSpecific && capability.vendorSpecific.tileSets;
             if (tileSets) {

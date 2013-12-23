@@ -5,31 +5,33 @@
 GeoExt.Lang.add("fr", {
 
     "gxp.plugins.AddLayers.prototype": {
-        addActionMenuText: "Ajouter des couches",
-        addActionTip: "Ajouter des couches",
+        addActionMenuText: "Ajouter des calques",
+        addActionTip: "Ajouter des calques",
         addServerText: "Ajouter un nouveau serveur",
         untitledText: "Sans titre",
         addLayerSourceErrorText: "Impossible d'obtenir les capacités WMS ({msg}).\nVeuillez vérifier l'URL et essayez à nouveau.",
         availableLayersText: "Couches disponibles",
+        doneText: "Terminé",
         uploadText: "Télécharger des données",
-        layerSelectionText: "Source:",
-        sourceSelectOrTypeText: "Choisissez un URL ou taper l'URL de service",
-        doneText: "Terminé"
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
-        title: "Couches Bing",
+        title: "Calques Bing",
         roadTitle: "Bing routes",
         aerialTitle: "Bing images aériennes",
         labeledAerialTitle: "Bing images aériennes avec étiquettes"
     },    
 
     "gxp.plugins.FeatureEditor.prototype": {
-        splitButtonText: "Rédiger",
-        createFeatureActionText: "Créer",
-        editFeatureActionText: "Modifier",
+        splitButtonText: "Edit",
+        createFeatureActionText: "Create",
+        editFeatureActionText: "Modify",
         createFeatureActionTip: "Créer un nouvel objet",
-        editFeatureActionTip: "Modifier un objet existant"
+        editFeatureActionTip: "Modifier un objet existant",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -39,7 +41,7 @@ GeoExt.Lang.add("fr", {
         zoomPageExtentTip: "Zoom sur la page",
         nextPageTip: "Page suivante",
         lastPageTip: "Dernière page",
-        totalMsg: "Caractéristiques {1} à {2} de {0}"
+        totalMsg: "Features {1} to {2} of {0}"
     },
 
     "gxp.plugins.GoogleEarth.prototype": {
@@ -48,15 +50,11 @@ GeoExt.Lang.add("fr", {
     },
     
     "gxp.plugins.GoogleSource.prototype": {
-        title: "Couches Google",
+        title: "Calques Google",
         roadmapAbstract: "Carte routière",
         satelliteAbstract: "Images satellite",
         hybridAbstract: "Images avec routes",
-        terrainAbstract: "Carte routière avec le terrain",
-        roadmapTitle: "Google Routière",       
-        hybridTitle: "Google Hybrid",
-        satelliteTitle: "Google Satellite",
-        terrainTitle: "Google Terrain"
+        terrainAbstract: "Carte routière avec le terrain"
     },
 
     "gxp.plugins.LayerProperties.prototype": {
@@ -65,8 +63,8 @@ GeoExt.Lang.add("fr", {
     },
     
     "gxp.plugins.LayerTree.prototype": {
-        shortTitle: "Couches",
-        rootNodeText: "Couches",
+        shortTitle: "Layers",
+        rootNodeText: "Layers",
         overlayNodeText: "Surimpressions",
         baseNodeText: "Couches"
     },
@@ -106,25 +104,25 @@ GeoExt.Lang.add("fr", {
     },
 
     "gxp.plugins.MapBoxSource.prototype": {
-        title: "Couches MapBox",
-        blueMarbleTopoBathyJanTitle: "Topographie et Bathymétrie Blue Marble (janvier)",
-        blueMarbleTopoBathyJulTitle: "Topographie et Bathymétrie Blue Marble (juillet)",
-        blueMarbleTopoJanTitle: "Topographie Blue Marble (janvier)",
-        blueMarbleTopoJulTitle: "Topographie Blue Marble (juillet)",
-        controlRoomTitle: "Salle de commande",
-        geographyClassTitle: "Cours de géographie",
-        naturalEarthHypsoTitle: "Hypsométrie du monde",
-        naturalEarthHypsoBathyTitle: "Hypsométrie & Bathymétrie du monde",
-        naturalEarth1Title: "Monde I",
-        naturalEarth2Title: "Monde II",
-        worldDarkTitle: "Monde (foncé)",
-        worldLightTitle: "Monde (éclair)",
-        worldPrintTitle: "Imprimer le monde"
+        title: "MapBox Layers",
+        blueMarbleTopoBathyJanTitle: "Blue Marble Topography & Bathymetry (January)",
+        blueMarbleTopoBathyJulTitle: "Blue Marble Topography & Bathymetry (July)",
+        blueMarbleTopoJanTitle: "Blue Marble Topography (January)",
+        blueMarbleTopoJulTitle: "Blue Marble Topography (July)",
+        controlRoomTitle: "Control Room",
+        geographyClassTitle: "Geography Class",
+        naturalEarthHypsoTitle: "Natural Earth Hypsometric",
+        naturalEarthHypsoBathyTitle: "Natural Earth Hypsometric & Bathymetry",
+        naturalEarth1Title: "Natural Earth I",
+        naturalEarth2Title: "Natural Earth II",
+        worldDarkTitle: "World Dark",
+        worldLightTitle: "World Light",
+        worldPrintTitle: "World Print"
     },
 
     "gxp.plugins.OSMSource.prototype": {
-        title: "Couches OpenStreetMap",
-        mapnikAttribution: "Données CC-By-SA par <a href='http://openstreetmap.org/'>OpenStreetMap</a>",
+        title: "Calques OpenStreetMap",
+        mapnikAttribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
         osmarenderAttribution: "Données CC-By-SA par <a href='http://openstreetmap.org/'>OpenStreetMap</a>"
     },
 
@@ -133,7 +131,7 @@ GeoExt.Lang.add("fr", {
         menuText: "Imprimer la carte",
         tooltip: "Imprimer la carte",
         previewText: "Aperçu avant impression",
-        notAllNotPrintableText: "Toutes les couches ne peuvent pas être imprimées",
+        notAllNotPrintableText: "Non, toutes les couches peuvent être imprimées",
         nonePrintableText: "Aucune de vos couches ne peut être imprimée"
     },
 
@@ -149,7 +147,7 @@ GeoExt.Lang.add("fr", {
         queryActionText: "Interrogation",
         queryMenuText: "Couche de requêtes",
         queryActionTip: "Interroger la couche sélectionnée",
-        queryByLocationText: "Interroger par la zone de la carte actuelle",
+        queryByLocationText: "Query by current map extent",
         queryByAttributesText: "Requête par attributs"
     },
 
@@ -159,16 +157,16 @@ GeoExt.Lang.add("fr", {
     },
 
     "gxp.plugins.WMSGetFeatureInfo.prototype": {
-        buttonText:"Identifier",
-        infoActionTip: "Acquérir les informations",
+        buttonText:"Identify",
+        infoActionTip: "Get Feature Info",
         popupTitle: "Info sur l'objet"
     },
 
     "gxp.plugins.Zoom.prototype": {
-        zoomMenuText: "Zone zoom",
+        zoomMenuText: "Zoom Box",
         zoomInMenuText: "Zoom avant",
         zoomOutMenuText: "Zoom arrière",
-        zoomTooltip: "Zoom en tirant un carré",
+        zoomTooltip: "Zoom by dragging a box",
         zoomInTooltip: "Zoom avant",
         zoomOutTooltip: "Zoom arrière"
     },
@@ -286,8 +284,19 @@ GeoExt.Lang.add("fr", {
         transparentText: "Transparent",
         cacheText: "Cache",
         cacheFieldText: "Utiliser la version mise en cache",
+        stylesText: "Available styles",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Choisissez un format"
+        infoFormatEmptyText: "Choisissez un format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -309,14 +318,16 @@ GeoExt.Lang.add("fr", {
         fileLabel: "Données",
         fieldEmptyText: "Parcourir pour ...",
         uploadText: "Upload",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Transfert de vos données ...",
         invalidFileExtensionText: "L'extension du fichier doit être : ",
         optionsText: "Options",
         workspaceLabel: "Espace de travail",
         workspaceEmptyText: "Espace de travail par défaut",
         dataStoreLabel: "Magasin de données",
-        dataStoreEmptyText: "Créer une nouvelle réserve",
-        defaultDataStoreEmptyText: "Réserve de données par défaut"
+        dataStoreEmptyText: "Create new store",
+        defaultDataStoreEmptyText: "Magasin de données par défaut"
     },
 
     "gxp.NewSourceDialog.prototype": {
@@ -330,154 +341,172 @@ GeoExt.Lang.add("fr", {
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Niveau de zoom"
     },
+
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Sauver Trouble: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Source",
+        addPicasaText: "Picasa Photos",
+        addYouTubeText: "YouTube Vidéos",
+        addRSSText: "GeoRSS Autre",
+        addFeedText: "Ajouter à la carte",
+        addTitleText: "Titre",
+        keywordText: "Mot-clé",
+        doneText: "Terminé",
+        titletext:  "Ajouter RSS",
+        maxResultsText: "Articles Max"
+    },
     
     "gxp.plugins.ArcGISCacheSource.prototype": {
-        noLayersTitle: "Aucune couche ArcGIS n'a été trouvée.",
-        noLayersText: " Aucune couche avec une projection compatible (Web Mercator) n'a été trouvée. "
+        noLayersTitle: "No ArcGIS Layers",
+        noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at "
     },    
     
     "gxp.plugins.ArcRestSource.prototype": {
-        noLayersTitle: "Aucune couche ArcGIS n'a été trouvée.",
-        noLayersText: "Aucune couche avec une projection compatible (Web Mercator) n'a été trouvée à "
+        noLayersTitle: "No ArcGIS Layers",
+        noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at "
     },
     
     "gxp.plugins.MapShare.prototype": { 
-    	text: "Partager cette carte",
-    	toolTip: "Informations sur cette carte et les liens de téléchargement"
+    	text: "Share Map",
+    	toolTip: "Map info and download links"
     },
     
     "gxp.plugins.AnnotationTool.prototype": {
-        errorTitle: "Une erreur s'est produite lors de la création de l'annotation.",
+        errorTitle: "Error creating annotation",
         noteText: "Note",        
         notesText: "Notes",
-        showNotesText: "Montrer les notes",
-        editNotesText: "Rédiger les notes",       
-        addNoteText: "Ajouter une note",        
-        newNoteText: "Nouvelle note",
+        showNotesText: "Show notes",
+        editNotesText: "Edit notes",       
+        addNoteText: "Add note",        
+        newNoteText: "New note",
         projection: "EPSG:4326",
         pointText: "Point",
-        lineText: "Ligne",
-        polygonText: "Forme",
-        saveFailTitle: "L'enregistrement de la note a échoué",
-        saveFailText: "La modification a échoué. Vous n'avez peut-être pas les autorisations pour sauvegarder cette note.",        
-        saveText: "Sauvegarder",        
-        editText: "Rédiger",       
-        deleteText: "Supprimer",        
-        cancelText: "Annuler",        
-        titleText: "Titre"
+        lineText: "Line",
+        polygonText: "Shape",
+        saveFailTitle: "Could not save note",
+        saveFailText: "Edit failed.  You might not have permission to save this note.",        
+        saveText: "Save",        
+        editText: "Edit",       
+        deleteText: "Delete",        
+        cancelText: "Cancel",        
+        titleText: "Title"
     },
     
     "gxp.SearchBar.prototype": {
-    	emptyText: 'Chercher...',
-    	searchText: 'Chercher',
-    	noSearchableLayersTitle: 'Aucune couche ne peut être intérroger.',
-    	noSearchableLayersMsg: "Il n'y a pas de couche interrogeable dans cette carte. Vous devez avoir au moins une couche visible avec des champs interrogeable dans la carte.",
-    	searchTermTitle: "Terme à rechercher obligatoire.", 
-    	searchTermText: "Veuillez entrer un terme à rechercher.",
-    	resetText: "Réinitialiser"
+    	emptyText: 'Enter search...',
+    	searchText: 'Search',
+    	noSearchableLayersTitle: 'No Searchable Layers',
+    	noSearchableLayersMsg: 'There are currently no searchable layers on the map.  You must have at least one visible layer with searchable fields on the map.',
+    	searchTermTitle: "Search Term Required", 
+    	searchTermText: "Please enter a search term",
+    	resetText: "Reset"
     },
     
     "gxp.plugins.PrintPage.prototype": {
-        menuText: "Imprimer la carte",
-        tooltip: "Imprimer la carte",
-        buttonText: "Imprimer"
+        menuText: "Print Map",
+        tooltip: "Print Map",
+        buttonText: "Print"
     },
     
     "gxp.plugins.CoordinateTool.prototype": {
-        title: "Coordonnées de la carte (longitude, latitude)",
-        infoActionTip: "Prendre les coordonnées de la position de la souris",
-        coordinatePositionText: "Position des coordonnées"
+        title: "Map Coordinates (longitude, latitude)",
+        infoActionTip: "Get coordinates at the mouse position",
+        coordinatePositionText: "CoordinatePosition"
     },
     
     "gxp.plugins.FeedSource.prototype": {
-        title: "Source d'alimentation"
+        title: 'Feed Source'
     },
     
     "gxp.plugins.HGLSource.prototype": {
-        title: "Bibliothèque géospatiale d'Harvard"
+        title: 'Harvard Geospatial Library Source'
     },
     
     "gxp.plugins.HGLFeedSource.prototype" : {
-        title: "Source d'alimentation HGL "
+        title: 'HGL Feed Source'
     },
     
     "gxp.plugins.PicasaFeedSource.prototype" : {
-        title: 'Picasa'
+        title: 'Picasa Source'
     },
     
     "gxp.plugins.YouTubeFeedSource.prototype" : {
-        title: 'YouTube'
+        title: 'YouTube Source'
     },
     
     "gxp.plugins.GeoLocator.prototype": {
-        infoActionTip: "Trouver mon emplacement",
-        locationFailedText: "Détection de l'emplacement a échoué"
+        infoActionTip: "Get My Location",
+        locationFailedText: "Location detection failed"
     },
     
     "gxp.plugins.LayerShare.prototype": {
-        menuText: "Partager cette couche",
-        toolTip: "Informations de la couche et les liens de téléchargement"
+        menuText: "Share Layer",
+        toolTip: "Layer info and download links"
     },
 
     "gxp.plugins.MapShare.prototype": {
-        text: "Partager ma carte",
-        toolTip: "Informations de la carte et les liens de téléchargement"
+        text: "Share My Map",
+        toolTip: "Map info and download links"
     },    
 
     "gxp.plugins.AddCategory.prototype": {
-        addCategoryMenuText:"Ajouter une catégorie",
-        addCategoryActionTipText:"Ajouter une catégorie à la hiérarchie des couches",
-        categoryNameText: "Nom de la catégorie:"
+        addCategoryMenuText:"Add Category",
+        addCategoryActionTipText:"Add a category to the layer tree",
+        categoryNameText: "Category name:"
     },    
     
     "gxp.plugins.RemoveCategory.prototype": {
-    	removeCategoryActionText:"Supprimer la catégorie",
-    	removeCategoryActionTipText: "Supprimer cette catégorie et toutes ses couches de la carte",
-    	cannotRemoveText: " Cette catégorie ne peut pas être supprimée."
+    	removeCategoryActionText:"Remove Category",
+    	removeCategoryActionTipText: "Remove this category and all its layers from the map",
+    	cannotRemoveText: "This category cannot be removed"
     },
     
     "gxp.plugins.RenameCategory.prototype": {
-        renameCategoryActionText:"Modifier le nom de la catégorie",
-        renameCategoryActionTipText:"Changer le nom de la catégorie",
-        cannotRenameText: "Vous n'êtes pas autorisé à changer le nom de cette catégorie"
+        renameCategoryActionText:"Rename Category",
+        renameCategoryActionTipText:"Give this category a new name",
+        cannotRenameText: "This category cannot be renamed"
     },
     
     "gxp.LinkEmbedMapDialog.prototype": {
-    	linkMessage: 'Veuillez copier-coller ce lien dans un email'
+    	linkMessage: 'Paste link in email or IM'
     },    
     
     "gxp.plugins.GeoNodeQueryTool.prototype" : {
-        infoActionTip: "Voir les informations de la caractéristique",
-        popupTitle: "Infos caractéristique",
-        resetTitle: "Réinitialiser",
-        resetToolTipText: " Enlever les caractéristiques"
+        infoActionTip: "Get Feature Info",
+        popupTitle: "Feature Info",
+        resetTitle: "Reset",
+        resetToolTipText: " Clear all features"
     },
     
     "gxp.plugins.MapRevisionTool.prototype" : {
-    	infoActionTip: 'Voir la liste des modifications de cette carte',
-    	toolText: 'Modifications',
-    	windowTitle: "Historique des modifications de la carte"
+    	infoActionTip: 'View a list of map revisions',
+    	toolText: 'Revisions',
+    	windowTitle: "Map Revision History"
     },
     
     "gxp.plugins.GazetteerTool.prototype" : {
-        infoActionTip: "Entrer le nom d'un lieu à localiser",
-        toolText: 'Index géographique',
-        searchingText: 'Cherche en cours...',
-        fromText: 'De: YYYY-MM-JJ',
-        toText: 'A: YYYY-MM-JJ',
+        infoActionTip: 'Enter a place name to search for',
+        toolText: 'Gazetteer',
+        searchingText: 'Searching...',
+        fromText: 'From: YYYY-MM-DD',
+        toText: 'To: YYYY-MM-DD',
         datesText: 'Dates',
-        geocodersText: 'Géocodes', 
-        advancedText: 'Avancé',
+        geocodersText: 'Geocoders', 
+        advancedText: 'Advanced',
         sourceText: 'Source',
-        startDateText: 'A partir de',
-        endDateText: 'Date de fin',  	
-        placenameText: 'Nom de lieu',
-        coordinatesText: 'Coordonnées'  	
+        startDateText: 'Start Date',
+        endDateText: 'End Date',  	
+        placenameText: 'Place name',
+        coordinatesText: 'Coordinates'  	
     },
     
-    "gxp.plugins.StreetViewTool.prototype" : {
-    	toolText: "Street View",
+    "gxp.plugins.StreetViewTool.js" : {
+    	toolText: "Google Street View",
     	streetViewTitle: "Google Street View",  	
-    	infoActionTip: "Cliquez sur la carte pour voir Google Street View"
+    	infoActionTip: "Click on the map to see Google Street View"
     }
 });

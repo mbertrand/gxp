@@ -21,30 +21,6 @@
  */
 Ext.namespace("gxp.plugins");
 
-
-OpenLayers.Layer.Bing.prototype.loadMetadata = function() {
-    this._callbackId = "_callback_" + this.id.replace(/\./g, "_");
-    // link the processMetadata method to the global scope and bind it
-    // to this instance
-    window[this._callbackId] = OpenLayers.Function.bind(
-        OpenLayers.Layer.Bing.processMetadata, this
-    );
-    var params = OpenLayers.Util.applyDefaults({
-        key: this.key,
-        jsonp: this._callbackId,
-        include: "ImageryProviders"
-    }, this.metadataParams);
-    var url = window.location.protocol  +
-        "//dev.virtualearth.net/REST/v1/Imagery/Metadata/" +
-        this.type + "?" + OpenLayers.Util.getParameterString(params);
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = url;
-    script.id = this._callbackId;
-    document.getElementsByTagName("head")[0].appendChild(script);
-};
-
-
 /** api: constructor
  *  .. class:: BingSource(config)
  *

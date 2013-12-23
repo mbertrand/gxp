@@ -33,6 +33,44 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
     /** api: ptype = gxp_geonodecataloguesource */
     ptype: "gxp_geonodecataloguesource",
 
+    /** api: config[rootProperty]
+     *  ``String`` Root property in the JSON response. Defaults to 'results'.
+     */
+    rootProperty: 'results',
+
+    /** api: config[baseParams]
+     *  ``Object`` Optional additional params to send in the requests.
+     */
+    baseParams: null,
+
+    /** api: config[fields]
+     *  ``Array`` Fields to use for the JsonReader. By default the following
+     *  fields are provided: title, abstract, bounds and URI. Optionally this 
+     *  can be overridden by applications to provide different or additional
+     *  mappings.
+     */
+    fields: [
+        {name: "title", convert: function(v) {
+            return [v];
+        }},
+        {name: "abstract", mapping: "description"},
+        {name: "bounds", mapping: "bbox", convert: function(v) {
+            return {
+                left: v.minx,
+                right: v.maxx,
+                bottom: v.miny,
+                top: v.maxy
+            };
+        }},
+        {name: "URI", mapping: "links", convert: function(v) {
+            var result = [];
+            for (var key in v) {
+                result.push({value: v[key].url});
+            }
+            return result;
+        }}
+    ],
+
     /** api: method[createStore]
      *  Create the store that will be used for the GeoNode searches.
      */
@@ -42,32 +80,12 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
                 url: this.url, 
                 method: 'GET'
             }, this.proxyOptions || {})),
-            baseParams: {
+            baseParams: Ext.apply({
                 type: 'layer'
-            },
+            }, this.baseParams),
             reader: new Ext.data.JsonReader({
-                root: 'results'
-            }, [
-                {name: "title", convert: function(v) {
-                    return [v];
-                }},
-                {name: "abstract", mapping: "description"},
-                {name: "bounds", mapping: "bbox", convert: function(v) {
-                    return {
-                        left: v.minx,
-                        right: v.maxx,
-                        bottom: v.miny,
-                        top: v.maxy
-                    };
-                }},
-                {name: "URI", mapping: "download_links", convert: function(v) {
-                    var result = [];
-                    for (var i=0,ii=v.length;i<ii;++i) {
-                        result.push(v[i][3]);
-                    }
-                    return result;
-                }}
-            ])
+                root: this.rootProperty
+            }, this.fields)
         });
         gxp.plugins.LayerSource.prototype.createStore.apply(this, arguments);
     },
@@ -100,17 +118,25 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
      */
     filter: function(options) {
         var bbox = undefined;
-        for (var i=0, ii=options.filters.length; i<ii; ++i) {
-            var f = options.filters[i];
-            if (f instanceof OpenLayers.Filter.Spatial) {
-                bbox = f.value.toBBOX();
-                break;
+
+        // check for the filters property before using it
+        if (options.filters !== undefined) {
+            for (var i=0, ii=options.filters.length; i<ii; ++i) {
+                var f = options.filters[i];
+                if (f instanceof OpenLayers.Filter.Spatial) {
+                    bbox = f.value.toBBOX();
+                    break;
+                }
             }
         }
         Ext.apply(this.store.baseParams, {
-            'q': options.queryString,
-            'limit': options.limit
+            'q': options.queryString
         });
+        if (options.limit !== undefined) {
+            Ext.apply(this.store.baseParams, {
+                'limit': options.limit
+            });
+        }
         if (bbox !== undefined) {
             Ext.apply(this.store.baseParams, {
                 'bbox': bbox
@@ -119,6 +145,12 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
             delete this.store.baseParams.bbox;
         }
         this.store.load();
+    },
+
+    createLayerRecord: function(layerConfig) {
+        layerConfig.restUrl = this.restUrl;
+        layerConfig.queryable = true;
+        return gxp.plugins.GeoNodeCatalogueSource.superclass.createLayerRecord.apply(this, arguments);
     }
 
 });

@@ -50,7 +50,7 @@ gxp.plugins.ArcGISCacheSource = Ext.extend(gxp.plugins.ArcRestSource, {
      *  loaded.  Fires the "ready" event when the store is loaded.
      */
     createStore:function () {
-        var baseUrl = this.url.split("?")[0].replace(/https?:/,window.location.protocol);
+        var baseUrl = this.url.split("?")[0];
         var source = this;
 
         var processResult = function (response) {

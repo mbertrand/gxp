@@ -21,7 +21,9 @@ GeoExt.Lang.add("id", {
         layerSelectionText: "Source:",
         sourceSelectOrTypeText: "Choose one or type service URL",
         doneText: "Selesai",
-        uploadText: "Unggah data"
+        uploadText: "Unggah data",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -36,7 +38,9 @@ GeoExt.Lang.add("id", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Membuat sebuah fitur",
-        editFeatureActionTip: "Edit fitur"
+        editFeatureActionTip: "Edit fitur",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -127,7 +131,7 @@ GeoExt.Lang.add("id", {
 
     "gxp.plugins.OSMSource.prototype": {
         title: "OpenStreetMap Layers",
-        mapnikAttribution: "Data CC-By-SA by <a href='http://openstreetmap.org/'>OpenStreetMap</a>",
+        mapnikAttribution: "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
         osmarenderAttribution: "Data CC-By-SA by <a href='http://openstreetmap.org/'>OpenStreetMap</a>"
     },
 
@@ -320,9 +324,19 @@ GeoExt.Lang.add("id", {
         transparentText: "Transparent",
         cacheText: "Cache",
         cacheFieldText: "Menggunakan versi cached",
-        stylesText: "Styles",
+        stylesText: "Styles tersedia",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Select a format"
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -371,6 +385,8 @@ GeoExt.Lang.add("id", {
         fileLabel: "Data",
         fieldEmptyText: "Pencarian arsip data...",
         uploadText: "Pengisian",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Mengisi Data anda...",
         invalidFileExtensionText: "Ekstensi file harus salah satu: ",
         optionsText: "Pilihan",
@@ -391,6 +407,24 @@ GeoExt.Lang.add("id", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Zoom level"
+    },
+
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Sumber",
+        addPicasaText: "Picasa Foto",
+        addYouTubeText: "YouTube Video",
+        addRSSText: "GeoRSS Pakan lain",
+        addFeedText: "Tambah ke Peta",
+        addTitleText: "Judul",
+        keywordText: "Kata Kunci",
+        doneText: "Selesai",
+        titleText: "Tambah Blog",
+        maxResultsText: "Produk Max"
     },
     
     "gxp.plugins.ArcGISCacheSource.prototype": {

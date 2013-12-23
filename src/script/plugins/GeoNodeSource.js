@@ -58,7 +58,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
         if (config['llbbox']) {
 
-            this.url = config.url.replace(/https?:/,window.location.protocol);
+            this.url = config.url;
 
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
@@ -114,7 +114,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
             );
 
 
-            if (!("tiled" in config) || config.tiled === true) {
+            if ("tiled" in config && config.tiled == true) {
 
                 var tileWidth = config['tileWidth'] || 256;
                 var tileHeight = config['tileHeight'] || 256;
