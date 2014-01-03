@@ -17,6 +17,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
     classifyText: "Classify",
     rampBlueText: "Blue",
     rampRedText: "Red",
+    rampOrangeText: "Orange",
     rampJetText: "Blue-Red",
     rampGrayText: "Gray",
     rampRandomText: "Random",
@@ -124,6 +125,7 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
                 data: [
                     ['Blue',this.rampBlueText],
                     ['Red', this.rampRedText],
+                    ['Orange', this.rampOrangeText],
                     ['Jet', this.rampJetText],
                     ['Gray', this.rampGrayText],
                     ['Random', this.rampRandomText],
@@ -139,11 +141,38 @@ gxp.ClassificationPanel = Ext.extend(Ext.Panel, {
             disabled: false,
             listeners: {
                 'select': function(cmb, data, idx) {
-
                     //If Custom: display start, end, middle color picker;
                     colorPanel.setVisible(cmb.value == "Custom");
-                    this.rulePanel.rule[cmb.name] = cmb.value;
-                    //this.rulePanel.fireEvent("change", this.rulePanel, this.rulePanel.rule);
+
+                    switch(cmb.value) {
+                        case "Blue":
+                            this.rulePanel.rule["color_start"] = "#f7fbff";
+                            this.rulePanel.rule["color_end"] = "#08306b";
+                            //this.rulePanel.rule["color_mid"] = "#fd8d3c";
+                            this.rulePanel.rule[cmb.name] = "Custom";
+                            break;
+                        case "Red":
+                            this.rulePanel.rule["color_start"] = "#fff5f0";
+                            this.rulePanel.rule["color_end"] = "#67000d";
+                            //this.rulePanel.rule["color_mid"] = "";
+                            this.rulePanel.rule[cmb.name] = "Custom";
+                            break;
+                        case "Orange":
+                            this.rulePanel.rule["color_start"] = "#fff5eb";
+                            this.rulePanel.rule["color_end"] = "#f16913";
+                            //this.rulePanel.rule["color_mid"] = "";
+                            this.rulePanel.rule[cmb.name] = "Custom";
+                            break;
+                        case "Jet":
+                            //this.rulePanel.rule["color_start"] = "#5e4fa2";
+                            //this.rulePanel.rule["color_end"] = "#9e0142";
+                            //this.rulePanel.rule["color_mid"] = "#ffffbf";
+                            this.rulePanel.rule[cmb.name] = "Jet";
+                            break;
+                        default:
+                            this.rulePanel.rule["color_mid"] = "";
+                            this.rulePanel.rule[cmb.name] = cmb.value;
+                    }
 
                 },
                 scope: this
