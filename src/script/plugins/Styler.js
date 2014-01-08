@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -27,43 +27,43 @@ Ext.namespace("gxp.plugins");
  *    Plugin providing a styles editing dialog for geoserver layers.
  */
 gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
-    
+
     /** api: ptype = gxp_styler */
     ptype: "gxp_styler",
-    
+
     /** api: config[menuText]
      *  ``String``
      *  Text for layer properties menu item (i18n).
      */
-    menuText: "Edit Styles",
+    menuText: "Styles",
 
     /** api: config[tooltip]
      *  ``String``
      *  Text for layer properties action tooltip (i18n).
      */
     tooltip: "Manage layer styles",
-    
+
     /** api: config[roles]
      *  ``Array`` Roles authorized to style layers. Default is
      *  ["ROLE_ADMINISTRATOR"]
      */
     roles: ["ROLE_ADMINISTRATOR"],
-    
+
     /** api: config[sameOriginStyling]
      *  ``Boolean``
      *  Only allow editing of styles for layers whose sources have a URL that
-     *  matches the origin of this applicaiton.  It is strongly discouraged to 
+     *  matches the origin of this applicaiton.  It is strongly discouraged to
      *  do styling through commonly used proxies as all authorization headers
      *  and cookies are shared with all remote sources.  Default is ``true``.
      */
     sameOriginStyling: true,
-    
+
     /** api: config[rasterStyling]
      *  ``Boolean`` If set to true, single-band raster styling will be
      *  supported. Default is ``false``.
      */
     rasterStyling: false,
-    
+
     /** api: config[requireDescribeLayer]
      *  ``Boolean`` If set to false, styling will be enabled for all WMS layers
      *  that have "/ows" or "/wms" at the end of their base url in case the WMS
@@ -71,10 +71,12 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
      *  set to true. Default is true.
      */
     requireDescribeLayer: true,
-    
+
+    editable: false,
+
     constructor: function(config) {
         gxp.plugins.Styler.superclass.constructor.apply(this, arguments);
-        
+
         if (!this.outputConfig) {
             this.outputConfig = {
                 autoHeight: true,
@@ -109,7 +111,7 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
             this.handleLayerChange(this.target.selectedLayer);
         }
     },
-    
+
     /** api: method[addActions]
      */
     addActions: function() {
@@ -124,16 +126,16 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
             },
             scope: this
         }]);
-        
+
         this.launchAction = actions[0];
         this.target.on({
             layerselectionchange: this.handleLayerChange,
             scope: this
         });
-        
+
         return actions;
     },
-    
+
     /** private: method[handleLayerChange]
      *  :arg record: ``GeoExt.data.LayerRecord``
      *
@@ -153,11 +155,11 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
 
     /** private: method[checkIfStyleable]
      *  :arg layerRec: ``GeoExt.data.LayerRecord``
-     *  :arg describeRec: ``Ext.data.Record`` Record from a 
+     *  :arg describeRec: ``Ext.data.Record`` Record from a
      *      `GeoExt.data.DescribeLayerStore``.
      *
-     *  Given a layer record and the corresponding describe layer record, 
-     *  determine if the target layer can be styled.  If so, enable the launch 
+     *  Given a layer record and the corresponding describe layer record,
+     *  determine if the target layer can be styled.  If so, enable the launch
      *  action.
      */
     checkIfStyleable: function(layerRec, describeRec) {
@@ -185,43 +187,35 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
                 editableStyles = url.charAt(0) === "/";
                 // and assume that local sources are GeoServer instances with
                 // styling capabilities
-                if (this.target.authenticate && editableStyles) {
-                    // we'll do on-demand authentication when the button is
-                    // pressed.
-                    this.launchAction.enable();
+                if (editableStyles) {
+                    this.enableEditingIfAuthorized(layerRec, url);
                     return;
                 }
             } else {
                 editableStyles = true;
-            }
-            if (editableStyles) {
-                if (this.target.isAuthorized()) {
-                    // check if service is available
-                    this.enableActionIfAvailable(url);
-                }
+                this.enableEditingIfAuthorized(layerRec, url);
             }
         }
     },
-    
+
     /** private: method[enableActionIfAvailable]
      *  :arg url: ``String`` URL of style service
-     * 
+     *
      *  Enable the launch action if the service is available.
      */
-    enableActionIfAvailable: function(url) {
+    enableEditingIfAuthorized: function(layerRec, url) {
         Ext.Ajax.request({
             method: "PUT",
-            url: url,
-            params: {"empty":"filler"},
+            url:"/data/" + layerRec.getLayer().params.LAYERS + "/ajax-edit-check",
             callback: function(options, success, response) {
-                // we expect a 405 error code here if we are dealing
-                // with GeoServer and have write access.
-                this.launchAction.setDisabled(response.status !== 405);                        
+                this.editable = (response.status == 200);
+                this.launchAction.enable();
             },
             scope: this
         });
+
     },
-    
+
     addOutput: function(config) {
         config = config || {};
         var record = this.target.selectedLayer;
@@ -234,11 +228,12 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
         Ext.apply(config, gxp.WMSStylesDialog.createGeoServerStylerConfig(record));
         if (this.rasterStyling === true) {
             config.plugins.push({
-                ptype: "gxp_wmsrasterstylesdialog"
+                ptype: "gxp_wmsrasterstylesdialog",
+                editable: this.editable
             });
         }
-        Ext.applyIf(config, {style: "padding: 10px"});
-        
+        Ext.applyIf(config, {style: "padding: 10px", editable: this.editable});
+
         var output = gxp.plugins.Styler.superclass.addOutput.call(this, config);
         if (!(output.ownerCt.ownerCt instanceof Ext.Window)) {
             output.dialogCls = Ext.Panel;
@@ -254,7 +249,7 @@ gxp.plugins.Styler = Ext.extend(gxp.plugins.Tool, {
             }
         });
     }
-        
+
 });
 
 Ext.preg(gxp.plugins.Styler.prototype.ptype, gxp.plugins.Styler);

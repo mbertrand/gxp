@@ -427,7 +427,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                     userStyle: userStyle.clone(),
                     nameEditable: false,
                     style: "padding: 10px;",
-                    classifyEnabled: this.classifyEnabled && !this.isRaster
+                    classifyEnabled: this.classifyEnabled && !this.isRaster && this.editable
                 }
             },
             listeners:{
@@ -927,7 +927,12 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             this.stylesStoreReady();
             layerParams.SLD_BODY && this.markModified();
 
-            this.enableClassification();
+            if (this.editable) {
+                // check if service is available
+                this.enableClassification();
+            } else {
+                this.setupNonEditable();
+            }
         }
         catch (e) {
             this.setupNonEditable();
@@ -952,12 +957,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
         this.editable = false;
         // disable styles toolbar
         this.items.get(1).hide();
-//        var rulesFieldSet = this.getComponent("rulesfieldset") ||
-//            this.addRulesFieldSet();
-//        rulesFieldSet.add(this.createLegendImage());
         this.doLayout();
-//        this.items.get(3).hide();
-//        this.stylesStoreReady();
     },
 
     /** private: method[stylesStoreReady]
@@ -1082,9 +1082,7 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             callback:callback,
             scope:this
         });
-        if (this.editable !== true) {
-            this.setupNonEditable();
-        }
+
     },
 
     enableClassification: function () {
@@ -1442,5 +1440,3 @@ OpenLayers.Renderer.defaultSymbolizer = {
 
 /** api: xtype = gxp_wmsstylesdialog */
 Ext.reg('gxp_wmsstylesdialog', gxp.WMSStylesDialog);
-
-
