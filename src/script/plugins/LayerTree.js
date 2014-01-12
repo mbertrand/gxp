@@ -145,7 +145,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     addOutput: function(config) {
         config = Ext.apply(this.createOutputConfig(), config || {});
         this.tree = gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
-        this.tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});
+        if (this.tree.body) {
+            this.tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});
+        }
         return this.tree;
     },
 
