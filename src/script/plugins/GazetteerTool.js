@@ -134,7 +134,7 @@ gxp.plugins.GazetteerTool = Ext.extend(gxp.plugins.Tool, {
                 items: [
                     this.startDateField,
                     this.endDateField
-                    ]
+                ]
             }
         };
 
@@ -175,7 +175,7 @@ gxp.plugins.GazetteerTool = Ext.extend(gxp.plugins.Tool, {
             {name: 'start_date'},
             {name: 'end_date'},
             {name: 'gazetteer_id'}
-            ]
+        ]
         );
 
         // data store proxy
@@ -260,8 +260,10 @@ gxp.plugins.GazetteerTool = Ext.extend(gxp.plugins.Tool, {
                 {header: 'Place Name', width:200, dataIndex: 'placename', sortable: true},
                 {header: 'Coordinates', width:100, dataIndex: 'coordinates', sortable: false,
                     renderer: function(value) {
-                        // your logic here
-                        return value[0].toFixed(2) + ', ' + value[1].toFixed(2);
+                        if (value.lat)
+                            return value.lat.toFixed(2) + ', ' + value.lon.toFixed(2);
+                        else
+                            return value[0].toFixed(2) + ', ' + value[1].toFixed(2);
                     }
                 },
                 {header: 'Source', width:200, dataIndex: 'source', sortable: true},
@@ -321,8 +323,8 @@ gxp.plugins.GazetteerTool = Ext.extend(gxp.plugins.Tool, {
                 id: this.id,
                 text: this.toolText,
                 handler: function() {
-                        gazetteerWindow.show();
-                        map.addLayer(markers);
+                    gazetteerWindow.show();
+                    map.addLayer(markers);
 
                 }
             }
@@ -336,17 +338,17 @@ gxp.plugins.GazetteerTool = Ext.extend(gxp.plugins.Tool, {
     //Query gazetteer & geocoders for placenames
     performSearch: function() {
 
-    this.gazetteerDataStore.proxy.conn.url = '/gazetteer/' + this.searchTB.getValue() + '/Service/' + this.services
-        + (this.startDateField.getValue() && this.startDateField.getValue() !== '' ? '/StartDate/' + this.startDateField.getValue(): '')
-        + (this.endDateField.getValue() && this.endDateField.getValue() !== '' ? '/EndDate/' + this.endDateField.getValue(): '');
+        this.gazetteerDataStore.proxy.conn.url = '/gazetteer/' + this.searchTB.getValue() + '/Service/' + this.services
+            + (this.startDateField.getValue() && this.startDateField.getValue() !== '' ? '/StartDate/' + this.startDateField.getValue(): '')
+            + (this.endDateField.getValue() && this.endDateField.getValue() !== '' ? '/EndDate/' + this.endDateField.getValue(): '');
 
-    if (this.firstLoad === true)
-    {
-        this.gazetteerDataStore.load();
-        this.firstLoad = false;
-    }
-    else
-        this.gazetteerDataStore.reload();
+        if (this.firstLoad === true)
+        {
+            this.gazetteerDataStore.load();
+            this.firstLoad = false;
+        }
+        else
+            this.gazetteerDataStore.reload();
     }
 
 });
