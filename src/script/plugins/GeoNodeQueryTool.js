@@ -470,7 +470,7 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                                                     }
                                                 }
                                                 else {
-                                                    var featureInfo = new OpenLayers.Format.GML().read(evt.text);
+                                                    var featureInfo = evt.features;
 
                                                     if (featureInfo && featureInfo.length > 0) {
                                                         if (featureInfo.constructor != Array) {
@@ -494,7 +494,8 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                                                             var feature = featureInfo[f];
 
 
-                                                            var featureBounds = feature.geometry.getBounds();
+                                                            var featureBounds = feature.geometry ?
+                                                                feature.geometry.getBounds() : feature.bounds;
                                                             //console.log('featureBounds:' + featureBounds.toBBOX());
                                                             var wgs84Bounds = new OpenLayers.Bounds(-180, -90, 180, 90);
 
