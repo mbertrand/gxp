@@ -94,6 +94,21 @@ Ext.namespace("gxp.plugins");
  *        group: "background"
  *    }
  *
+ * An optional 'getFeatureInfo' property can also be passed to
+ * customize the sort order, visibility, & labels for layer attributes.
+ * A sample 'getFeatureInfo' configuration would look like this:
+ *
+ *  .. code-block:: javascript
+ *
+ *    {
+ *        fields: ["twn_name","pop1990"]
+ *        propertyNames: {"pop1990": "1990 Population",  "twn_name": "Town"}
+ *    }
+ *
+ *  Within the 'getFeatureInfo' configuration, the 'fields' property determines sort
+ *  order & visibility (any attributes not included are not displayed) and
+ *  'propertyNames'  specifies the labels for the attributes.
+ *
  *  For initial programmatic layer configurations, to leverage lazy loading of
  *  the Capabilities document, it is recommended to configure layers with the
  *  fields listed in :obj:`requiredProperties`.
@@ -201,8 +216,12 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      *  Reload the store when the authorization changes.
      */
     onAuthorizationChange: function() {
-        if (this.store && this.store.url.charAt(0) === "/") {
-            this.store.reload();
+        if (this.store && this.url.charAt(0) === "/") {
+            var lastOptions = this.store.lastOptions || {params: {}};
+            Ext.apply(lastOptions.params, {
+                '_dc': Math.random()
+            });
+            this.store.reload(lastOptions);
         }
     },
 
@@ -223,14 +242,12 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     isLazy: function() {
         var lazy = true;
-        var sourceFound = false;
         var mapConfig = this.target.initialConfig.map;
         if (mapConfig && mapConfig.layers) {
             var layerConfig;
             for (var i=0, ii=mapConfig.layers.length; i<ii; ++i) {
                 layerConfig = mapConfig.layers[i];
                 if (layerConfig.source === this.id) {
-                    sourceFound = true;
                     lazy = this.layerConfigComplete(layerConfig);
                     if (lazy === false) {
                         break;
@@ -238,7 +255,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 }
             }
         }
-        return (lazy && sourceFound);
+        return (lazy);
     },
 
     /** private: method[layerConfigComplete]
@@ -474,7 +491,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             //Update the source url if different from the layer url
             if (layer.url !== this.store.url)
             	this.store.url = this.url = this.trimUrl(layer.url);
-            	
+
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
              * of layers in different SRS.
