@@ -76,15 +76,28 @@ gxp.plugins.LayerShare = Ext.extend(gxp.plugins.Tool, {
         var layerShareAction = actions[0];
 
         this.target.on("layerselectionchange", function(record) {
+            var remote=null;
+            if (record){
+                if (record.get("source_params")) {
+                    remote = record.get("source_params").name;
+                }
+                else {
+                    var store = this.target.sources[record.get("source")];
+                    if ("name" in store){
+                        remote = store.name;
+                    }
+                }
+            }
+
             layerShareAction.setDisabled(
-                !record || !record.get("properties") ||
+                !record || !record.get("properties") || (!remote &&
                     record.getLayer().url.replace(
-                        this.target.urlPortRegEx, "$1/").indexOf(
-                        this.target.localGeoServerBaseUrl.replace(
-                            this.urlPortRegEx, "$1/")) !== 0
+                            this.target.urlPortRegEx, "$1/").indexOf(
+                            this.target.localGeoServerBaseUrl.replace(
+                                this.urlPortRegEx, "$1/")) !== 0)
             );
             if (!layerShareAction.isDisabled()) {
-                this.link = this.linkPrefix + record.getLayer().params.LAYERS;
+                this.link = this.linkPrefix + (remote? remote + ":" : "") + record.getLayer().params.LAYERS;
             }
 
         }, this);
