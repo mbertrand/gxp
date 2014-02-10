@@ -280,11 +280,32 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
 
         var  record = new GeoExt.data.LayerRecord(config);
         record.set("name", config.name);
-        record.set("layerid", config.layerid || "show:0");
+        if (config.layerid)
+            record.set("layerid", config.layerid || "show:0");
+        else
+            record.set("layerid", "show:" + config.name);
+        record.set("title", config.title);
         record.set("format", config.format || "png");
         record.set("tiled", "tiled" in config ? config.tiled : true);
 
-        record.setLayer(new OpenLayers.Layer.ArcGIS93Rest(config.name,  this.url.split("?")[0] + "/export",
+
+
+        var maxExtent;
+        var llbbox = config.llbbox;
+        if (llbbox) {
+                var extent = OpenLayers.Bounds.fromArray(llbbox).transform("EPSG:4326", srs);
+                // make sure maxExtent is valid (transform does not succeed for all llbbox)
+                if ((1 / extent.getHeight() > 0) && (1 / extent.getWidth() > 0)) {
+                    // maxExtent has infinite or non-numeric width or height
+                    // in this case, the map maxExtent must be specified in the config
+                    maxExtent = extent;
+                }
+        }
+
+
+
+
+        record.setLayer(new OpenLayers.Layer.ArcGIS93Rest(config.title || config.name,  this.url.split("?")[0] + "/export",
             {
                 layers: config.layerid,
                 TRANSPARENT:true,
@@ -295,7 +316,10 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                 displayInLayerSwitcher:true,
                 projection:srs,
                 singleTile: "tiled" in config ? !config.tiled : false,
-                queryable: "queryable" in config ? config.queryable : false}
+                queryable: "queryable" in config ? config.queryable : false,
+                maxExtent: maxExtent,
+                restrictedExtent: maxExtent
+            }
         )
         );
         return record;
