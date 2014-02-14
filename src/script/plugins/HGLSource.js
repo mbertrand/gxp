@@ -39,6 +39,7 @@ gxp.plugins.HGLSource = Ext.extend(gxp.plugins.WMSSource, {
      */
     url: null,
 
+
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -46,7 +47,16 @@ gxp.plugins.HGLSource = Ext.extend(gxp.plugins.WMSSource, {
      *  Create a layer record given the config.
      */
     createLayerRecord: function(config) {
-        //HGL Feed doesn't include bboxes, so just make global bbox
+        //Tell HGL to load the layer
+        Ext.Ajax.request({
+            url:"/hglServiceStarter/" + config.name,
+            timeout: 10,
+            params:{'layer':config.name},
+            method:'POST'
+        });
+
+
+        //HGL doesn't include bboxes, so just make global bbox
         config.bbox = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
         var llbbox = config.llbbox;
         var maxExtent;
@@ -63,7 +73,6 @@ gxp.plugins.HGLSource = Ext.extend(gxp.plugins.WMSSource, {
 
 
         var record = gxp.plugins.HGLSource.superclass.createLayerRecord.apply(this, arguments);
-
 
         record.get("layer").addOptions({
             restrictedExtent: maxExtent

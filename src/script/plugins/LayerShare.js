@@ -97,7 +97,12 @@ gxp.plugins.LayerShare = Ext.extend(gxp.plugins.Tool, {
                                 this.urlPortRegEx, "$1/")) !== 0)
             );
             if (!layerShareAction.isDisabled()) {
-                this.link = this.linkPrefix + (remote? remote + ":" : "") + record.getLayer().params.LAYERS;
+                var layerid = record.getLayer().params.LAYERS;
+                if (record.getLayer() instanceof OpenLayers.Layer.ArcGIS93Rest) {
+                    layerid = layerid.replace("show:","");
+                }
+
+                this.link = this.linkPrefix + (remote? remote + ":" : "") + layerid;
             }
 
         }, this);
