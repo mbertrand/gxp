@@ -549,7 +549,6 @@ gxp.Viewer = Ext.extend(Ext.util.Observable, {
 
     addLayers: function() {
         var mapConfig = this.initialConfig.map;
-        var selectedBackground = 0;
         if(mapConfig && mapConfig.layers) {
             var conf, source, record, baseRecords = [], overlayRecords = [];
             for (var i=0; i<mapConfig.layers.length; ++i) {

@@ -490,7 +490,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
 
             //Update the source url if different from the layer url
             if (layer.url !== this.store.url)
-            	this.store.url = this.url = this.trimUrl(layer.url);
+                this.store.url = this.url = this.trimUrl(layer.url);
 
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
@@ -528,7 +528,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 TRANSPARENT: config.transparent,
                 CQL_FILTER: config.cql_filter
             });
-            
+
             var singleTile = false;
             if ("tiled" in config) {
                 singleTile = !config.tiled;
@@ -554,7 +554,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 minScale: config.minscale,
                 maxScale: config.maxscale
             });
-            
+
             // data for the new record
             var data = Ext.applyIf({
                 title: layer.name,

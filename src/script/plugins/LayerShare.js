@@ -83,8 +83,8 @@ gxp.plugins.LayerShare = Ext.extend(gxp.plugins.Tool, {
                 }
                 else {
                     var store = this.target.sources[record.get("source")];
-                    if ("name" in store){
-                        remote = store.name;
+                    if (store && store["name"]){
+                        remote = store["name"];
                     }
                 }
             }

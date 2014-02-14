@@ -47,9 +47,28 @@ gxp.plugins.HGLSource = Ext.extend(gxp.plugins.WMSSource, {
      */
     createLayerRecord: function(config) {
         //HGL Feed doesn't include bboxes, so just make global bbox
-        config.bbox =  [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
-        return gxp.plugins.HGLSource.superclass.createLayerRecord.apply(this, arguments);
+        config.bbox = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
+        var llbbox = config.llbbox;
+        var maxExtent;
 
+        if (llbbox) {
+            var extent = OpenLayers.Bounds.fromArray(llbbox).transform("EPSG:4326", "EPSG:900913");
+            // make sure maxExtent is valid (transform does not succeed for all llbbox)
+            if ((1 / extent.getHeight() > 0) && (1 / extent.getWidth() > 0)) {
+                // maxExtent has infinite or non-numeric width or height
+                // in this case, the map maxExtent must be specified in the config
+                maxExtent = extent;
+            }
+        }
+
+
+        var record = gxp.plugins.HGLSource.superclass.createLayerRecord.apply(this, arguments);
+
+
+        record.get("layer").addOptions({
+            restrictedExtent: maxExtent
+        });
+        return record;
     },
 
     /** private: method[initDescribeLayerStore]

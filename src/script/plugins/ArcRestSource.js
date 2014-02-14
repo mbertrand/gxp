@@ -29,13 +29,13 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
      *  Title for no layers message (i18n).
      */
     noLayersTitle: "No ArcGIS Layers",
-    
+
     /** api: config[noLayersText]
      *  ``String``
      *  Content of no layers message (i18n).
      */
     noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at ",
-    
+
     requiredProperties: ["name"],
 
     constructor:function (config) {
@@ -102,9 +102,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         };
 
         var processFailure = function (response) {
-        	if (!response.isTimeout) {
-        		Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
-        	}	
+            if (!response.isTimeout) {
+                Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
+            }
             source.fireEvent("failure", source);
         };
 
@@ -221,7 +221,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             var singleTile = false;
             if ("tiled" in config) {
                 singleTile = !config.tiled;
-            } 
+            }
             record.set("tiled", !singleTile);
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);
@@ -293,13 +293,13 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         var maxExtent;
         var llbbox = config.llbbox;
         if (llbbox) {
-                var extent = OpenLayers.Bounds.fromArray(llbbox).transform("EPSG:4326", srs);
-                // make sure maxExtent is valid (transform does not succeed for all llbbox)
-                if ((1 / extent.getHeight() > 0) && (1 / extent.getWidth() > 0)) {
-                    // maxExtent has infinite or non-numeric width or height
-                    // in this case, the map maxExtent must be specified in the config
-                    maxExtent = extent;
-                }
+            var extent = OpenLayers.Bounds.fromArray(llbbox).transform("EPSG:4326", srs);
+            // make sure maxExtent is valid (transform does not succeed for all llbbox)
+            if ((1 / extent.getHeight() > 0) && (1 / extent.getWidth() > 0)) {
+                // maxExtent has infinite or non-numeric width or height
+                // in this case, the map maxExtent must be specified in the config
+                maxExtent = extent;
+            }
         }
 
 
