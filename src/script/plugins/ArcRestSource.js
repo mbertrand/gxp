@@ -37,6 +37,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
     noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at ",
 
     requiredProperties: ["name"],
+    forceLoad: false,
 
     constructor:function (config) {
         this.config = config;
@@ -135,6 +136,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
      *  construct layer records, the source can be lazy.
      */
     isLazy: function() {
+        if (this.config.forceLoad){
+            return false;
+        }
         var lazy = true;
         var mapConfig = this.target.initialConfig.map;
         if (mapConfig && mapConfig.layers) {

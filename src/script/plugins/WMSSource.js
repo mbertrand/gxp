@@ -185,6 +185,8 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     requiredProperties: ["title", "bbox"],
 
+    forceLoad: true,
+
     /** private: method[constructor]
      */
     constructor: function(config) {
@@ -197,6 +199,9 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
                 console.warn("Deprecated config option 'forceLazy: true' for layer source '" +
                     config.id + "'. Use 'requiredProperties: []' instead.");
             }
+        }
+        if (config && config.forceLoad === true) {
+            this.forceLoad = true;
         }
         gxp.plugins.WMSSource.superclass.constructor.apply(this, arguments);
         if (!this.format) {
@@ -241,6 +246,9 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      *  construct layer records, the source can be lazy.
      */
     isLazy: function() {
+        if (this.forceLoad) {
+            return false;
+        }
         var lazy = true;
         var mapConfig = this.target.initialConfig.map;
         if (mapConfig && mapConfig.layers) {
