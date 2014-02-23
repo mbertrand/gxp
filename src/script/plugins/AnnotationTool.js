@@ -3,23 +3,23 @@ Ext.namespace("gxp.plugins");
 gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
     /** api: ptype = gxp_annotation */
     ptype: "gxp_annotation",
-    
+
     iconCls: "gxp-icon-note",
-    
+
     currentFeature: null,
-    
+
     errorTitle: "Error creating annotation",
 
     noteText: "Note",
-    
+
     notesText: "Notes",
 
     showNotesText: "Show notes",
 
     editNotesText: "Edit notes",
-    
+
     addNoteText: "Add note",
-    
+
     newNoteText: "New note",
 
     projection: "EPSG:4326",
@@ -33,18 +33,18 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
     saveFailTitle: "Could not save note",
 
     saveFailText: "Edit failed.  You might not have permission to save this note.",
-    
+
     saveText: "Save",
-    
+
     editText: "Edit",
-    
+
     deleteText: "Delete",
-    
+
     cancelText: "Cancel",
-    
+
     titleText: "Title",
-    
-    
+
+
 
     /**
      * api: method[addActions]
@@ -53,15 +53,16 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
 
         function saveFail(evt) {
             Ext.Msg.alert(this.saveFailTitle,
-                    this.saveFailText);
+                this.saveFailText);
         }
 
         var saveStrategy = new OpenLayers.Strategy.Save();
         saveStrategy.events.register('fail', this, saveFail);
 
         var currentUser = this.user;
-		var isMapEditor = this.target.config["edit_map"];
-		
+        var isMapEditor = this.target.config["edit_map"];
+        var annoTool = this;
+
         var layer = new OpenLayers.Layer.Vector(
             'geo_annotation_layer', {
                 displayInLayerSwitcher: false,
@@ -96,7 +97,8 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
             });
         var modControl = new OpenLayers.Control.ModifyFeature(
             layer, {
-                vertexRenderIntent: 'temporary'
+                vertexRenderIntent: 'temporary',
+                standalone: true
             });
         var selectAnnoControl = new OpenLayers.LayerFeatureAgent(
             layer, {
@@ -108,6 +110,7 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
                 addPointControl.deactivate();
                 addLineControl.deactivate();
                 addPolygonControl.deactivate();
+                selectAnnoControl.activate();
             } else {
                 Ext.getCmp("check_view_annotations")
                     .setChecked(true);
@@ -122,18 +125,19 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
                 true);
             Ext.getCmp("check_add_annotations")
                 .setChecked(true);
+            selectAnnoControl.deactivate();
             switch (checkbox.text) {
-            case this.pointText:
-                addPointControl.activate();
-                break;
-            case this.lineText:
-                addLineControl.activate();
-                break;
-            case this.polygonText:
-                addPolygonControl.activate();
-                break;
-            default:
-                break;
+                case this.pointText:
+                    addPointControl.activate();
+                    break;
+                case this.lineText:
+                    addLineControl.activate();
+                    break;
+                case this.polygonText:
+                    addPolygonControl.activate();
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -170,9 +174,9 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
         }
 
         function featureSelected(evt) {
-            if (this.currentFeature && this.currentFeature != evt.feature) {
+            if (annoTool.currentFeature && annoTool.currentFeature != evt.feature) {
                 selectAnnoControl
-                    .unhighlight(this.currentFeature);
+                    .unhighlight(annoTool.currentFeature);
             }
 
             if (selectAnnoControl) {
@@ -186,9 +190,9 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
                         scripts: true
                     }
                 });
-                this.currentFeature = evt.feature;
+                annoTool.currentFeature = evt.feature;
                 selectAnnoControl
-                    .highlight(this.currentFeature);
+                    .highlight(annoTool.currentFeature);
                 selectAnnoControl.popup = new GeoExt.Popup({
                     title: evt.feature.attributes.title,
                     closeAction: "close",
@@ -200,39 +204,39 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
                             selectAnnoControl
                                 .unhighlight(evt.feature);
                             evt.feature = null;
-                            this.currentFeature = null;
+                            //annoTool.currentFeature = null;
                         }
                     },
                     location: evt.feature,
                     items: [newPanel],
                     bbar: [{
-                            xtype: 'button',
-                            id: 'anno_editButton',
-                            text: this.editText,
-                            disabled: currentUser != this.currentFeature.attributes["owner_id"] && !isMapEditor,
-                            cls: 'x-btn-text',
-                            style: "display:inline-block;",
-                            handler: function (e) {
-                                addEditNote.call(this, evt);
-                                selectAnnoControl.popup.close();
-                                return false;
-                            },
-                            scope: this
+                        xtype: 'button',
+                        id: 'anno_editButton',
+                        text: annoTool.editText,
+                        disabled: currentUser != annoTool.currentFeature.attributes["owner_id"] && !isMapEditor,
+                        cls: 'x-btn-text',
+                        style: "display:inline-block;",
+                        handler: function (e) {
+                            addEditNote.call(annoTool, evt);
+                            selectAnnoControl.popup.close();
+                            return false;
                         },
+                        scope: this
+                    },
                         "->", {
                             xtype: 'button',
                             id: 'anno_deleteButton',
-                            disabled: currentUser != this.currentFeature.attributes["owner_id"] && !isMapEditor,
-                            text: this.deleteText,
+                            disabled: currentUser != annoTool.currentFeature.attributes["owner_id"] && !isMapEditor,
+                            text: annoTool.deleteText,
                             cls: 'x-btn-text',
                             style: "display:inline-block;",
                             handler: function (e) {
-                                this.currentFeature.state = OpenLayers.State.DELETE;
-                                save_annotation.call(this);
                                 selectAnnoControl.popup.close();
+                                annoTool.currentFeature.state = OpenLayers.State.DELETE;
+                                save_annotation.call(annoTool);
                                 return false;
                             },
-                            scope: this
+                            scope: annoTool
                         }
                     ]
                 });
@@ -242,44 +246,55 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
 
         function added(evt) {
             if (!evt.feature.fid) {
-                addEditNote.call(this, evt);
+                addEditNote.call(annoTool, evt);
             }
         }
 
-        function cancelEdit() {
-            modControl.unselectFeature(this.currentFeature);
-            if (!this.currentFeature.saved) {
-                layer.refresh({
-                    force: true
-                });
+        function cancelEdit(popup) {
+            if (!popup.keepFeature) {
+                if (!annoTool.currentFeature.saved) {
+                    modControl.unselectFeature(annoTool.currentFeature);
+                    layer.refresh({
+                        force: true
+                    });
+                }
+                modControl.deactivate();
+                selectAnnoControl.activate();
+                selectAnnoControl.unhighlight(annoTool.currentFeature);
             }
-            modControl.deactivate();
-            selectAnnoControl.activate();
-            selectAnnoControl.unhighlight(this.currentFeature);
         }
 
         function addEditNote(evt) {
             selectAnnoControl.deactivate();
-            this.currentFeature = evt.feature;
-            this.currentFeature.saved = false;
+
+            var previousFeature = annoTool.currentFeature || null;
+            if (previousFeature && !previousFeature.fid){
+                previousFeature.destroy();
+            }
+
+
+            annoTool.currentFeature = evt.feature;
+            annoTool.currentFeature.saved = false;
 
             if (modControl) {
                 modControl.activate();
-                modControl.selectFeature(this.currentFeature);
-                if (!this.currentFeature.state)
-                    this.currentFeature.state = OpenLayers.State.UPDATE;
+                modControl.selectFeature(annoTool.currentFeature);
+                if (!annoTool.currentFeature.state)
+                    annoTool.currentFeature.state = OpenLayers.State.UPDATE;
+
                 if (modControl.popup) {
+                    modControl.popup.keepFeature = true;
                     modControl.popup.close();
                 }
                 modControl.popup = new GeoExt.Popup({
-                    title: this.newNoteText,
+                    title: annoTool.newNoteText,
                     width: 450,
                     closeAction: "close",
                     listeners: {
                         'beforeclose': cancelEdit,
-                        scope: this
+                        scope: annoTool
                     },
-                    scope: this,
+                    scope: annoTool,
                     location: evt.feature,
                     items: [{
                         xtype: "form",
@@ -289,41 +304,41 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
                         labelAlign: "top",
                         items: [{
                             xtype: 'textfield',
-                            fieldLabel: this.titleText,
+                            fieldLabel: annoTool.titleText,
                             id: "popup_form_title",
-                            value: this.currentFeature && this.currentFeature.attributes["title"] ? this.currentFeature.attributes["title"] : ""
+                            value: annoTool.currentFeature && annoTool.currentFeature.attributes["title"] ? annoTool.currentFeature.attributes["title"] : ""
                         }, {
                             xtype: 'textarea',
                             width: 400,
                             height: 100,
-                            fieldLabel: this.noteText,
+                            fieldLabel: annoTool.noteText,
                             id: "popup_form_content",
-                            value: this.currentFeature && this.currentFeature.attributes["content"] ? this.currentFeature.attributes["content"] : ""
+                            value: annoTool.currentFeature && annoTool.currentFeature.attributes["content"] ? annoTool.currentFeature.attributes["content"] : ""
                         }]
                     }],
                     bbar: [{
-                            xtype: 'button',
-                            id: 'anno_saveButton',
-                            text: this.saveText,
-                            cls: 'x-btn-text',
-                            style: "display:inline-block;",
-                            handler: function (e) {
-                                save_annotation.call(this);
-                                return false;
-                            },
-                            scope: this
+                        xtype: 'button',
+                        id: 'anno_saveButton',
+                        text: annoTool.saveText,
+                        cls: 'x-btn-text',
+                        style: "display:inline-block;",
+                        handler: function (e) {
+                            save_annotation.call(annoTool);
+                            return false;
                         },
+                        scope: annoTool
+                    },
                         "->", {
                             xtype: 'button',
                             id: 'anno_cancelButton',
-                            text: this.cancelText,
+                            text: annoTool.cancelText,
                             cls: 'x-btn-text',
                             style: "display:inline-block;",
                             handler: function (e) {
                                 modControl.popup.close();
                                 return false;
                             },
-                            scope: this
+                            scope: annoTool
                         }
                     ]
                 });
@@ -333,17 +348,19 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
         }
 
         function save_annotation() {
-            if (this.currentFeature.state != OpenLayers.State.DELETE) {
-                this.currentFeature.attributes["title"] = Ext
+            if (annoTool.currentFeature.state != OpenLayers.State.DELETE) {
+                annoTool.currentFeature.attributes["title"] = Ext
                     .getCmp("popup_form_title").getValue();
-                this.currentFeature.attributes["content"] = Ext
+                annoTool.currentFeature.attributes["content"] = Ext
                     .getCmp("popup_form_content").getValue();
             }
-            layer.strategies[1].save([this.currentFeature]);
-            this.currentFeature.saved = true;
-            modControl.unselectFeature(this.currentFeature);
-            if (!this.currentFeature.attributes["owner_id"]) {
-                this.currentFeature.attributes["owner_id"] = currentUser;
+            layer.strategies[1].save([annoTool.currentFeature]);
+            annoTool.currentFeature.saved = true;
+            if (modControl.feature === annoTool.currentFeature) {
+                modControl.unselectFeature(annoTool.currentFeature);
+            }
+            if (!annoTool.currentFeature.attributes["owner_id"]) {
+                annoTool.currentFeature.attributes["owner_id"] = currentUser;
             }
 
             if (modControl.popup) {
@@ -354,119 +371,119 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
 
         return gxp.plugins.AnnotationTool.superclass.addActions.apply(
             this, [{
-            text: this.notesText,
-            disabled: !this.target.mapID,
-            iconCls: this.iconCls,
-            toggleGroup: this.toggleGroup,
-            enableToggle: true,
-            allowDepress: false,
-            toggleHandler: function (button,
-                pressed) {
-                if (!pressed) {
-                    Ext.getCmp("check_view_annotations").setChecked(false);
-                }
-            },
-            menu: new Ext.menu.Menu({
-                items: [
-                    new Ext.menu.CheckItem({
-                        id: "check_view_annotations",
-                        checked: false,
-                        text: this.showNotesText,
-                        listeners: {
-                            checkchange: function (
-                                item,
-                                checked) {
-                                if (checked === true) {
-                                    if (this.target.selectControl) {
-                                        this.target.selectControl.deactivate();
-                                    }
-                                    this.target.mapPanel.map
-                                        .addControls([
+                text: this.notesText,
+                disabled: !this.target.mapID,
+                iconCls: this.iconCls,
+                toggleGroup: this.toggleGroup,
+                enableToggle: true,
+                allowDepress: false,
+                toggleHandler: function (button,
+                                         pressed) {
+                    if (!pressed) {
+                        Ext.getCmp("check_view_annotations").setChecked(false);
+                    }
+                },
+                menu: new Ext.menu.Menu({
+                    items: [
+                        new Ext.menu.CheckItem({
+                            id: "check_view_annotations",
+                            checked: false,
+                            text: this.showNotesText,
+                            listeners: {
+                                checkchange: function (
+                                    item,
+                                    checked) {
+                                    if (checked === true) {
+                                        if (this.target.selectControl) {
+                                            this.target.selectControl.deactivate();
+                                        }
+                                        this.target.mapPanel.map
+                                            .addControls([
+                                                modControl,
+                                                addPointControl,
+                                                addLineControl,
+                                                addPolygonControl
+                                            ]);
+                                        this.target.mapPanel.map.addLayer(layer);
+                                        selectAnnoControl.activate();
+                                        layer.events.register('featureadded',this,added);
+                                        //layer.events .register('beforefeaturemodified',this, added);
+                                        layer.events.register('featureselected',this,featureSelected);
+                                        layer.events.register('multipleselected',this,multipleSelected);
+                                    } else {
+                                        selectAnnoControl.deactivate();
+                                        if (this.target.selectControl) {
+                                            this.target.selectControl.activate();
+                                        }
+                                        this.target.mapPanel.map.removeLayer(layer);
+                                        Ext.getCmp("check_add_annotations").setChecked(false);
+                                        layer.events.unregister('multipleselected',this,multipleSelected);
+                                        layer.events.unregister('featureselected',this,featureSelected);
+                                        layer.events.unregister('featureadded',this,added);
+                                        layer.events.unregister('beforefeaturemodified',this,added);
+
+                                        var controls = new Array(
                                             modControl,
                                             addPointControl,
                                             addLineControl,
-                                            addPolygonControl
-                                        ]);
-                                    this.target.mapPanel.map.addLayer(layer);
-                                    selectAnnoControl.activate();
-                                    layer.events.register('featureadded',this,added);
-                                    layer.events .register('beforefeaturemodified',this, added);
-                                    layer.events.register('featureselected',this,featureSelected);
-                                    layer.events.register('multipleselected',this,multipleSelected);
-                                } else {
-                                    selectAnnoControl.deactivate();
-                                    if (this.target.selectControl) {
-                                        this.target.selectControl.activate();
-                                    }
-                                    this.target.mapPanel.map.removeLayer(layer);
-                                    Ext.getCmp("check_add_annotations").setChecked(false);
-                                    layer.events.unregister('multipleselected',this,multipleSelected);
-                                    layer.events.unregister('featureselected',this,featureSelected);
-                                    layer.events.unregister('featureadded',this,added);
-                                    layer.events.unregister('beforefeaturemodified',this,added);
+                                            addPolygonControl);
 
-                                    var controls = new Array(
-                                        modControl,
-                                        addPointControl,
-                                        addLineControl,
-                                        addPolygonControl);
-
-                                    for (var control = 0; control < controls.length; control++) {
-                                        controls[control].deactivate();
-                                        this.target.mapPanel.map.removeControl(controls[control]);
-                                    }
-                                }
-                            },
-                            scope: this
-                        }
-                    }),
-                    new Ext.menu.CheckItem({
-                        id: "check_add_annotations",
-                        checked: false,
-                        disabled: currentUser == "None",
-                        listeners: {
-                            checkchange: checkAddChange,
-                            scope: this
-                        },
-                        text: this.addNoteText,
-                        menu: [
-                            new Ext.menu.CheckItem({
-                                groupClass: null,
-                                text: this.pointText,
-                                group: 'featureeditorgroup',
-                                iconCls: 'gxp-icon-point',
-                                listeners: {
-                                    click: checkToolChange,
-                                    scope: this
-                                }
-                            }),
-                            new Ext.menu.CheckItem({
-                                groupClass: null,
-                                text: this.lineText,
-                                group: 'featureeditorgroup',
-                                iconCls: 'gxp-icon-line',
-                                listeners: {
-                                    click: checkToolChange,
-                                    scope: this
-                                }
-                            }),
-                            new Ext.menu.CheckItem({
-                                groupClass: null,
-                                text: this.polygonText,
-                                group: 'featureeditorgroup',
-                                iconCls: 'gxp-icon-polygon',
-                                        listeners: {
-                                            click: checkToolChange,
-                                            scope: this
+                                        for (var control = 0; control < controls.length; control++) {
+                                            controls[control].deactivate();
+                                            this.target.mapPanel.map.removeControl(controls[control]);
                                         }
-                                    })
-                                ]
-                            })
-                        ]
-                    })
-                }]
-            );
-        }
+                                    }
+                                },
+                                scope: this
+                            }
+                        }),
+                        new Ext.menu.CheckItem({
+                            id: "check_add_annotations",
+                            checked: false,
+                            disabled: currentUser == "None",
+                            listeners: {
+                                checkchange: checkAddChange,
+                                scope: this
+                            },
+                            text: this.addNoteText,
+                            menu: [
+                                new Ext.menu.CheckItem({
+                                    groupClass: null,
+                                    text: this.pointText,
+                                    group: 'featureeditorgroup',
+                                    iconCls: 'gxp-icon-point',
+                                    listeners: {
+                                        click: checkToolChange,
+                                        scope: this
+                                    }
+                                }),
+                                new Ext.menu.CheckItem({
+                                    groupClass: null,
+                                    text: this.lineText,
+                                    group: 'featureeditorgroup',
+                                    iconCls: 'gxp-icon-line',
+                                    listeners: {
+                                        click: checkToolChange,
+                                        scope: this
+                                    }
+                                }),
+                                new Ext.menu.CheckItem({
+                                    groupClass: null,
+                                    text: this.polygonText,
+                                    group: 'featureeditorgroup',
+                                    iconCls: 'gxp-icon-polygon',
+                                    listeners: {
+                                        click: checkToolChange,
+                                        scope: this
+                                    }
+                                })
+                            ]
+                        })
+                    ]
+                })
+            }]
+        );
+    }
 });
 
 Ext.preg(gxp.plugins.AnnotationTool.prototype.ptype,gxp.plugins.AnnotationTool);
