@@ -43,6 +43,10 @@ gxp.plugins.MapRevisionTool = Ext.extend(gxp.plugins.Tool, {
 	
 	windowTitle: "Map Revision History",
 
+	hidden: false,
+
+	disabled: false,
+
 	addActions: function() {
 
 		var store = new Ext.data.JsonStore({
@@ -129,6 +133,8 @@ gxp.plugins.MapRevisionTool = Ext.extend(gxp.plugins.Tool, {
 					 iconCls: this.iconCls,
 					 id: this.id,
 					 text: this.toolText,
+					 hidden: this.hidden,
+					 disabled: this.disabled,
 					 handler: function() {
 						 store.load();
 						 historyWindow.show();

@@ -1,30 +1,13 @@
 /**
- * Copyright (c) 2008-2011 The Open Planning Project
- *
- * Published under the GPL license.
- * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
- * of the license.
+ * Published under the GNU General Public License
+ * Copyright 2011 © The President and Fellows of Harvard College
  */
 
-/**
- * @requires plugins/FeedSource.js
- * @requires plugins/PicasaFeedSource.js
- * @requires plugins/YouTubeFeedSource.js
- * @requires widgets/PointSymbolizer.js
- */
-
-/** api: (define)
- *  module = gxp
- *  class = FeedSourceDialog
- *  base_link = `Ext.Container <http://extjs.com/deploy/dev/docs/?class=Ext.Container>`_
- */
 Ext.namespace("gxp");
 
-gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
+gxp.FeedSourceWindow = Ext.extend(Ext.Window, {
 
     addPicasaText: "Picasa Photos",
-
-    addFlickrText: "Add Flickr Photos",
 
     addYouTubeText: "YouTube Videos",
 
@@ -59,11 +42,10 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
             columns: [500],
             labelWidth: 100,
             items: [
-                {name: 'source_type', inputValue: 'gxp_picasasource', boxLabel: this.addPicasaText},
-                {name: 'source_type', inputValue: 'gxp_youtubesource', boxLabel: this.addYouTubeText},
-                {name: 'source_type', inputValue: 'gxp_hglfeedsource', boxLabel: this.addHGLText},
-                {name: 'source_type', inputValue: 'gxp_feedsource', boxLabel: this.addRSSText, checked: true},
-                {name: 'source_type', inputValue: 'gx_flickrsource', boxLabel: this.addFlickrText}
+                {name: 'source_type', inputValue: 'gx_picasasource', boxLabel: this.addPicasaText},
+                {name: 'source_type', inputValue: 'gx_youtubesource', boxLabel: this.addYouTubeText},
+                {name: 'source_type', inputValue: 'gx_hglfeedsource', boxLabel: this.addHGLText},
+                {name: 'source_type', inputValue: 'gx_feedsource', boxLabel: this.addRSSText, checked: true}
             ],
             listeners: {
                 "change": function(radiogroup, radio) {
@@ -152,7 +134,6 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
                 var ptype = this.sourceTypeRadioList.getValue().inputValue;
                 var config = {
                     "title" : this.titleTextField.getValue(),
-                    "name" : this.titleTextField.getValue(),
                     "group" : "GeoRSS Feeds"
                 };
 
@@ -259,5 +240,8 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
 });
 
 /** api: xtype = gxp_embedmapdialog */
-Ext.reg('gxp_feedsourcedialog', gxp.FeedSourceDialog);
+Ext.reg('gxp_feedsourcewindow', gxp.FeedSourceWindow);
+
+
+
 

@@ -136,8 +136,14 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                     var control;
                     for (var i = 0, len = info.controls.length; i < len; i++) {
                         control = info.controls[i];
+                        try {
                         control.deactivate();  // TODO: remove when http://trac.openlayers.org/ticket/2130 is closed
+                        } catch(err) {
+                            //IE throws exception here when exiting page
+                        } finally {
                         control.destroy();
+                        }
+
                     }
 
                     var count = queryableLayers.length, successCount = 0, featureCount = 0;
@@ -147,7 +153,7 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                     info.controls = [];
                     queryableLayers.each(function (x) {
                         var layer = x.getLayer();
-
+                        if (layer.url) {
 
                         //console.log(layer.name +":" + layer.srs);
                         var vendorParams = Ext.apply({}, this.vendorParams), param;
@@ -369,7 +375,9 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                                                     var feature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Point(results[r]["goog_x"],
                                                         results[r]["goog_y"]));
                                                     for (var attribute in results[r]) {
-                                                        feature.attributes[attribute] = results[r][attribute];
+                                                            feature.attributes[attribute] = attribute === "time"
+                                                                ? new Date(results[r][attribute] * 1000.0).toLocaleString()
+                                                                : results[r][attribute];
                                                     }
                                                     feature.wm_layer_id = featureCount;
                                                     feature.wm_layer_title = x.get("title");
@@ -466,7 +474,7 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                                                 }
                                             }
                                             else {
-                                                var featureInfo = new OpenLayers.Format.GML().read(evt.text);
+                                                    var featureInfo = evt.features;
 
                                                 if (featureInfo && featureInfo.length > 0) {
                                                     if (featureInfo.constructor != Array) {
@@ -490,7 +498,8 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                                                         var feature = featureInfo[f];
 
 
-                                                        var featureBounds = feature.geometry.getBounds();
+                                                            var featureBounds = feature.geometry ?
+                                                                feature.geometry.getBounds() : feature.bounds;
                                                         //console.log('featureBounds:' + featureBounds.toBBOX());
                                                         var wgs84Bounds = new OpenLayers.Bounds(-180, -90, 180, 90);
 
@@ -558,6 +567,7 @@ gxp.plugins.GeoNodeQueryTool = Ext.extend(gxp.plugins.Tool, {
                         info.controls.push(control);
                         if (infoButton && infoButton.pressed) {
                             control.activate();
+                            }
                         }
                     }, this);
                 }

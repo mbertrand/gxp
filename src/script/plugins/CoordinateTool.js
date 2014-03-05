@@ -14,7 +14,7 @@
 
 /** api: (define)
  *  module = gxp.plugins
- *  class = GeoNodeQueryTool
+ *  class = CoordinateTool
  */
 
 /** api: (extends)
@@ -51,10 +51,10 @@ OpenLayers.Control.RightClick = OpenLayers.Class(OpenLayers.Control, {
 });
 
 /** api: constructor
- *  .. class:: GeoNodeQueryTool(config)
+ *  .. class:: CoordinateTool(config)
  *
- *    This plugins provides an action which, when active, will issue a
- *    GetFeatureInfo request to the WMS of all layers on the map. The output
+ *    This plugins provides an action which, when active, will display the
+ *    coordinates at whatever point the user right-clicks on the map. The output
  *    will be displayed in a popup.
  */
 gxp.plugins.CoordinateTool = Ext.extend(gxp.plugins.Tool, {

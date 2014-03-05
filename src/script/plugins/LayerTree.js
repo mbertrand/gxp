@@ -66,7 +66,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for overlay node of layer tree (i18n).
      */
-    overlayNodeText: "My Overlays",
+    overlayNodeText: "Overlays",
 
     /** api: config[baseNodeText]
      *  ``String``
@@ -186,7 +186,6 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             plugin = this,
             exclusive;
 
-
         for (var group = 0, max=this.groups.length; group < max; group++) {
             var newFolder = this.createCategoryFolder(this.groups[group]);
             //for (var group in this.groups) {
@@ -204,7 +203,6 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
             newFolder.enable();
 		}
 		
-
         return {
             xtype: "treepanel",
             root: treeRoot,
@@ -308,7 +306,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     replaceURLWithHTMLLinks: function(text) {
         if (text != null  && !text.match(/\<a|\<img/ig)) {
             var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-            return text.replace(exp,"<a href='$1'>$1</a>");
+            return text.replace(exp,"<a target='_blank' href='$1'>$1</a>");
         }  else 
         	return text;
     },
@@ -326,7 +324,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 return r.getLayer() === layer;
             }));
             if (record) {
-                attr.tiptext = this.replaceURLWithHTMLLinks(record.get('abstract'));
+                //attr.tiptext = this.replaceURLWithHTMLLinks(record.get('abstract'));
                 if (!record.get("queryable")) {
                     attr.iconCls = "gxp-tree-rasterlayer-icon";
                 }
@@ -529,7 +527,7 @@ NodeMouseoverPlugin = Ext.extend(Object, {
             if (nodeId) {
             	var node = this.tree.getNodeById(nodeId);
             	if (node.layerStore) {
-            		var abstractText = node.layerStore.getByLayer(node.layer).get("abstract")
+                    var abstractText = this.replaceURLWithHTMLLinks(node.layerStore.getByLayer(node.layer).get("abstract"));
             		var treemanager = Ext.fly(t).up('div.gxp-layermanager-tree');
                     
             		//Create or update tooltip
@@ -554,6 +552,7 @@ NodeMouseoverPlugin = Ext.extend(Object, {
             	
         		    
             		//Set or cancel timeouts for tooltip
+                    if (this.tooltip) {
             		this.tooltip.on('show', function(){
             		    	var timeout;
                 			var tooltip = this;
@@ -594,10 +593,24 @@ NodeMouseoverPlugin = Ext.extend(Object, {
             		}
 
 
-            	}
+            	  }
+                }
                 this.tree.fireEvent('mouseover', this.tree.getNodeById(nodeId), e);
                 
             }
         }
     }
 });
+
+Ext.preg(gxp.plugins.LayerTree.prototype.ptype, gxp.plugins.LayerTree);
+
+/**
+ * Handle moving of records in layertree data store
+ */
+Ext.data.Store.prototype.move = function(record, to){
+    //var r = this.getAt(from);
+    this.data.remove(record);
+    this.data.insert(to, record);
+    this.fireEvent("load", this, to);
+};
+

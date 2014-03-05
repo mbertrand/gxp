@@ -260,8 +260,10 @@ gxp.plugins.GazetteerTool = Ext.extend(gxp.plugins.Tool, {
                 {header: 'Place Name', width:200, dataIndex: 'placename', sortable: true},
                 {header: 'Coordinates', width:100, dataIndex: 'coordinates', sortable: false,
                     renderer: function(value) {
-                        // your logic here
-                        return value[0].toFixed(2) + ', ' + value[1].toFixed(2);
+                        if (value.lat)
+                            return value.lat.toFixed(2) + ', ' + value.lon.toFixed(2);
+                        else
+                            return value[0].toFixed(2) + ', ' + value[1].toFixed(2);
                     }
                 },
                 {header: 'Source', width:200, dataIndex: 'source', sortable: true},
