@@ -185,7 +185,7 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
      */
     requiredProperties: ["title", "bbox"],
 
-    forceLoad: true,
+    forceLoad: false,
 
     /** private: method[constructor]
      */
@@ -510,11 +510,10 @@ gxp.plugins.WMSSource = Ext.extend(gxp.plugins.LayerSource, {
             // compatible projection that equals the map projection. This helps
             // us in dealing with the different EPSG codes for web mercator.
             var layerProjection = this.getProjection(original);
-
+            layer.addOptions({projection: layerProjection});
             var projCode = (layerProjection || projection).getCode(),
                 bbox = original.get("bbox"), maxExtent;
             if (bbox && bbox[projCode]){
-                layer.addOptions({projection: layerProjection});
                 maxExtent = OpenLayers.Bounds.fromArray(bbox[projCode].bbox, layer.reverseAxisOrder());
             } else {
                 var llbbox = original.get("llbbox");
