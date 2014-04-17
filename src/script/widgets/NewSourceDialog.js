@@ -58,6 +58,12 @@ gxp.NewSourceDialog = Ext.extend(Ext.Panel, {
      */
     invalidURLText: "Enter a valid URL to a WMS/TMS/REST endpoint (e.g. http://example.com/geoserver/wms)",
 
+    /** api: config[addLayerSourceErrorText]
+     *  ``String``
+     *  Message to display when an invalid response is returned (i18n).
+     */
+    addLayerSourceErrorText: "Error - ({msg}).\nPlease check the url and try again.",
+
     /** api: config[contactingServerText]
      *  ``String``
      *  Text for server contact (i18n).
@@ -159,15 +165,14 @@ gxp.NewSourceDialog = Ext.extend(Ext.Panel, {
             scope: this
         });
 
-        this.on("urlselected", function(cmp, url) {
+        this.on("urlselected", function(cmp, url, type) {
             this.setLoading();
             var failure = function() {
                 this.setError(this.sourceLoadFailureMessage);
             };
 
             // this.explorer.addSource(url, null, success, failure, this);
-            //this.addSource(url, this.hide, failure, this);
-            this.addSource(url, sourceType, this.hide, failure, this);
+            this.addSource(url, type, this.hide, failure, this);
         }, this);
 
     },
