@@ -69,7 +69,7 @@
             <fileset dir="externals/geoext/resources"/>
         </copy>
         <copy todir="${build}/theme/gxp">
-            <fileset dir="${src}/theme"/>
+            <fileset dir="theme"/>
         </copy>
         <copy todir="${build}/examples" overwrite="true">
             <fileset dir="examples"/>
@@ -87,7 +87,7 @@
             value="../script/gxp.js" 
             includes="**/*.html"/>
         <replace dir="${build}/examples" 
-            token="../src/theme/all.css" 
+            token="../theme/all.css"
             value="../theme/gxp/all.css" 
             includes="**/*.html"/>
         <replace dir="${build}/examples" 
