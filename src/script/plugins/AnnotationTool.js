@@ -1,5 +1,9 @@
 Ext.namespace("gxp.plugins");
 
+/**
+ * @requires OpenLayers/Strategy/Save.js
+ */
+
 gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
     /** api: ptype = gxp_annotation */
     ptype: "gxp_annotation",
