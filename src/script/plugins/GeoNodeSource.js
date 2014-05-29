@@ -143,7 +143,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 'name': config.name,
                 'source': config.source,
                 'group': config.group,
-                'attributes': config.attributes,
+                'getFeatureInfo': "getFeatureInfo" in config ? config.getFeatureInfo : '',
                 'properties': "gxp_wmslayerpanel",
                 'fixed': config.fixed,
                 'selected': "selected" in config ? config.selected : false,
@@ -165,7 +165,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 {name: "name", type: "string"},
                 {name: "source", type: "string"},
                 {name: "group", type: "string"},
-                {name: "attributes"}, //array
+                {name: "getFeatureInfo"}, //array
                 {name: "properties", type: "string"},
                 {name: "fixed", type: "boolean"},
                 {name: "selected", type: "boolean"},
