@@ -14,7 +14,7 @@
         "menu/LayerMenu.js",
         "widgets/CrumbPanel.js",
         "widgets/EmbedMapDialog.js",
-        "widgets/LinkEmbedMapDialog.js",        
+        "widgets/LinkEmbedMapDialog.js",
         "widgets/FeatureEditPopup.js",
         "widgets/FilterBuilder.js",
         "widgets/QueryPanel.js",
@@ -115,10 +115,11 @@
         "plugins/Print.js",
         "plugins/LoadingIndicator.js",
         "plugins/Playback.js",
+        "plugins/GazetteerTool.js",
         "locale/es.js",
         "locale/ca.js"
     );
-    
+
     var scripts = document.getElementsByTagName("script");
     var parts = scripts[scripts.length-1].src.split("/");
     parts.pop();
@@ -128,10 +129,10 @@
     var pieces = new Array(len);
 
     for (var i=0; i<len; i++) {
-        pieces[i] = "<script src='" + path + "/" + jsfiles[i] + "'></script>"; 
+        pieces[i] = "<script src='" + path + "/" + jsfiles[i] + "'></script>";
     }
     document.write(pieces.join(""));
-    
+
     if (GeoExt.Lang) {
         GeoExt.Lang.set(OpenLayers.Util.getParameters()["lang"] || GeoExt.Lang.locale);
     }
