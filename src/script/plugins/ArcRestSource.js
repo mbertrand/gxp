@@ -299,7 +299,11 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
 
         var  record = new GeoExt.data.LayerRecord(config);
         record.set("name", config.name);
-        record.set("layerid", config.layerid || "show:0");
+        if (config.layerid)
+            record.set("layerid", config.layerid || "show:0");
+        else
+            record.set("layerid", "show:" + config.name);
+        record.set("title", config.title);
         record.set("format", config.format || "png");
         record.set("tiled", "tiled" in config ? config.tiled : true);
 
