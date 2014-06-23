@@ -44,9 +44,9 @@ gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
             columns: [500],
             labelWidth: 100,
             items: [
-                //{name: 'source_type', inputValue: 'gx_picasasource', boxLabel: this.addPicasaText},
-                //{name: 'source_type', inputValue: 'gx_youtubesource', boxLabel: this.addYouTubeText},
                 {name: 'source_type', inputValue: 'gx_flickrsource', boxLabel: this.addFlickrText},
+                {name: 'source_type', inputValue: 'gx_picasasource', boxLabel: this.addPicasaText},
+                {name: 'source_type', inputValue: 'gx_youtubesource', boxLabel: this.addYouTubeText},
                 {name: 'source_type', inputValue: 'gx_hglfeedsource', boxLabel: this.addHGLText},
                 {name: 'source_type', inputValue: 'gx_feedsource', boxLabel: this.addRSSText, checked: true}
             ],
