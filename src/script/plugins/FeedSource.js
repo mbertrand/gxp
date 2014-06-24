@@ -210,6 +210,9 @@ gxp.plugins.FeedSource = Ext.extend(gxp.plugins.LayerSource, {
                     this.target.selectControl.popup = null;
                 }
             },
+            "removed": function() {
+                layer.destroyFeatures();
+            },
             scope: this
         });
     }
