@@ -116,6 +116,7 @@
         "plugins/LoadingIndicator.js",
         "plugins/Playback.js",
         "plugins/GazetteerTool.js",
+        "plugins/GeoLocator.js",
         "locale/es.js",
         "locale/ca.js"
     );

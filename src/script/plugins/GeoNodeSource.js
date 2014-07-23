@@ -55,10 +55,11 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
      */
     createLayerRecord: function(config) {
         var record;
+        var bbox = config['bbox'] ? config["bbox"] : (config["llbbox"] ? config["llbbox"] : null);
 
-        if (config['llbbox']) {
+        if (bbox) {
 
-            this.url = config.url.replace(/https?:/,window.location.protocol);
+            this.url = this.url.replace(/https?:/,window.location.protocol);
 
             /**
              * TODO: The WMSCapabilitiesReader should allow for creation
@@ -67,7 +68,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
             var projection = this.getMapProjection();
 
             var maxExtent =
-                OpenLayers.Bounds.fromArray(config['llbbox']).transform(new OpenLayers.Projection("EPSG:4326"), projection);
+                OpenLayers.Bounds.fromArray(bbox).transform(new OpenLayers.Projection("EPSG:4326"), projection);
 
 
             // make sure maxExtent is valid (transform does not succeed for all llbbox)
@@ -87,8 +88,8 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 VERSION: '1.1.1',
                 SERVICE: 'WMS',
                 REQUEST: 'GetMap',
-                LLBBOX: config['llbbox'],
-                URL: config.url
+                LLBBOX: bbox,
+                URL: this.url
             };
 
 
@@ -100,7 +101,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
             var layer = new OpenLayers.Layer.WMS(
                 config.title,
-                config.url,
+                this.url,
                 params, {
                     maxExtent: maxExtent,
                     restrictedExtent: maxExtent,

@@ -1,5 +1,6 @@
 /**
  * @requires plugins/Tool.js
+ * @requires OpenLayers/Control/Geolocate.js
  */
 
 /** api: (define)
