@@ -124,7 +124,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
 
     initComponent: function() {
         this.cqlFormat = new OpenLayers.Format.CQL();
-        if (this.source) {
+        if (this.source && this.source.getSchema) {
             this.source.getSchema(this.layerRecord, function(attributeStore) {
                 if (attributeStore !== false) {
                     var filter = this.layerRecord.getLayer().params.CQL_FILTER;
