@@ -5,17 +5,17 @@ Ext.namespace("gxp");
  *  target: GeoExplorer instance
  */
 gxp.SearchBar = Ext.extend(Ext.Toolbar,{
-    
+
     emptyText: 'Enter search...',
     searchText: 'Search',
     noSearchableLayersTitle: 'No Searchable Layers',
     noSearchableLayersMsg: 'There are currently no searchable layers on the map.  You must have at least one visible layer with searchable fields on the map.',
-    searchTermTitle: "Search Term Required", 
+    searchTermTitle: "Search Term Required",
     searchTermText: "Please enter a search term",
     resetText: "Reset",
-    
+
     initComponent: function () {
-    	var target = this.target;
+        var target = this.target;
 
         var getQueryableLayers = function () {
             return target.mapPanel.layers.queryBy(function (x) {
@@ -42,16 +42,14 @@ gxp.SearchBar = Ext.extend(Ext.Toolbar,{
         });
 
         var psHandler = function () {
-            performSearch();
+            performSearch(this.noSearchableLayersTitle,
+                this.noSearchableLayersMsg);
         };
 
-        var searchBtn = new Ext.Button({
-            text: '<span class="x-btn-text">' + this.searchText + '</span>',
-            handler: psHandler
-        });
 
 
-        var performSearch = function () {
+
+        var performSearch = function (title,message) {
 
             // Find queryable layers (visible with searchable fields)
             var searchCount = 0;
@@ -63,8 +61,7 @@ gxp.SearchBar = Ext.extend(Ext.Toolbar,{
                 }
             });
             if (queryableLayers.length == 0) {
-                Ext.MessageBox.alert(this.searchableLayersTitle,
-                    this.searchableLayersText);
+                Ext.MessageBox.alert(title, message);
                 return;
 
             }
@@ -158,6 +155,12 @@ gxp.SearchBar = Ext.extend(Ext.Toolbar,{
 
         };
 
+        var searchBtn = new Ext.Button({
+            text: '<span class="x-btn-text">' + this.searchText + '</span>',
+            handler: psHandler,
+            scope: this
+        });
+
         var reset = function () {
             searchTB.setValue('');
             removeHighlightLayers();
@@ -183,18 +186,18 @@ gxp.SearchBar = Ext.extend(Ext.Toolbar,{
             }
 
         }
-        
+
         this.id = "tlbr";
         this.items = [searchTB,
-                ' ', searchBtn, ' ', {
-                    xtype: 'button',
-                    text: '<span class="x-btn-text">' + this.resetText + '</span>',
-                    handler: function (brn, e) {
-                        reset();
-                    }
+            ' ', searchBtn, ' ', {
+                xtype: 'button',
+                text: '<span class="x-btn-text">' + this.resetText + '</span>',
+                handler: function (brn, e) {
+                    reset();
                 }
-            ];
-        
+            }
+        ];
+
         gxp.SearchBar.superclass.initComponent.call(this);
 
     }
