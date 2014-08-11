@@ -88,7 +88,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 SERVICE: 'WMS',
                 REQUEST: 'GetMap',
                 LLBBOX: config['llbbox'],
-                URL: config.url
+                URL: this.url
             };
 
 
@@ -100,7 +100,7 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
 
             var layer = new OpenLayers.Layer.WMS(
                 config.title,
-                config.url,
+                this.url,
                 params, {
                     maxExtent: maxExtent,
                     restrictedExtent: maxExtent,
