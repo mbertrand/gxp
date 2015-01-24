@@ -12,4 +12,4 @@
 	url = git://github.com/tschaub/buildkit.git
 [submodule "externals/PrintPreview"]
 	path = externals/PrintPreview
-	url = git://github.com/GeoNode/PrintPreview.git
+	url = git://github.com/mbertrand/PrintPreview.git
