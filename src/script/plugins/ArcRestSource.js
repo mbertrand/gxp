@@ -223,14 +223,18 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             var singleTile = false;
             if ("tiled" in config) {
                 singleTile = !config.tiled;
-            }
-            record.set("tiled", !singleTile);
+            } 
+
+            record.set("name", config.name);
+            record.set("layerid", config.layerid || "show:0");
+            record.set("format", config.format || "png");
+            record.set("tiled", "tiled" in config ? config.tiled : true);
+            record.set("srs", layer.projection.getCode());
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);
             record.set("source", config.source);
-            record.set("name", config.name);
-            record.set("layerid", config.layerid);
             record.set("properties", "gxp_wmslayerpanel");
+
             if ("group" in config) {
                 record.set("group", config.group);
             }
@@ -275,6 +279,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         var srs = config.srs || this.target.map.projection;
         config.srs = {};
         config.srs[srs] = true;
+
 
         var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
         config.bbox = {};
@@ -348,7 +353,8 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             opacity: layer.opacity || undefined,
             group: record.get("group"),
             fixed: record.get("fixed"),
-            selected: record.get("selected")
+            selected: record.get("selected"),
+            srs: record.get("srs")
         };
     }
 
