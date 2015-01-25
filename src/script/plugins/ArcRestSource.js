@@ -233,7 +233,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);
             record.set("source", config.source);
-            record.set("properties", "gxp_wmslayerpanel");
+
 
             if ("group" in config) {
                 record.set("group", config.group);
