@@ -43,6 +43,7 @@ gxp.ArcRestLayerPanel = Ext.extend(Ext.TabPanel, {
     aboutText: "About",
     titleText: "Title",
     nameText: "Name",
+    opacityText: "Opacity",
 
     activeTab: 0,
 
@@ -96,6 +97,19 @@ gxp.ArcRestLayerPanel = Ext.extend(Ext.TabPanel, {
                     anchor: "99%",
                     value: this.layerRecord.get("name"),
                     readOnly: true
+                },{
+                    xtype: "gx_opacityslider",
+                    name: "opacity",
+                    anchor: "99%",
+                    isFormField: true,
+                    fieldLabel: this.opacityText,
+                    listeners: {
+                        change: function() {
+                            this.fireEvent("change");
+                        },
+                        scope: this
+                    },
+                    layer: this.layerRecord
                 }]
             }]
         };
