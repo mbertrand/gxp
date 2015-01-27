@@ -91,7 +91,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                     {name:"name", type:"string", mapping:"name"},
                     {name:"layerid", type:"string"},
                     {name:"group", type:"string", defaultValue:this.title},
-                    {name:"fixed", type:"boolean", defaultValue:true},
+                    {name:"fixed", type:"boolean", defaultValue:false},
                     {name:"tiled", type:"boolean", defaultValue:true},
                     {name:"queryable", type:"boolean", defaultValue:true},
                     {name:"selected", type:"boolean"}
