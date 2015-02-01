@@ -105,7 +105,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         var processFailure = function (response) {
             if (!response.isTimeout) {
                 Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
-            }
+            }   
             source.fireEvent("failure", source);
         };
 
@@ -176,6 +176,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         return lazy;
     },
 
+
     /** api: method[getConfigForRecord]
      *  :arg record: :class:`GeoExt.data.LayerRecord`
      *  :returns: ``Object``
@@ -200,6 +201,12 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                 record = this.createLazyLayerRecord(config);
             }
             layer = record.getLayer();
+
+            if ("bbox" in config) {
+                layer.addOptions({"maxExtent": config.bbox});
+            } else {
+                this.setLayerBounds(layer);
+            }
 
             // set layer title from config
             if (config.title) {
@@ -226,7 +233,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             } 
 
             record.set("name", config.name);
-            record.set("layerid", config.layerid || "show:0");
+            record.set("layerid", config.layerid || layer.params.LAYERS);
             record.set("format", config.format || "png");
             record.set("tiled", "tiled" in config ? config.tiled : true);
             record.set("srs", layer.projection.getCode());
@@ -269,6 +276,27 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         return compatibleProjection;
     },
 
+    setLayerBounds: function (layer) {
+
+        var processResult = function (response) {
+            var json = Ext.decode(response.responseText);
+            if ("extent" in json) {
+                layer.addOptions({"maxExtent": [json.extent.xmin, json.extent.ymin, json.extent.xmax, json.extent.ymax]});            
+            }
+        };
+
+        var response = Ext.Ajax.request({         
+            timeout: 2000,
+            params:{'f':'json', 'pretty':'false', 'keepPostParams':'true'},
+            method:'POST',
+            url: this.url.split("?")[0] + "/" + layer.params.LAYERS.replace("show:",""),
+            success: processResult
+        }); 
+        json = Ext.decode(response.responseText);
+
+
+    },
+
     /** private: method[createLazyLayerRecord]
      *  :arg config: ``Object`` The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -279,11 +307,6 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         var srs = config.srs || this.target.map.projection;
         config.srs = {};
         config.srs[srs] = true;
-
-
-        var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
-        config.bbox = {};
-        config.bbox[srs] = {bbox: bbox};
 
         var  record = new GeoExt.data.LayerRecord(config);
         record.set("name", config.name);
@@ -354,7 +377,8 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             group: record.get("group"),
             fixed: record.get("fixed"),
             selected: record.get("selected"),
-            srs: record.get("srs")
+            srs: record.get("srs"),
+            bbox: layer.maxExtent.toArray()
         };
     }
 
