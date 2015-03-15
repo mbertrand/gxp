@@ -31,7 +31,7 @@ gxp.GoogleStreetViewPanel = Ext.extend(Ext.Panel, {
     heading: 0,
 
     /** api: config[pitch]
-     *  ``Number``  The camera pitch in degrees, relative to the street view 
+     *  ``Number``  The camera pitch in degrees, relative to the Street View 
      *  vehicle. Ranges from 90 degrees (directly upwards) to -90 degrees 
      *  (directly downwards).
      */

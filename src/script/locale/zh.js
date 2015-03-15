@@ -535,10 +535,11 @@ GeoExt.Lang.add("zh", {
         coordinatesText: 'Coordinates'  	
     },
     
-    "gxp.plugins.StreetViewTool.js" : {
-    	toolText: "Google Street View",
-    	streetViewTitle: "Google Street View",  	
-    	infoActionTip: "Click on the map to see Google Street View"
+    "gxp.plugins.StreetViewTool.prototype" : {
+    	toolText: '[CN] Street View',
+    	streetViewTitle: '[CN] Street View',  	
+    	infoActionTip: '[CN] Click on the map to see Google Street View'
     }
+    
     
 });

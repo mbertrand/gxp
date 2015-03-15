@@ -15,7 +15,7 @@ StreetViewPopup = OpenLayers.Class(OpenLayers.Control, {
 
     popup: null,
     mapPanel: null,
-    titleHeader: 'Street View',
+    titleHeader: 'WTFStreet View',
     popupHeight: 300,
     popupWidth: 300,
 
@@ -77,7 +77,7 @@ gxp.plugins.StreetViewTool = Ext.extend(gxp.plugins.Tool, {
 
 	streetViewTitle: "Google Street View",
 	
-	infoActionTip: "Click on the map to see Google Street View",
+	infoActionTip: "SHITClick on the map to see Google Street View",
 	
 	popupHeight: 300,
 	
