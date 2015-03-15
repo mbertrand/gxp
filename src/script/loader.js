@@ -107,6 +107,7 @@
         "plugins/Playback.js",
         "locale/es.js",
         "locale/ca.js"
+        
     );
     
     var scripts = document.getElementsByTagName("script");
