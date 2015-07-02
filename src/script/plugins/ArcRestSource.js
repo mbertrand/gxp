@@ -58,7 +58,20 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
     /** api: ptype = gxp_arcrestsource */
     ptype:"gxp_arcrestsource",
 
+    /** api: config[noLayersTitle]
+     *  ``String``
+     *  Title for no layers message (i18n).
+     */
+    noLayersTitle: "No ArcGIS Layers",
+
+    /** api: config[noLayersText]
+     *  ``String``
+     *  Content of no layers message (i18n).
+     */
+    noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at ",
+
     requiredProperties: ["name"],
+    forceLoad: false,
 
     constructor:function (config) {
         this.config = config;
@@ -96,7 +109,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                             displayInLayerSwitcher:true,
                             visibility:true,
                             projection:layerProjection,
-                            queryable:json.capabilities && json.capabilities["Identify"]}
+                            queryable:json.capabilities && json.capabilities.indexOf("Query") > -1}
                     ));
                 }
             } else {
@@ -112,7 +125,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                     {name:"name", type:"string", mapping:"name"},
                     {name:"layerid", type:"string"},
                     {name:"group", type:"string", defaultValue:this.title},
-                    {name:"fixed", type:"boolean", defaultValue:true},
+                    {name:"fixed", type:"boolean", defaultValue:false},
                     {name:"tiled", type:"boolean", defaultValue:true},
                     {name:"queryable", type:"boolean", defaultValue:true},
                     {name:"selected", type:"boolean"}
@@ -124,7 +137,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         };
 
         var processFailure = function (response) {
-            Ext.Msg.alert("No ArcGIS Layers", "Could not find any compatible layers  at " + source.config.url);
+            if (!response.isTimeout) {
+                Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
+            }
             source.fireEvent("failure", source);
         };
 
@@ -154,15 +169,16 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
      *  construct layer records, the source can be lazy.
      */
     isLazy: function() {
+        if (this.config.forceLoad){
+            return false;
+        }
         var lazy = true;
-        var sourceFound = false;
         var mapConfig = this.target.initialConfig.map;
         if (mapConfig && mapConfig.layers) {
             var layerConfig;
             for (var i=0, ii=mapConfig.layers.length; i<ii; ++i) {
                 layerConfig = mapConfig.layers[i];
                 if (layerConfig.source === this.id) {
-                    sourceFound = true;
                     lazy = this.layerConfigComplete(layerConfig);
                     if (lazy === false) {
                         break;
@@ -170,7 +186,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                 }
             }
         }
-        return (lazy && sourceFound);
+        return (lazy);
     },
 
 
@@ -218,6 +234,12 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             }
             layer = record.getLayer();
 
+            if ("bbox" in config) {
+                layer.addOptions({"maxExtent": config.bbox});
+            } else {
+                this.setLayerBounds(layer);
+            }
+
             // set layer title from config
             if (config.title) {
                 layer.setName(config.title);
@@ -241,13 +263,17 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             if ("tiled" in config) {
                 singleTile = !config.tiled;
             } 
-            record.set("tiled", !singleTile);
+
+            record.set("name", config.name);
+            record.set("layerid", config.layerid || layer.params.LAYERS);
+            record.set("format", config.format || "png");
+            record.set("tiled", "tiled" in config ? config.tiled : true);
+            record.set("srs", layer.projection.getCode());
             record.set("selected", config.selected || false);
             record.set("queryable", config.queryable || true);
             record.set("source", config.source);
-            record.set("name", config.name);
-            record.set("layerid", config.layerid);
-            record.set("properties", "gxp_wmslayerpanel");
+            record.set("properties", "gxp_arcrestlayerpanel");
+
             if ("group" in config) {
                 record.set("group", config.group);
             }
@@ -282,6 +308,27 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         return compatibleProjection;
     },
 
+    setLayerBounds: function (layer) {
+
+        var processResult = function (response) {
+            var json = Ext.decode(response.responseText);
+            if ("extent" in json) {
+                layer.addOptions({"maxExtent": [json.extent.xmin, json.extent.ymin, json.extent.xmax, json.extent.ymax]});
+            }
+        };
+
+        var response = Ext.Ajax.request({
+            timeout: 2000,
+            params:{'f':'json', 'pretty':'false', 'keepPostParams':'true'},
+            method:'POST',
+            url: this.url.split("?")[0] + "/" + layer.params.LAYERS.replace("show:",""),
+            success: processResult
+        });
+        json = Ext.decode(response.responseText);
+
+
+    },
+
     /** private: method[createLazyLayerRecord]
      *  :arg config: ``Object`` The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -293,17 +340,34 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         config.srs = {};
         config.srs[srs] = true;
 
-        var bbox = config.bbox || this.target.map.maxExtent || OpenLayers.Projection.defaults[srs].maxExtent;
-        config.bbox = {};
-        config.bbox[srs] = {bbox: bbox};
-
         var  record = new GeoExt.data.LayerRecord(config);
         record.set("name", config.name);
-        record.set("layerid", config.layerid || "show:0");
+        if (config.layerid)
+            record.set("layerid", config.layerid || "show:0");
+        else
+            record.set("layerid", "show:" + config.name);
+        record.set("title", config.title);
         record.set("format", config.format || "png");
         record.set("tiled", "tiled" in config ? config.tiled : true);
 
-        record.setLayer(new OpenLayers.Layer.ArcGIS93Rest(config.name,  this.url.split("?")[0] + "/export",
+
+
+        var maxExtent;
+        var llbbox = config.llbbox;
+        if (llbbox) {
+            var extent = OpenLayers.Bounds.fromArray(llbbox).transform("EPSG:4326", srs);
+            // make sure maxExtent is valid (transform does not succeed for all llbbox)
+            if ((1 / extent.getHeight() > 0) && (1 / extent.getWidth() > 0)) {
+                // maxExtent has infinite or non-numeric width or height
+                // in this case, the map maxExtent must be specified in the config
+                maxExtent = extent;
+            }
+        }
+
+
+
+
+        record.setLayer(new OpenLayers.Layer.ArcGIS93Rest(config.title || config.name,  this.url.split("?")[0] + "/export",
             {
                 layers: config.layerid,
                 TRANSPARENT:true,
@@ -314,7 +378,10 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                 displayInLayerSwitcher:true,
                 projection:srs,
                 singleTile: "tiled" in config ? !config.tiled : false,
-                queryable: "queryable" in config ? config.queryable : false}
+                queryable: "queryable" in config ? config.queryable : false,
+                maxExtent: maxExtent,
+                restrictedExtent: maxExtent
+            }
         )
         );
         return record;
@@ -341,7 +408,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
             opacity: layer.opacity || undefined,
             group: record.get("group"),
             fixed: record.get("fixed"),
-            selected: record.get("selected")
+            selected: record.get("selected"),
+            srs: record.get("srs"),
+            bbox: layer.maxExtent.toArray()
         };
     }
 
