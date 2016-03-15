@@ -65,7 +65,7 @@ gxp.plugins.LayerShare = Ext.extend(gxp.plugins.Tool, {
         var actions = gxp.plugins.LayerShare.superclass.addActions.apply(this, [{
             menuText: this.menuText,
             iconCls: "gxp-icon-link",
-            disabled: true,
+            disabled: false,
             tooltip: this.toolTip,
             handler: function() {
                 this.removeOutput();
@@ -76,15 +76,9 @@ gxp.plugins.LayerShare = Ext.extend(gxp.plugins.Tool, {
         var layerShareAction = actions[0];
 
         this.target.on("layerselectionchange", function(record) {
-            layerShareAction.setDisabled(
-                !record || !record.get("properties") ||
-                    record.getLayer().url.replace(
-                        this.target.urlPortRegEx, "$1/").indexOf(
-                        this.target.localGeoServerBaseUrl.replace(
-                            this.urlPortRegEx, "$1/")) !== 0
-            );
+           
             if (!layerShareAction.isDisabled()) {
-                this.link = this.linkPrefix + record.getLayer().params.LAYERS;
+                this.link = record.get('detail_url');
             }
 
         }, this);
