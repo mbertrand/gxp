@@ -97,44 +97,56 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 params['CQL_FILTER'] = config['cql_filter'];
             }
 
+            if(!config.local){
+                var layer = new OpenLayers.Layer.OSM(
+                    config.title,
+                    config.url,
+                    {
+                        isBaseLayer: false
+                    }
+                );
+            }else{
+                var layer = new OpenLayers.Layer.WMS(
+                    config.title,
+                    this.url,
+                    params, {
+                        maxExtent: maxExtent,
+                        restrictedExtent: maxExtent,
+                        singleTile: ("tiled" in config) ? !config.tiled : false,
+                        ratio: config.ratio || 1,
+                        visibility: ("visibility" in config) ? config.visibility : true,
+                        opacity: ("opacity" in config) ? config.opacity : 1,
+                        buffer: ("buffer" in config) ? config.buffer : 1,
+                        projection: projection
+                    }
+                );
 
-            var layer = new OpenLayers.Layer.WMS(
-                config.title,
-                this.url,
-                params, {
-                    maxExtent: maxExtent,
-                    restrictedExtent: maxExtent,
-                    singleTile: ("tiled" in config) ? !config.tiled : false,
-                    ratio: config.ratio || 1,
-                    visibility: ("visibility" in config) ? config.visibility : true,
-                    opacity: ("opacity" in config) ? config.opacity : 1,
-                    buffer: ("buffer" in config) ? config.buffer : 1,
-                    projection: projection
+
+                if (!("tiled" in config) || config.tiled === true) {
+
+                    var tileWidth = config['tileWidth'] || 256;
+                    var tileHeight = config['tileHeight'] || 256;
+                    var tileResolutions = config['tileResolutions']  || [156543.03390625,78271.516953125,39135.7584765625,19567.87923828125,9783.939619140625,4891.9698095703125,2445.9849047851562,1222.9924523925781,611.4962261962891,305.74811309814453,152.87405654907226,76.43702827453613,38.218514137268066,19.109257068634033,9.554628534317017,4.777314267158508,2.388657133579254,1.194328566789627,0.5971642833948135,0.29858214169740677,0.14929107084870338,0.07464553542435169,0.037322767712175846,0.018661383856087923,0.009330691928043961,0.004665345964021981];
+                    var originLon = config['tileOriginLon'] || -20037508.34;
+                    var originLat = config['tileOriginLat'] || -20037508.34;
+
+                    layer.addOptions({resolutions: tileResolutions,
+                        tileSize: new OpenLayers.Size(tileWidth, tileHeight),
+                        tileOrigin: new OpenLayers.LonLat(originLat, originLon)});
+                    layer.params.TILED = true; // set to true when http://projects.opengeo.org/suite/ticket/1286 is closed
+                } else {
+                    layer.params.TILED = false;
                 }
-            );
-
-
-            if (!("tiled" in config) || config.tiled === true) {
-
-                var tileWidth = config['tileWidth'] || 256;
-                var tileHeight = config['tileHeight'] || 256;
-                var tileResolutions = config['tileResolutions']  || [156543.03390625,78271.516953125,39135.7584765625,19567.87923828125,9783.939619140625,4891.9698095703125,2445.9849047851562,1222.9924523925781,611.4962261962891,305.74811309814453,152.87405654907226,76.43702827453613,38.218514137268066,19.109257068634033,9.554628534317017,4.777314267158508,2.388657133579254,1.194328566789627,0.5971642833948135,0.29858214169740677,0.14929107084870338,0.07464553542435169,0.037322767712175846,0.018661383856087923,0.009330691928043961,0.004665345964021981];
-                var originLon = config['tileOriginLon'] || -20037508.34;
-                var originLat = config['tileOriginLat'] || -20037508.34;
-
-                layer.addOptions({resolutions: tileResolutions,
-                    tileSize: new OpenLayers.Size(tileWidth, tileHeight),
-                    tileOrigin: new OpenLayers.LonLat(originLat, originLon)});
-                layer.params.TILED = true; // set to true when http://projects.opengeo.org/suite/ticket/1286 is closed
-            } else {
-                layer.params.TILED = false;
-            }
 
 
 
-            if (config.attributes){
-                layer.attributes = config.attributes;
-            }
+                if (config.attributes){
+                    layer.attributes = config.attributes;
+                }
+            };
+            
+
+            
 
 
             // data for the new record
@@ -155,7 +167,8 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
                 'restUrl': this.restUrl,
                 'cql_filter': "cql_filter" in config ? config.cql_filter : '',
                 'getFeatureInfo':  config.getFeatureInfo,
-                'detail_url': config.detail_url
+                'detail_url': config.detail_url,
+                'local': config.local
             };
 
 
@@ -238,7 +251,8 @@ gxp.plugins.GeoNodeSource = Ext.extend(gxp.plugins.WMSSource, {
         config= Ext.apply(config, {
             styles: params.STYLES,
             tiled: params.TILED,
-            detail_url: record.data.detail_url
+            detail_url: record.data.detail_url,
+            local: record.data.local
         });
         return config;
     }
